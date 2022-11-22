@@ -7,6 +7,7 @@ import pathlib
 import sys
 import numpy as np
 import pandas as pd
+from pandas.api.types import CategoricalDtype
 import datetime as dt
 import sqlite3
 from contextlib import closing
@@ -43,6 +44,7 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 # Initial values
 wind_speed_init = 8
 wind_direction_init = 270
+solar_init = 1E7
 
 # Get the turbine locs
 x_locs, y_locs = get_turbine_locs()
@@ -95,23 +97,7 @@ app.layout = html.Div(
                         # input method selector
                         html.Div (
                             [
-                                
-                                # html.Div (
-                                #     [
-                                #         daq.PowerButton(
-                                #             id='power_button',
-                                #             label="Start Simulation",
-                                #             labelPosition='bottom',
-                                #             on=False,
-                                #             color=app_color['primary'],
-                                #             size=80,
-                                            
-                                            
-                                #         )
-                                #     ],
-                                #     className='power__container'
-                                    
-                                # ),
+
                                 html.Div (
                                     [
                                         html.H6(
@@ -271,6 +257,86 @@ app.layout = html.Div(
                                     ],
                                     className="second",
                                 ),
+                                # Solar Irradiance
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.H6(
+                                                    "SOLAR IRRADIANCE", className="inputs__title"
+                                                )
+                                            ]
+                                        ),
+                                        html.Div(
+                                            [
+                                                dcc.Slider(
+                                                    id="solar-slider",
+                                                    min=0,
+                                                    max=1E7,
+                                                    step=1E5,
+                                                    value=solar_init,
+                                                    updatemode="drag",
+                                                    marks={
+                                                        0: {"label": "0"},
+                                                        # 255: {"label": "255"},
+                                                        # 260: {"label": "260"},
+                                                        # 265: {"label": "265"},
+                                                        # 270: {"label": "270"},
+                                                        # 275: {"label": "275"},
+                                                        # 280: {"label": "280"},
+                                                        # 285: {"label": "285"},
+                                                        1E7: {"label": "1E7"}
+                                                    },
+                                                )
+                                            ],
+                                            className="slider",
+                                        ),
+                                        html.Div(
+                                            [
+                                               html.H1(id="solar-out", className="output__display")
+                                            ]
+                                        )
+                                    ],
+                                    className="second",
+                                ),
+                                # Storage
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.H6(
+                                                    "STORAGE MODE", className="inputs__title"
+                                                )
+                                            ]
+                                        ),
+                                        html.Div(
+                                            [
+                                                dcc.Slider(
+                                                    id="storage-slider",
+                                                    min=-1,
+                                                    max=1,
+                                                    step=1,
+                                                    value=0,
+                                                    updatemode="drag",
+                                                    marks={
+                                                        -1: {"label": "Charging"},
+                                                        0: {"label": "Off"},
+                                                        1: {"label": "Discharging"},
+                                                        
+                                                    },
+                                                )
+                                            ],
+                                            className="slider",
+                                        ),
+                                        html.Div(
+                                            [
+                                               html.H1(id="storage-mode", className="output__display")
+                                            ]
+                                        )
+                                    ],
+                                    className="second",
+                                ),
+                                
                             ],
                             id="manual-inputs-container",
                             style={'display': 'block'}
@@ -420,11 +486,13 @@ def show_hide_element(visibility_state):
     [
         State(component_id='speed-slider', component_property='value'),
         State(component_id='dir-slider', component_property='value'),
+        State(component_id='solar-slider', component_property='value'),
+        State(component_id='storage-slider', component_property='value'),
         State("input_method_dd", "value"),
         # State(component_id='power_button', component_property='on'),
     ]
 )
-def update_turbine_power(interval, wind_speed_val, wind_dir_val, input_method):#:, power_button_val):
+def update_turbine_power(interval, wind_speed_val, wind_dir_val, solar_it_val, storage_slider,input_method):#:, power_button_val):
     """
     Update turbines graph.
 
@@ -444,7 +512,7 @@ def update_turbine_power(interval, wind_speed_val, wind_dir_val, input_method):#
 
     # code used by all input methods
     logger.debug("Sending input method, wind speed and direction to control center")
-    insert_data(input_method, wind_speed, wind_dir)#, power_button_val)
+    insert_data(input_method, wind_speed, wind_dir, solar_it_val, storage_slider)#, power_button_val)
 
     logger.debug("Getting turbine data from database now")
     df_data = get_data()
@@ -455,14 +523,28 @@ def update_turbine_power(interval, wind_speed_val, wind_dir_val, input_method):#
         wind_speed = df_data[(df_data.source_system=='control_center') & (df_data.data_type=='wind_speed')].value.values[-1]
         wind_dir = df_data[(df_data.source_system=='control_center') & (df_data.data_type=='wind_direction')].value.values[-1]
 
-    print(df_data.head())
+    # print(df_data.head())
+
+    # # Extract the turbine data and rename the columns
+    # df_turbine = (df_data
+    #     [df_data.data_type=='turbine_power'] # Limit to turbine columns
+    #     .loc[:,['sim_time_s','data_label','value']] # Take only the columns we need
+    #     .rename({'data_label':'turbine','value':'power'}, axis='columns') # Rename columns to more useful names
+    #     .assign(power_type = 'turbine') # Force a category type for now
+    # )
+
+    # Define the categories of power
+    power_categories = CategoricalDtype(categories=["turbine_power", "solar_power", "battery_power"], ordered=True)
 
     # Extract the turbine data and rename the columns
+    # print(df_data.tail())
+    # print(df_data.data_type)
+
     df_turbine = (df_data
-        [df_data.data_type=='turbine_power'] # Limit to turbine columns
-        .loc[:,['sim_time_s','data_label','value']] # Take only the columns we need
-        .rename({'data_label':'turbine','value':'power'}, axis='columns') # Rename columns to more useful names
-        .assign(power_type = 'turbine') # Force a category type for now
+        [df_data.data_type.isin(['turbine_power','solar_power','battery_power'])] # Limit to turbine columns
+        .assign(power_type = lambda df_: df_.data_type.astype(power_categories)) # Force a category type for now
+        .loc[:,['sim_time_s','data_label','value','power_type']] # Take only the columns we need
+        .rename({'data_label':'sub_element','value':'power'}, axis='columns') # Rename columns to more useful names
     )
     
     # If big enough, drop the initial transients
@@ -472,12 +554,12 @@ def update_turbine_power(interval, wind_speed_val, wind_dir_val, input_method):#
     fig = px.area(df_turbine, 
         x="sim_time_s", 
         y="power", 
-        line_group='turbine', 
+        line_group='sub_element', 
         color='power_type',
         labels={
             "sim_time_s": "Time",
             "power": "Power (kW)",
-            "turbine": "Turbine ID"
+            "sub_element": "Sub Element ID"
         },)
     fig.update_layout(template='plotly_dark', plot_bgcolor=app_color["graph_bg"],
         paper_bgcolor=app_color["graph_bg"], )

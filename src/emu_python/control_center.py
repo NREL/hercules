@@ -59,7 +59,8 @@ class ControlCenter(federateagent):
         logger.info("Control Center Starting Up...")
 
         # Get the AMRWind info
-        amr_wind_input = os.path.join(self.amr_wind_folder, 'input.i')
+        amr_wind_input = os.path.join(self.amr_wind_folder, 'c2c_input.i')
+        # amr_wind_input = os.path.join(self.amr_wind_folder, 'one_turbine.i')
         with open(amr_wind_input) as fp:
             Lines = fp.readlines()
             
@@ -102,7 +103,7 @@ class ControlCenter(federateagent):
 
             # Create the main data table
             logger.info("...Initiating data_table")
-            cur_cc.execute("CREATE TABLE data_table (timestamp TIMESTAMP, sim_time_s REAL, time_rate_s REAL,source_system TEXT, data_type TEXT, data_label TEXT, value REAL)")
+            cur_cc.execute("CREATE TABLE data_table (timestamp TIMESTAMP, sim_time_s REAL, time_rate_s REAL, source_system TEXT, data_type TEXT, data_label TEXT, value REAL)")
 
         # Set up the front_end database
         logger.info("Making the front_end database...")
@@ -153,6 +154,8 @@ class ControlCenter(federateagent):
             # Pull out wind speed and direction (most recent)
             wind_speed_front_end = df_front_end[df_front_end.data_type=='wind_speed']['value'].values[-1]
             wind_direction_front_end = df_front_end[df_front_end.data_type=='wind_direction']['value'].values[-1]
+            solar_it_front_end = df_front_end[df_front_end.data_type=='solar_it']['value'].values[-1]
+            storage_radio_front_end = df_front_end[df_front_end.data_type=='storage_radio']['value'].values[-1]
 
             self.logger.info("...Wind speed and direction received: {}, {}".format(wind_speed_front_end, wind_direction_front_end))
 
@@ -160,6 +163,8 @@ class ControlCenter(federateagent):
             self.input_method = input_method
             self.wind_speed_front_end = wind_speed_front_end
             self.wind_direction_front_end = wind_direction_front_end
+            self.solar_it_front_end = solar_it_front_end
+            self.storage_radio_front_end = storage_radio_front_end
 
     def set_wind_speed_direction(self):
         # Get the wind speed and direction, dependent on the input_method
@@ -167,7 +172,9 @@ class ControlCenter(federateagent):
         if self.input_method == 'dash':
             self.logger.info("... Setting wind speed and direction based on manual inputs from dash")
             self.wind_speed = self.wind_speed_front_end
-            self.wind_direction = self.wind_direction_front_end       
+            self.wind_direction = self.wind_direction_front_end  
+            self.solar_it = self.solar_it_front_end     
+            self.storage_radio = self.storage_radio_front_end    
 
         elif self.input_method == 'nwtc':
             self.logger.info("... Setting wind speed and direction based on m2 tower at wind site")
@@ -323,10 +330,23 @@ class ControlCenter(federateagent):
                 # print(t, turbine_power_array)
                 self.insert_value(sim_time_s_amr_wind,self.time_rate_s, 'amr_wind','turbine_power','t%d' % t,turbine_power_array[t])
 
-            # Just as a test read the database
-            with sqlite3.connect(self.control_center_database_filename, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as con_cc:
-                statement = f'SELECT * from data_table order by timestamp;'
-                df_test = pd.read_sql_query(statement, con_cc)
+            # Solar power
+            eta = 1.0 ## Efficiency of solar panels
+            solar_power = self.solar_it * eta
+            self.insert_value(sim_time_s_amr_wind,self.time_rate_s, 'control_center','solar_power','solar_power',solar_power)
+
+            # Battery power
+            if self.storage_radio == -1:
+                self.insert_value(sim_time_s_amr_wind,self.time_rate_s, 'control_center','battery_power','battery_power',-2E6)
+            elif self.storage_radio == 1:
+                self.insert_value(sim_time_s_amr_wind,self.time_rate_s, 'control_center','battery_power','battery_power',2E6)
+            elif self.storage_radio == 0:
+                self.insert_value(sim_time_s_amr_wind,self.time_rate_s, 'control_center','battery_power','battery_power',0)
+
+            # # Just as a test read the database
+            # with sqlite3.connect(self.control_center_database_filename, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as con_cc:
+            #     statement = f'SELECT * from data_table order by timestamp;'
+            #     df_test = pd.read_sql_query(statement, con_cc)
             
             self.sync_time_helics(self.deltat)
 
@@ -348,7 +368,7 @@ class ControlCenter(federateagent):
         self.set_wind_speed_direction()
 
         yaw_angles = [270 for t in range(self.num_turbines)]
-        yaw_angles[1] = 260
+        # yaw_angles[1] = 260
 
         tmp = np.array([self.get_currenttime(),self.wind_speed, self.wind_direction] + yaw_angles).tolist()
 

@@ -42,7 +42,7 @@ def get_data(num_records=600):
 
     return df
 
-def insert_data(input_method, wind_speed, wind_direction):#, power_button_val):
+def insert_data(input_method, wind_speed, wind_direction, solar_it, storage_radio):#, power_button_val):
 
     insertQuery = "INSERT INTO front_end_table VALUES (?, ?, ?, ?);"
 
@@ -62,5 +62,9 @@ def insert_data(input_method, wind_speed, wind_direction):#, power_button_val):
         tuple_to_add = (currentDateTime, 'wind_speed','wind_speed', wind_speed)
         cur.execute(insertQuery, tuple_to_add)
         tuple_to_add = (currentDateTime, 'wind_direction','wind_direction', wind_direction)
+        cur.execute(insertQuery, tuple_to_add)
+        tuple_to_add = (currentDateTime, 'solar_it','solar_it', solar_it)
+        cur.execute(insertQuery, tuple_to_add)
+        tuple_to_add = (currentDateTime, 'storage_radio','storage_radio', storage_radio)
         cur.execute(insertQuery, tuple_to_add)
     

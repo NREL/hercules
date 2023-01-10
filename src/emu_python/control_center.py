@@ -1,20 +1,54 @@
-import pathlib
-import sqlite3
-import logging
+from dav_kafka_python.producer import PythonProducer
+from dav_kafka_python.configuration import Configuration
+import random
+import json
+import getopt
+import ast
 import datetime
+import logging
 import os
+import pathlib
+import pickle
+import sqlite3
 import sys
 import time
-import pandas as pd
-import numpy as np
 from io import StringIO
-import pickle
 
-import ast
+import numpy as np
+import pandas as pd
+
+import datetime as dt
 from federateaccesspoint import federateagent
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+import argparse
+parser = argparse.ArgumentParser()
+
+#-db DATABSE -u USERNAME -p PASSWORD -size 20
+parser.add_argument("-k", "--kafka", dest = "kafka", default = False , help="default False, no Kafka", type=bool)
+args = parser.parse_args()
+
+print( "Using Kafka : {} ".format(
+        args.kafka
+        ))
+
+KAFKA = args.kafka
+
+
+LOGFILE = str(dt.datetime.now()).replace(":","_").replace(" ","_").replace(".","_")
+
 
 # Control center interacts with simulations, sqlite database, and front end app via sqlite
 
+if KAFKA:
+    # Kafka topic :
+    topic = "EmupyV0.1"
+    print("KAFKA topic", topic)
+    config = Configuration(env_path='./.env')
+    python_producer = PythonProducer(config)
+    python_producer.connect()
 
 
 class ControlCenter(federateagent):
@@ -29,18 +63,18 @@ class ControlCenter(federateagent):
         # Parameters
 
         # Running on eagle
-        self.amr_wind_folder = '/scratch/pfleming/c2c/amr_wind_demo'
+        # self.amr_wind_folder = '/scratch/pfleming/c2c/amr_wind_demo'
 
         # Uncomment if running local
-        # self.amr_wind_folder = 'local_amr_wind_demo'
-        
-        # self.num_turbines = 8 
+        self.amr_wind_folder = 'local_amr_wind_demo'
+
+        # self.num_turbines = 8
         self.time_delta = 1.
 
         # Initializations
         self.current_timestamp = datetime.datetime.now()
-        self.sim_time_s = 0 # Initialize to 0
-        self.time_rate_s = self.time_delta # Initialize to expectation
+        self.sim_time_s = 0  # Initialize to 0
+        self.time_rate_s = self.time_delta  # Initialize to expectation
         # self.power_button_val = False
 
         # Set up the logger
@@ -52,7 +86,7 @@ class ControlCenter(federateagent):
                             filemode='w')
         logger = logging.getLogger("control_center")
 
-        # Perhaps a small hack to also send log to the terminal outout 
+        # Perhaps a small hack to also send log to the terminal outout
         logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
         #  Make an announcement
@@ -62,13 +96,18 @@ class ControlCenter(federateagent):
         amr_wind_input = os.path.join(self.amr_wind_folder, 'input.i')
         with open(amr_wind_input) as fp:
             Lines = fp.readlines()
-            
+
             # Find the actuators
             for line in Lines:
                 if 'Actuator.labels' in line:
                     turbine_labels = line.split()[2:]
                     self.num_turbines = len(turbine_labels)
-                    
+
+            aa = [f"power_{i}" for i in range(self.num_turbines)]
+            xyz = ",".join(aa)                
+            with open(f'{LOGFILE}.csv', 'a') as filex:
+                filex.write( 'helics_time' +  ',' + 'AMRwind_time' + ',' +  'AMRWind_speed' + ',' + 'AMRWind_direction' + ',' + xyz + os.linesep)
+
             # Find the diameter
             for line in Lines:
                 if 'rotor_diameter' in line:
@@ -79,15 +118,18 @@ class ControlCenter(federateagent):
             for label in turbine_labels:
                 for line in Lines:
                     if 'Actuator.%s.base_position' % label in line:
-                        locations = tuple([float(f) for f in line.split()[-3:-1]])
+                        locations = tuple([float(f)
+                                          for f in line.split()[-3:-1]])
                         turbine_locations.append(locations)
             self.turbine_locations = turbine_locations
 
-        logger.info('There are %d turbines, with diameter %.1f' % (self.num_turbines, self.D))
+        logger.info('There are %d turbines, with diameter %.1f' %
+                    (self.num_turbines, self.D))
 
         # Set up the control_center database
         logger.info("Making the control_center database...")
-        self.control_center_database_filename = pathlib.Path(__file__).parent / 'control_center.db'
+        self.control_center_database_filename = pathlib.Path(
+            __file__).parent / 'control_center.db'
 
         # Initialize the sqlite database file
         if os.path.exists(self.control_center_database_filename):
@@ -102,11 +144,13 @@ class ControlCenter(federateagent):
 
             # Create the main data table
             logger.info("...Initiating data_table")
-            cur_cc.execute("CREATE TABLE data_table (timestamp TIMESTAMP, sim_time_s REAL, time_rate_s REAL,source_system TEXT, data_type TEXT, data_label TEXT, value REAL)")
+            cur_cc.execute(
+                "CREATE TABLE data_table (timestamp TIMESTAMP, sim_time_s REAL, time_rate_s REAL,source_system TEXT, data_type TEXT, data_label TEXT, value REAL)")
 
         # Set up the front_end database
         logger.info("Making the front_end database...")
-        self.front_end_database_filename = pathlib.Path(__file__).parent / 'front_end.db'
+        self.front_end_database_filename = pathlib.Path(
+            __file__).parent / 'front_end.db'
 
         # Initialize the front_end sqlite database file
         if os.path.exists(self.front_end_database_filename):
@@ -115,13 +159,14 @@ class ControlCenter(federateagent):
 
         # Get a connection and cursor to create the front_end data table
         with sqlite3.connect(self.front_end_database_filename, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as con_front:
-        
+
             # Get a cursor and set up data table
             cur_front = con_front.cursor()
 
             # Create the front_end_table
             logger.info("...Initiating front_end_table")
-            cur_front.execute("CREATE TABLE front_end_table (timestamp TIMESTAMP, data_type TEXT, data_label TEXT, value REAL)")
+            cur_front.execute(
+                "CREATE TABLE front_end_table (timestamp TIMESTAMP, data_type TEXT, data_label TEXT, value REAL)")
             # con_front.commit()
 
         # Save the logger
@@ -129,48 +174,57 @@ class ControlCenter(federateagent):
 
         # Post the turbine locations
         for t_idx, t in enumerate(self.turbine_locations):
-            self.insert_value(self.sim_time_s,self.time_rate_s, 'control_center','x_loc','t_%d' % t_idx,t[0])
-            self.insert_value(self.sim_time_s,self.time_rate_s, 'control_center','y_loc','t_%d' % t_idx,t[1])
-    
+            self.insert_value(self.sim_time_s, self.time_rate_s,
+                              'control_center', 'x_loc', 't_%d' % t_idx, t[0])
+            self.insert_value(self.sim_time_s, self.time_rate_s,
+                              'control_center', 'y_loc', 't_%d' % t_idx, t[1])
+
     def get_signals_from_front_end(self):
 
-            self.logger.info("...Getting input_method, wind speed and direction from front end")
-            statement = f'SELECT * from front_end_table order by timestamp;'
-            with sqlite3.connect(self.front_end_database_filename, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as con_front:
+        self.logger.info(
+            "...Getting input_method, wind speed and direction from front end")
+        statement = f'SELECT * from front_end_table order by timestamp;'
+        with sqlite3.connect(self.front_end_database_filename, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as con_front:
+            df_front_end = pd.read_sql_query(statement, con_front)
+            num_rows_from_front_end = df_front_end.shape[0]
+
+            # Loop until we have at least two records
+            while num_rows_from_front_end < 2:
                 df_front_end = pd.read_sql_query(statement, con_front)
                 num_rows_from_front_end = df_front_end.shape[0]
+                time.sleep(0.5)
 
-                # Loop until we have at least two records
-                while num_rows_from_front_end < 2:
-                    df_front_end = pd.read_sql_query(statement, con_front)
-                    num_rows_from_front_end = df_front_end.shape[0]
-                    time.sleep(0.5)
+        # Get the most recent input method and save
+        input_method = df_front_end[df_front_end.data_type ==
+                                    'input_method']['data_label'].values[-1]
+        self.logger.info("...Current Data Method: {}".format(input_method))
 
-            # Get the most recent input method and save
-            input_method = df_front_end[df_front_end.data_type=='input_method']['data_label'].values[-1]
-            self.logger.info("...Current Data Method: {}".format(input_method))
+        # Pull out wind speed and direction (most recent)
+        wind_speed_front_end = df_front_end[df_front_end.data_type ==
+                                            'wind_speed']['value'].values[-1]
+        wind_direction_front_end = df_front_end[df_front_end.data_type ==
+                                                'wind_direction']['value'].values[-1]
 
-            # Pull out wind speed and direction (most recent)
-            wind_speed_front_end = df_front_end[df_front_end.data_type=='wind_speed']['value'].values[-1]
-            wind_direction_front_end = df_front_end[df_front_end.data_type=='wind_direction']['value'].values[-1]
+        self.logger.info("...Wind speed and direction received: {}, {}".format(
+            wind_speed_front_end, wind_direction_front_end))
 
-            self.logger.info("...Wind speed and direction received: {}, {}".format(wind_speed_front_end, wind_direction_front_end))
-
-            # Save these values
-            self.input_method = input_method
-            self.wind_speed_front_end = wind_speed_front_end
-            self.wind_direction_front_end = wind_direction_front_end
+        # Save these values
+        self.input_method = input_method
+        self.wind_speed_front_end = wind_speed_front_end
+        self.wind_direction_front_end = wind_direction_front_end
 
     def set_wind_speed_direction(self):
         # Get the wind speed and direction, dependent on the input_method
 
         if self.input_method == 'dash':
-            self.logger.info("... Setting wind speed and direction based on manual inputs from dash")
+            self.logger.info(
+                "... Setting wind speed and direction based on manual inputs from dash")
             self.wind_speed = self.wind_speed_front_end
-            self.wind_direction = self.wind_direction_front_end       
+            self.wind_direction = self.wind_direction_front_end
 
         elif self.input_method == 'nwtc':
-            self.logger.info("... Setting wind speed and direction based on m2 tower at wind site")
+            self.logger.info(
+                "... Setting wind speed and direction based on m2 tower at wind site")
             self.wind_speed, self.wind_direction = self.get_nwtc_wind_data()
 
     def get_nwtc_wind_data(self):
@@ -187,9 +241,11 @@ class ControlCenter(federateagent):
 
         # Make a new timestamp column
         # Signals given are the year, day of year, MST (hour/minute code)
-        df_nwtc['minute'] = df_nwtc['MST'] % 100 # Minute are last two digits
-        df_nwtc['hour']  = np.floor(df_nwtc['MST'] / 100.) # hours are first two digits
-        df_nwtc['timestamp_mst'] = pd.to_datetime(df_nwtc['Year'] * 10000000 + df_nwtc['DOY'] * 10000 + df_nwtc['hour']*100 + df_nwtc['minute'], format='%Y%j%H%M')
+        df_nwtc['minute'] = df_nwtc['MST'] % 100  # Minute are last two digits
+        # hours are first two digits
+        df_nwtc['hour'] = np.floor(df_nwtc['MST'] / 100.)
+        df_nwtc['timestamp_mst'] = pd.to_datetime(
+            df_nwtc['Year'] * 10000000 + df_nwtc['DOY'] * 10000 + df_nwtc['hour']*100 + df_nwtc['minute'], format='%Y%j%H%M')
 
         # Grab the most recent values
         # local_time = df_nwtc['timestamp_mst'].values[-1]
@@ -207,20 +263,20 @@ class ControlCenter(federateagent):
             if wind_direction > lim_range[1]:
                 wind_direction = lim_range[1] - (wind_direction - lim_range[1])
 
-
         #logger.info("NWTC data grab {}, {}, {}, {}, {}".format(local_time, wind_speed, turbulence_intensity, wind_direction, irradiance))
         # print(local_time, wind_speed, turbulence_intensity, wind_direction, irradiance)
-        self.logger.info("NWTC wind speed: {}, direction: {}".format(wind_speed, wind_direction))
+        self.logger.info("NWTC wind speed: {}, direction: {}".format(
+            wind_speed, wind_direction))
         return wind_speed, wind_direction
 
+    def insert_value(self, sim_time_s, time_rate_s, source_system, data_type, data_label, value):
 
-    def insert_value(self, sim_time_s, time_rate_s,source_system, data_type, data_label, value):
-        
         # Define the insert query
         insertQuery = "INSERT INTO data_table VALUES (?, ?, ?, ?, ?, ?, ?);"
 
         # Build the tupe of values to add
-        tuple_to_add = (self.current_timestamp, sim_time_s, time_rate_s, source_system, data_type,data_label, value)
+        tuple_to_add = (self.current_timestamp, sim_time_s,
+                        time_rate_s, source_system, data_type, data_label, value)
 
         timeout = 10
         for x in range(0, timeout):
@@ -231,7 +287,7 @@ class ControlCenter(federateagent):
                     cur = con_cc.cursor()
                     cur.execute(insertQuery, tuple_to_add)
             except:
-                time.sleep(0.1) #Wait 100ms
+                time.sleep(0.1)  # Wait 100ms
                 continue
             break
         else:
@@ -243,11 +299,12 @@ class ControlCenter(federateagent):
     # def main_loop(self):
     def run(self):
 
-        # Before entering main loop make initial connection to AMR-Wind and front end 
+        # Before entering main loop make initial connection to AMR-Wind and front end
         # and send the wind speed and direction
-        
+
         # Get wind speed and direction from front end
-        self.logger.info("Waiting for intial wind speed and wind direction from front end")
+        self.logger.info(
+            "Waiting for intial wind speed and wind direction from front end")
         self.get_signals_from_front_end()
 
         # Set the wind speed and direction based on input mode
@@ -259,15 +316,14 @@ class ControlCenter(federateagent):
         # self.zmq_server.send(np.array([self.wind_speed, self.wind_direction]))
         list(self.pub.values())[0].publish(str("[-1,-1,-1]"))
         self.logger.info(" #### Entering main loop #### ")
-        
+
         # Initialize the turbine power array
         turbine_power_array = np.zeros(self.num_turbines)
 
         # Inside a while loop # TODO ADD STOP CONDITION
-        # while True:         
-        while self.currenttime < (self.endtime - self.starttime  + 1 ):
+        # while True:
+        while self.currenttime < (self.endtime - self.starttime + 1):
 
- 
             # Recieve the time step turbine powers and echoed wind speed and direction
             # (Note on first call this will be mostly uninitialized information to be ignored)
             # sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind, turbine_power_array = self.zmq_server.receive()
@@ -277,28 +333,38 @@ class ControlCenter(federateagent):
             tmp = self.helics_get_all()
             if tmp != {}:
                 subscription_value = self.process_subscription_event(tmp)
-                sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = subscription_value [:3]
+                sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = subscription_value[
+                    :3]
                 turbine_power_array = subscription_value[3:3+self.num_turbines]
                 turbine_wd_array = subscription_value[3+self.num_turbines:]
 
-                
                 print("=======================================")
                 print("AMRWindTime:", sim_time_s_amr_wind)
                 print("AMRWindSpeed:", wind_speed_amr_wind)
                 print("AMRWindDirection:", wind_direction_amr_wind)
                 print("AMRWindTurbinePowers:", turbine_power_array)
+                print(" AMRWIND number of turbines here: ", self.num_turbines)
                 print("AMRWindTurbineWD:", turbine_wd_array)
                 print("=======================================")
             else:
                 print("Did not get any subs!! ", tmp)
-                sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = [0,0,0]
+                sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = [
+                    0, 0, 0]
                 turbine_power_array = np.zeros(self.num_turbines).tolist()
 
             # self.zmq_server.send(np.array([self.wind_speed, self.wind_direction]))
             self.process_periodic_publication()
+            if KAFKA:
+                key = json.dumps({"key": "wind_tower"})
+                value = json.dumps({"helics_time": self.currenttime, "bucket": "wind_tower", "AMRWind_speed": wind_speed_amr_wind,
+                                "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
+                python_producer.write(key=key, value=value,
+                                    topic=topic, token='test-token')
+
 
             # Update the time rate using a sort of lazy filtering
-            self.time_rate_s = 0.5 * self.time_rate_s + 0.5 * (datetime.datetime.now() - self.current_timestamp).total_seconds()
+            self.time_rate_s = 0.5 * self.time_rate_s + 0.5 * \
+                (datetime.datetime.now() - self.current_timestamp).total_seconds()
 
             # Update the timestamp
             self.current_timestamp = datetime.datetime.now()
@@ -309,48 +375,69 @@ class ControlCenter(federateagent):
             # self.logger.info("Simulation time is now: %.1f" % self.sim_time_s)
 
             # Insert into database recevied wind speed and direction values to control_center_table
-            self.insert_value(self.sim_time_s,self.time_rate_s, 'control_center','wind_speed','wind_speed',self.wind_speed)
-            self.insert_value(self.sim_time_s,self.time_rate_s, 'control_center','wind_direction','wind_direction',self.wind_direction)
+            self.insert_value(self.sim_time_s, self.time_rate_s,
+                              'control_center', 'wind_speed', 'wind_speed', self.wind_speed)
+            self.insert_value(self.sim_time_s, self.time_rate_s, 'control_center',
+                              'wind_direction', 'wind_direction', self.wind_direction)
 
             # Insert values from AMRWind
-            self.insert_value(sim_time_s_amr_wind,self.time_rate_s, 'amr_wind','wind_speed','wind_speed',wind_speed_amr_wind)
-            self.insert_value(sim_time_s_amr_wind,self.time_rate_s, 'amr_wind','wind_direction','wind_direction',wind_direction_amr_wind)
+            self.insert_value(sim_time_s_amr_wind, self.time_rate_s,
+                              'amr_wind', 'wind_speed', 'wind_speed', wind_speed_amr_wind)
+            self.insert_value(sim_time_s_amr_wind, self.time_rate_s, 'amr_wind',
+                              'wind_direction', 'wind_direction', wind_direction_amr_wind)
 
             # Turbine powers
             if len(turbine_power_array) == 0:
-                turbine_power_array = [-1,-1,-1,-1]
+                turbine_power_array = np.ones(self.num_turbines)*-1.0
             for t in range(self.num_turbines):
-                # print(t, turbine_power_array)
-                self.insert_value(sim_time_s_amr_wind,self.time_rate_s, 'amr_wind','turbine_power','t%d' % t,turbine_power_array[t])
+                print("T, power array: ", t, turbine_power_array,
+                      " num turbines ", self.num_turbines)
+                self.insert_value(sim_time_s_amr_wind, self.time_rate_s, 'amr_wind',
+                                  'turbine_power', 't%d' % t, turbine_power_array[t])
+                if KAFKA:
+                    keyname = f"wind_turbine_{t}"
+                    key = json.dumps({"key": keyname})
+                    value = json.dumps({"helics_time": self.currenttime, "bucket":  keyname, "power": turbine_power_array[
+                                    t], "AMRWind_speed": wind_speed_amr_wind, "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
+                    python_producer.write(
+                        key=key, value=value, topic=topic, token='test-token')
 
+            aa = [str(xx) for xx in turbine_power_array]
+            xyz = ",".join(aa)                
+            with open(f'{LOGFILE}.csv', 'a') as filex:
+                    filex.write(str(self.currenttime) + ',' + str(sim_time_s_amr_wind) + ',' + str(wind_speed_amr_wind) + ',' + str(wind_direction_amr_wind) + ',' + xyz + os.linesep)
             # Just as a test read the database
             with sqlite3.connect(self.control_center_database_filename, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as con_cc:
                 statement = f'SELECT * from data_table order by timestamp;'
                 df_test = pd.read_sql_query(statement, con_cc)
-            
+
             self.sync_time_helics(self.deltat)
 
     def process_subscription_event(self, msg):
         # process data from subscription
-        print(f"{self.name}, {self.get_currenttime()} subscribed to message {msg}", flush=True)
-        
+        print(
+            f"{self.name}, {self.get_currenttime()} subscribed to message {msg}", flush=True)
+
         try:
             return list(ast.literal_eval(msg))
-            
+
         except Exception as e:
             print("SUBSCRIPTIION ERROR !!! ", e, flush=True)
-            return [0,0,0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
+            return [0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
 
     def process_periodic_publication(self):
-        # Periodically publish data to the surrpogate   
+        # Periodically publish data to the surrpogate
 
         self.get_signals_from_front_end()
         self.set_wind_speed_direction()
 
         yaw_angles = [270 for t in range(self.num_turbines)]
+        ## log these in kafka
+        
         yaw_angles[1] = 260
 
-        tmp = np.array([self.get_currenttime(),self.wind_speed, self.wind_direction] + yaw_angles).tolist()
+        tmp = np.array([self.get_currenttime(), self.wind_speed,
+                       self.wind_direction] + yaw_angles).tolist()
 
         print("publishing  ", tmp)
 
@@ -358,40 +445,41 @@ class ControlCenter(federateagent):
 
     def process_endpoint_event(self, msg):
         pass
+
     def process_periodic_endpoint(self):
-        pass    
+        pass
 
 
 def launch_control_center():
     config = {
-            "name": "controlcenter",
-            "gridpack": {
-            },
-            "helics": {
-                "deltat": 1,
-                "subscription_topic": [
-                    "status"
+        "name": "controlcenter",
+        "amrwindmodel": {
+        },
+        "helics": {
+            "deltat": 1,
+            "subscription_topic": [
+                "status"
 
-                ],
-                "publication_topic": [
-                    "control"
+            ],
+            "publication_topic": [
+                "control"
 
-                ],
-                "endpoints": [
-                ]
-            },
+            ],
+            "endpoints": [
+            ]
+        },
 
-            "publication_interval": 1,
-            "endpoint_interval": 1,
-            "starttime": 0,
-            "stoptime": 10000000,
-            "Agent" : "ControlCenter"
-        
-        }
+        "publication_interval": 1,
+        "endpoint_interval": 1,
+        "starttime": 0,
+        "stoptime": 100000,
+        "Agent": "ControlCenter"
+
+    }
     obj = ControlCenter(config)
     obj.run_helics_setup()
     obj.enter_execution(function_targets=[],
-                function_arguments=[[]])
+                        function_arguments=[[]])
 
 
 launch_control_center()

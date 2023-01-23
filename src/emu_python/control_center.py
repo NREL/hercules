@@ -1,5 +1,5 @@
-from dav_kafka_python.producer import PythonProducer
-from dav_kafka_python.configuration import Configuration
+#from dav_kafka_python.producer import PythonProducer
+#from dav_kafka_python.configuration import Configuration
 import random
 import json
 import getopt
@@ -22,34 +22,12 @@ from federateaccesspoint import federateagent
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-
-import argparse
-parser = argparse.ArgumentParser()
-
-#-db DATABSE -u USERNAME -p PASSWORD -size 20
-parser.add_argument("-k", "--kafka", dest = "kafka", default = False , help="default False, no Kafka", type=bool)
-args = parser.parse_args()
-
-print( "Using Kafka : {} ".format(
-        args.kafka
-        ))
-
-KAFKA = args.kafka
+LOGFILE = str(dt.datetime.now()).replace(
+    ":", "_").replace(" ", "_").replace(".", "_")
 
 
-LOGFILE = str(dt.datetime.now()).replace(":","_").replace(" ","_").replace(".","_")
-
-
-# Control center interacts with simulations, sqlite database, and front end app via sqlite
-
-if KAFKA:
-    # Kafka topic :
-    topic = "EmupyV0.1"
-    print("KAFKA topic", topic)
-    config = Configuration(env_path='./.env')
-    python_producer = PythonProducer(config)
-    python_producer.connect()
-
+# Control center intera
+# cts with simulations, sqlite database, and front end app via sqlite
 
 class ControlCenter(federateagent):
     """
@@ -60,13 +38,26 @@ class ControlCenter(federateagent):
         super(ControlCenter, self).__init__(
             name=config_dict['name'], feeder_num=0, starttime=config_dict['starttime'], endtime=config_dict['stoptime'], agent_num=0, config_dict=config_dict)
         self.config_dict = config_dict
+        self.use_dash_frontend = config_dict["use_dash_frontend"]
         # Parameters
+        self.KAFKA = config_dict["KAFKA"]
 
         # Running on eagle
         # self.amr_wind_folder = '/scratch/pfleming/c2c/amr_wind_demo'
+        if self.KAFKA:
+            # Kafka topic :
+            self.topic = config_dicf["KAFKA_TOPIC"]
+            print("KAFKA topic", self.topic)
+            config = Configuration(env_path='./.env')
+            self.python_producer = PythonProducer(config)
+            self.python_producer.connect()
 
         # Uncomment if running local
         self.amr_wind_folder = 'local_amr_wind_demo'
+        if self.use_dash_frontend:
+            self.get_signals_from_front_end = self.get_signals_from_front_end_dash
+        else:
+            self.get_signals_from_front_end = self.get_signals_from_front_end_none
 
         # self.num_turbines = 8
         self.time_delta = 1.
@@ -103,10 +94,14 @@ class ControlCenter(federateagent):
                     turbine_labels = line.split()[2:]
                     self.num_turbines = len(turbine_labels)
 
+            self.num_turbines = 2
             aa = [f"power_{i}" for i in range(self.num_turbines)]
-            xyz = ",".join(aa)                
+            xyz = ",".join(aa)
+            bb = [f"turbine_wd_direction_{i}" for i in range(self.num_turbines)]
+            zyx = ",".join(bb)
             with open(f'{LOGFILE}.csv', 'a') as filex:
-                filex.write( 'helics_time' +  ',' + 'AMRwind_time' + ',' +  'AMRWind_speed' + ',' + 'AMRWind_direction' + ',' + xyz + os.linesep)
+                filex.write('helics_time' + ',' + 'AMRwind_time' + ',' +
+                            'AMRWind_speed' + ',' + 'AMRWind_direction' + ',' + xyz+ ',' +zyx + os.linesep)
 
             # Find the diameter
             for line in Lines:
@@ -173,13 +168,20 @@ class ControlCenter(federateagent):
         self.logger = logger
 
         # Post the turbine locations
-        for t_idx, t in enumerate(self.turbine_locations):
-            self.insert_value(self.sim_time_s, self.time_rate_s,
-                              'control_center', 'x_loc', 't_%d' % t_idx, t[0])
-            self.insert_value(self.sim_time_s, self.time_rate_s,
-                              'control_center', 'y_loc', 't_%d' % t_idx, t[1])
+        #for t_idx, t in enumerate(self.turbine_locations):
+            #self.insert_value(self.sim_time_s, self.time_rate_s,
+                              #'control_center', 'x_loc', 't_%d' % t_idx, t[0])
+            #self.insert_value(self.sim_time_s, self.time_rate_s,
+                              #'control_center', 'y_loc', 't_%d' % t_idx, t[1])
 
-    def get_signals_from_front_end(self):
+    def get_signals_from_front_end_none(self):
+
+            self.logger.info("Not using wind speed and direction from the front end")
+            self.wind_speed_front_end = 8
+            self.wind_direction_front_end = 250
+
+            self.input_method = "precursor" 
+    def get_signals_from_front_end_dash(self):
 
         self.logger.info(
             "...Getting input_method, wind speed and direction from front end")
@@ -192,7 +194,7 @@ class ControlCenter(federateagent):
             while num_rows_from_front_end < 2:
                 df_front_end = pd.read_sql_query(statement, con_front)
                 num_rows_from_front_end = df_front_end.shape[0]
-                time.sleep(0.5)
+                #time.sleep(0.5)
 
         # Get the most recent input method and save
         input_method = df_front_end[df_front_end.data_type ==
@@ -287,7 +289,7 @@ class ControlCenter(federateagent):
                     cur = con_cc.cursor()
                     cur.execute(insertQuery, tuple_to_add)
             except:
-                time.sleep(0.1)  # Wait 100ms
+                #time.sleep(0.1)  # Wait 100ms
                 continue
             break
         else:
@@ -337,6 +339,9 @@ class ControlCenter(federateagent):
                     :3]
                 turbine_power_array = subscription_value[3:3+self.num_turbines]
                 turbine_wd_array = subscription_value[3+self.num_turbines:]
+                self.wind_speed = wind_speed_amr_wind
+                self.wind_direction = wind_direction_amr_wind 
+
 
                 print("=======================================")
                 print("AMRWindTime:", sim_time_s_amr_wind)
@@ -351,16 +356,18 @@ class ControlCenter(federateagent):
                 sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = [
                     0, 0, 0]
                 turbine_power_array = np.zeros(self.num_turbines).tolist()
+                turbine_wd_array = np.zeros(self.num_turbines).tolist()
+                self.wind_speed = wind_speed_amr_wind
+                self.wind_direction = wind_direction_amr_wind 
 
             # self.zmq_server.send(np.array([self.wind_speed, self.wind_direction]))
             self.process_periodic_publication()
-            if KAFKA:
+            if self.KAFKA:
                 key = json.dumps({"key": "wind_tower"})
                 value = json.dumps({"helics_time": self.currenttime, "bucket": "wind_tower", "AMRWind_speed": wind_speed_amr_wind,
-                                "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
-                python_producer.write(key=key, value=value,
-                                    topic=topic, token='test-token')
-
+                                    "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
+                self.python_producer.write(key=key, value=value,
+                                           topic=self.topic, token='test-token')
 
             # Update the time rate using a sort of lazy filtering
             self.time_rate_s = 0.5 * self.time_rate_s + 0.5 * \
@@ -375,16 +382,16 @@ class ControlCenter(federateagent):
             # self.logger.info("Simulation time is now: %.1f" % self.sim_time_s)
 
             # Insert into database recevied wind speed and direction values to control_center_table
-            self.insert_value(self.sim_time_s, self.time_rate_s,
-                              'control_center', 'wind_speed', 'wind_speed', self.wind_speed)
-            self.insert_value(self.sim_time_s, self.time_rate_s, 'control_center',
-                              'wind_direction', 'wind_direction', self.wind_direction)
+            #self.insert_value(self.sim_time_s, self.time_rate_s,
+                              #'control_center', 'wind_speed', 'wind_speed', self.wind_speed)
+            #self.insert_value(self.sim_time_s, self.time_rate_s, 'control_center',
+                              #'wind_direction', 'wind_direction', self.wind_direction)
 
             # Insert values from AMRWind
-            self.insert_value(sim_time_s_amr_wind, self.time_rate_s,
-                              'amr_wind', 'wind_speed', 'wind_speed', wind_speed_amr_wind)
-            self.insert_value(sim_time_s_amr_wind, self.time_rate_s, 'amr_wind',
-                              'wind_direction', 'wind_direction', wind_direction_amr_wind)
+            #self.insert_value(sim_time_s_amr_wind, self.time_rate_s,
+                              #'amr_wind', 'wind_speed', 'wind_speed', wind_speed_amr_wind)
+            #self.insert_value(sim_time_s_amr_wind, self.time_rate_s, 'amr_wind',
+                              #'wind_direction', 'wind_direction', wind_direction_amr_wind)
 
             # Turbine powers
             if len(turbine_power_array) == 0:
@@ -392,20 +399,23 @@ class ControlCenter(federateagent):
             for t in range(self.num_turbines):
                 print("T, power array: ", t, turbine_power_array,
                       " num turbines ", self.num_turbines)
-                self.insert_value(sim_time_s_amr_wind, self.time_rate_s, 'amr_wind',
-                                  'turbine_power', 't%d' % t, turbine_power_array[t])
-                if KAFKA:
+                #self.insert_value(sim_time_s_amr_wind, self.time_rate_s, 'amr_wind',
+                               #   'turbine_power', 't%d' % t, turbine_power_array[t])
+                if self.KAFKA:
                     keyname = f"wind_turbine_{t}"
                     key = json.dumps({"key": keyname})
-                    value = json.dumps({"helics_time": self.currenttime, "bucket":  keyname, "power": turbine_power_array[
-                                    t], "AMRWind_speed": wind_speed_amr_wind, "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
-                    python_producer.write(
-                        key=key, value=value, topic=topic, token='test-token')
+                    value = json.dumps({"helics_time": self.currenttime, "bucket":  keyname, "turbine_wd_direction" : turbine_wd_array[t]	 ,"power": turbine_power_array[
+                        t], "AMRWind_speed": wind_speed_amr_wind, "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
+                    self.python_producer.write(
+                        key=key, value=value, topic=self.topic, token='test-token')
 
             aa = [str(xx) for xx in turbine_power_array]
-            xyz = ",".join(aa)                
+            xyz = ",".join(aa)
+            bb = [str(xx) for xx in turbine_wd_array]
+            zyx = ",".join(bb)
             with open(f'{LOGFILE}.csv', 'a') as filex:
-                    filex.write(str(self.currenttime) + ',' + str(sim_time_s_amr_wind) + ',' + str(wind_speed_amr_wind) + ',' + str(wind_direction_amr_wind) + ',' + xyz + os.linesep)
+                filex.write(str(self.currenttime) + ',' + str(sim_time_s_amr_wind) + ',' + str(
+                    wind_speed_amr_wind) + ',' + str(wind_direction_amr_wind) + ',' + xyz + ','+ zyx +  os.linesep)
             # Just as a test read the database
             with sqlite3.connect(self.control_center_database_filename, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES) as con_cc:
                 statement = f'SELECT * from data_table order by timestamp;'
@@ -431,10 +441,11 @@ class ControlCenter(federateagent):
         self.get_signals_from_front_end()
         self.set_wind_speed_direction()
 
-        yaw_angles = [270 for t in range(self.num_turbines)]
-        ## log these in kafka
-        
-        yaw_angles[1] = 260
+        #yaw_angles = [270 for t in range(self.num_turbines)]
+        yaw_angles = [240 for t in range(self.num_turbines)]
+        # log these in kafka
+
+        #yaw_angles[1] = 260
 
         tmp = np.array([self.get_currenttime(), self.wind_speed,
                        self.wind_direction] + yaw_angles).tolist()
@@ -453,6 +464,9 @@ class ControlCenter(federateagent):
 def launch_control_center():
     config = {
         "name": "controlcenter",
+        "use_dash_frontend": False,
+        "KAFKA": False,
+        "KAFKA_topics": "EMUV1py",
         "amrwindmodel": {
         },
         "helics": {
@@ -472,7 +486,7 @@ def launch_control_center():
         "publication_interval": 1,
         "endpoint_interval": 1,
         "starttime": 0,
-        "stoptime": 100000,
+        "stoptime": 36000,
         "Agent": "ControlCenter"
 
     }
@@ -483,3 +497,4 @@ def launch_control_center():
 
 
 launch_control_center()
+

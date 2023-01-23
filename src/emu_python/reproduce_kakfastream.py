@@ -35,11 +35,14 @@ for i,x in df.iterrows():
     python_producer.write(key=key, value=json.dumps(value),
                         topic=topic, token='test-token')
     power_keys = [xx for xx in x.keys() if "power_" in xx]
+    wd_keys = [xx for xx in x.keys() if "wd_direction" in xx]
     for yy in power_keys:
         idx = yy.split("_")[-1]
         key_power = json.dumps({"key": f"wind_turbine_{idx}"})
         val_power = dict(value)
         val_power.update({"power" : x[yy]})
+        wd_key = f"turbine_wd_direction_{idx}"
+        val_power.update({"turbine_wd_direction" : x[wd_key]})
         python_producer.write(key=key_power, value=json.dumps(val_power),
                     topic=topic, token='test-token')
         

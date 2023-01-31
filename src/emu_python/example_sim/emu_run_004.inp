@@ -1,7 +1,7 @@
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #            SIMULATION STOP            #
 #.......................................#
-time.stop_time               =   40000.0     # Max (simulated) time to evolve
+time.stop_time               =   10800.0     # Max (simulated) time to evolve
 time.max_step                =   -1          # Max number of time steps
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
@@ -16,7 +16,9 @@ time.cfl              =   0.95               # CFL factor
 #.......................................#
 time.plot_interval            =  3600        # Steps between plot files
 time.checkpoint_interval      =  3600        # Steps between checkpoint files
-io.restart_file = "/projects/ssc/amr_precursors/004_abl_neutral_highTI/chk36000"
+io.restart_file = "/projects/ssc/amr_precursors/004_abl_neutral_highTI_redo/chk14400" # Corresponses to time 7200
+
+
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #               PHYSICS                 #
@@ -32,8 +34,8 @@ transport.laminar_prandtl = 0.7
 transport.turbulent_prandtl = 0.3333
 turbulence.model = OneEqKsgsM84
 
-incflo.physics = ABL
-ICNS.source_terms = BoussinesqBuoyancy CoriolisForcing ABLForcing ABLMeanBoussinesq
+incflo.physics = ABL Actuator
+ICNS.source_terms = BoussinesqBuoyancy CoriolisForcing ABLMeanBoussinesq ActuatorForcing
 TKE.source_terms = KsgsM84Src
 BoussinesqBuoyancy.reference_temperature = 300.0
 CoriolisForcing.latitude = 41.3
@@ -63,7 +65,9 @@ ABL.stats_output_frequency                  = 1
 ABL.surface_temp_flux                       = 0.00
 ABL.wall_shear_stress_type                  = "Moeng"
 
-ABL.bndry_file = "/projects/ssc/amr_precursors/004_abl_neutral_highTI/bndry_files"
+ABL.bndry_file = "/projects/ssc/amr_precursors/004_abl_neutral_highTI_redo/bndry_files"
+
+
 ABL.bndry_io_mode = 1
 ABL.bndry_planes = ylo xlo # I'm (Paul) adding this but not sure if I have to
 

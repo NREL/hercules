@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=emu
-#SBATCH --time=1:00:00
-#SBATCH --nodes=2
+#SBATCH --time=4:00:00
+#SBATCH --nodes=29
 #SBATCH --ntasks-per-node=36
 #SBATCH --account=ssc
 #SBATCH --qos=high
@@ -28,9 +28,11 @@ conda activate emupy
 
 helics_broker -t zmq  -f 2 --loglevel="debug" & 
 
-python control_center.py & 
+python control_center.py & # 
 
 cd example_sim/
+cd /scratch/pfleming/c2c/example_sim
 
-mpirun -n 64 /home/pfleming/amr-wind/build/amr_wind emu_run_004.inp >> logamr 
+
+mpirun -n 1024 /home/pfleming/amr-wind/build/amr_wind emu_run_004.inp >> logamr 
 

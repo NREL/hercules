@@ -1,2 +1,0 @@
-g++-11 -c temps.cpp -L /Users/dvaidhyn/opt/anaconda3/envs/scale/lib/python3.8/site-packages/helics/install/lib -I /Users/dvaidhyn/opt/anaconda3/envs/scale/lib/python3.8/site-packages/helics/install/include -o testobject
-g++-11 testobject -o runtest /Users/dvaidhyn/opt/anaconda3/envs/scale/lib/python3.8/site-packages/helics/install/lib/libhelics.3.1.1.dylib

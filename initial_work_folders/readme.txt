@@ -1,0 +1,1 @@
+This folder is for now a kind of grab bag of things useful when we were getting started but not part of the emu_python application itself

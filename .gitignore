@@ -23,3 +23,6 @@ t_*.txt
 src/emu_python/sample_copy.nc
 src/emu_python/t_0*
 src/emu_python/local_amr_wind_demo/sample_copy.nc
+
+#Ignore csv files
+*.csv

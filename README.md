@@ -34,7 +34,7 @@ In 4 different terminals with location set to emu_python/, type the following co
 - Terminal 1: `python control_center.py`
 - Terminal 2: `python testclient.py`
 - Terminal 3: `python vis_client.py`
-- Terminal 4: `python app.py`
+- Terminal 4: `python front_end_dash.py`
 
 # Running [Eagle]
 
@@ -98,14 +98,14 @@ In 4 different terminals with location set to emu_python/, type the following co
     # OR #
     python vis_client.py
     # OR #
-    python app.py
+    python front_end_dash.py
 ```
 
 ### Final setps
 ```bash
     # If not already running, run amr_wind
 
-    # The terminal running app.py will show a web address
+    # The terminal running front_end_dash.py will show a web address
     # Enter that address into a web browser on your local machine
 ```
 

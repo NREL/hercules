@@ -28,7 +28,9 @@ Col
 
 # Running [Local]
 
-In 4 different terminals with location set to src/emu_python/, type the following commands
+In 4 different terminals with location set to emu_python/, type the following commands
+(This is more and more out of date)
+
 - Terminal 1: `python control_center.py`
 - Terminal 2: `python testclient.py`
 - Terminal 3: `python vis_client.py`

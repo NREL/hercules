@@ -14,7 +14,7 @@ module load netcdf-c/4.7.3/gcc-mpi
 
 conda activate /projects/aumc/dvaidhyn/aumcuc/auc
 
-cd /projects/aumc/dvaidhyn/transmissionemulator/dev/emu_python/src/emu_python/
+cd /projects/aumc/dvaidhyn/transmissionemulator/dev/emu_python/emu_python/
 
 
 helics_broker -t zmq  -f 2 --loglevel="debug" & 

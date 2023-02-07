@@ -12,7 +12,7 @@
 
 from pathlib import Path
 
-ROOT = Path(__file__).parent.parent.parent
-with open(ROOT / "VERSION") as version_file:
+ROOT = Path(__file__).parent
+with open(ROOT / "version.py") as version_file:
     VERSION = version_file.read().strip()
 __version__ = VERSION

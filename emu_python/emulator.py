@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd
 
 import datetime as dt
-from federateaccesspoint import federateagent
-
-
+from emu_python.federateaccesspoint import federateagent
 
 
 class Emulator():

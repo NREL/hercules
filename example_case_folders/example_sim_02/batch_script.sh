@@ -21,7 +21,7 @@ helics_broker -t zmq  -f 2 --loglevel="debug" &
 
 # Need to set this to your emu_python folder
 cd /home/pfleming/emu_python/emu_python
-python control_center.py & # Start the controller center
+python control_center.py /scratch/pfleming/c2c/example_sim_02/emu_run_005.inp & # Start the controller center and pass in input file
 
 # Now go back to scratch folder and launch the job
 cd /scratch/pfleming/c2c/example_sim_02

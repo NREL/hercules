@@ -14,7 +14,7 @@ print(input_dict)
 
 # controller = Controller(input_dict)
 # emu_helics = EmuHelics(input_dict)
-# py_sims = PySims(input_dict)
+py_sims = PySims(input_dict)
 
 
 # emulator = Emulator(controller, emu_helics, py_sims)

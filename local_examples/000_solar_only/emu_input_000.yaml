@@ -7,6 +7,8 @@ name: example_000
 # Describe this emulator setup
 description: Just a solar plant
 
+dt: 0.5
+
 emu_helics:
 
   wind_farm_0:
@@ -35,8 +37,14 @@ py_sims:
 
   solar_farm_0: # The name of py_sim object 1
 
-    type: simple_solar_farm
+    py_sim_type: SimpleSolar
     capacity: 50 # MW
+    efficiency: 0.5 #Fraction
+
+    initial_conditions:
+
+      power: 25 # MW
+
 
 controller:
 

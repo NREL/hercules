@@ -1,26 +1,40 @@
-from emu_python.python_simulators.simple_solar_model import SimpleSolar
+from emu_python.python_simulators.simple_solar import SimpleSolar
 
 
 class PySims():
 
-    def __init__(self, input_dictionary, dt):
+    def __init__(self, input_dictionary):
 
-        self.input_dict = input_dictionary['py_sims']
+        # Save timt step
+        self.dt = input_dictionary['dt']
 
-        available_modules = ['SimpleSolar']
-        present_modules = {}
+        # Grab py sim details
+        self.py_sim_dict = input_dictionary['py_sims']
+        self.n_py_sim = len(self.py_sim_dict )
+        self.py_sim_names = self.py_sim_dict.keys()
 
-        # Find what technologies are in the input file
-        component_names = list(self.input_dict.keys())
-        for i in component_names:
-            present_modules[i] = self.input_dict[i]['type'](self.input_dict[i], dt)
-        
+        # Collect the py_sim objects, inputs and outputs
+        for py_sim_name in self.py_sim_names:
+            
+            self.py_sim_dict[py_sim_name]['object'] = self.get_py_sim(self.py_sim_dict[py_sim_name])
+            self.py_sim_dict[py_sim_name]['outputs'] =  self.py_sim_dict[py_sim_name]['object'].return_outputs()
+            self.py_sim_dict[py_sim_name]['inputs'] = {}
 
-    def step(self, inputs):
+        # print(self.py_sim_dict['solar_farm_0']['object'])
 
-        # Calls individual python simulations
+    def get_py_sim(self, py_sim_obj_dict):
 
-        outputs = None
+        if py_sim_obj_dict['py_sim_type'] == 'SimpleSolar':
+            
+            return SimpleSolar(py_sim_obj_dict, self.dt)
 
-        return outputs
+
+    def step(self):
+
+        # Collect the py_sim objects
+        for py_sim_name in self.py_sim_names:
+
+                self.py_sim_dict[py_sim_name]['outputs'] = self.py_sim_dict[py_sim_name]['object'].step(self.py_sim_dict[py_sim_name]['inputs'])
+
+
 

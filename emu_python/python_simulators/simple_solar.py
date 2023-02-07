@@ -20,21 +20,36 @@ class SimpleSolar():
         # Fixed dt for solar simulations
         self.dt = dt
 
+        # Save the initial condition
+        self.power_mw = input_dict['initial_conditions']['power']
+
         # # compute power output of solar panels
         # self.compute_power()
 
+    def return_outputs(self):
 
-    def compute_power(self, irradiance):
+        return {'power': self.power_mw}
+
+    def step(self, inputs):
 
         # TODO add tilt tracking - haven't gotten to this yet
         # right now, just static
         # https://www.sciencedirect.com/science/article/pii/S1364032106001134
 
         # Note: irradiance is measured in W/m^2, so the power is calculated in Watts, and then scaled to MW
-        self.power_mw = 0.0
+        # self.power_mw = 0.0
+
+        # Gather inputs
+        irradiance = inputs['irradiance']
 
         self.power_mw = irradiance * self.area * self.efficiency / 1e6 * self.dt
         if self.power_mw < 0.0:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
         # Need to put outputs into input/output structure
+
+        return self.return_outputs()
+
+
+
+

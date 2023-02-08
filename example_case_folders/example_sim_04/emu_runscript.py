@@ -13,7 +13,6 @@ input_dict = load_yaml(sys.argv[1])
 #print(input_dict)
 
 controller = Controller(input_dict)
-# emu_comms = EmuComms(input_dict)
 py_sims = PySims(input_dict)
 
 

@@ -22,13 +22,16 @@ class SimpleSolar():
 
         # Save the initial condition
         self.power_mw = input_dict['initial_conditions']['power']
+        self.irradiance = input_dict['initial_conditions']['irradiance']
 
         # # compute power output of solar panels
         # self.compute_power()
 
     def return_outputs(self):
 
-        return {'power': self.power_mw}
+        return {'power': self.power_mw,
+                'irradiance': self.irradiance
+        }
 
     def step(self, inputs):
 
@@ -39,8 +42,15 @@ class SimpleSolar():
         # Note: irradiance is measured in W/m^2, so the power is calculated in Watts, and then scaled to MW
         # self.power_mw = 0.0
 
+        # Assume model generates its own irradiance
+        irradiance = 1000.
+
+        # Save this as an output for now
+        self.irradiance = irradiance
+
+
         # Gather inputs
-        irradiance = inputs['irradiance']
+        # irradiance = inputs['irradiance']
 
         self.power_mw = irradiance * self.area * self.efficiency / 1e6 * self.dt
         if self.power_mw < 0.0:

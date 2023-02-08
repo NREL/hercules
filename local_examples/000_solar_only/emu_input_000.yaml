@@ -1,0 +1,56 @@
+# Input YAML for emy_python
+
+# Name
+name: example_000
+
+###
+# Describe this emulator setup
+description: Just a solar plant
+
+dt: 0.5
+
+emu_helics:
+
+  wind_farm_0:
+    type: amr_wind
+    amr_wind_input_file: input.inp
+
+  helics:
+
+    config:
+        # "name": "controlcenter",
+        # "use_dash_frontend": False,
+        KAFKA: False
+        KAFKA_topics: EMUV1py
+        helics: 
+            deltat: 1
+            subscription_topic: [status]
+            publication_topic: [control]
+            endpoints: []
+        publication_interval: 1
+        endpoint_interval: 1
+        starttime: 0
+        stoptime: 36000
+        Agent: ControlCenter
+
+py_sims:
+
+  solar_farm_0: # The name of py_sim object 1
+
+    py_sim_type: SimpleSolar
+    capacity: 50 # MW
+    efficiency: 0.5 #Fraction
+
+    initial_conditions:
+
+      power: 25 # MW
+
+
+controller:
+
+
+
+
+
+
+

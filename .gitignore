@@ -26,3 +26,8 @@ emu_python/local_amr_wind_demo/sample_copy.nc
 
 #Ignore csv files
 *.csv
+
+# Some output files to ignore
+t_00*
+logdummy
+logemu

@@ -5,6 +5,8 @@ import datetime as dt
 import numpy as np
 import json
 
+import ast
+
 from emu_python.federateaccesspoint import federateagent
 
 
@@ -198,11 +200,11 @@ class Emulator(federateagent):
     def process_periodic_publication(self):
         # Periodically publish data to the surrpogate
 
-        self.get_signals_from_front_end()
-        self.set_wind_speed_direction()
+        # self.get_signals_from_front_end()
+        # self.set_wind_speed_direction()
 
         #yaw_angles = [270 for t in range(self.num_turbines)]
-        yaw_angles = [240 for t in range(self.num_turbines)]
+        yaw_angles = [270 for t in range(self.num_turbines)]
         # log these in kafka
 
         #yaw_angles[1] = 260

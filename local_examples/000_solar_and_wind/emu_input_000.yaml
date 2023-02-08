@@ -9,21 +9,23 @@ description: Just a solar plant
 
 dt: 0.5
 
-emu_helics:
+emu_comms:
 
-  wind_farm_0:
-    type: amr_wind
-    amr_wind_input_file: input.inp
+  amr_wind:
+
+    wind_farm_0:
+      type: amr_wind_local #options are amr_wind or amr_wind_local
+      amr_wind_input_file: test_input.inp
 
   helics:
 
     config:
-        # "name": "controlcenter",
-        # "use_dash_frontend": False,
+        name: emu_python # What is the purpose of this name
+        use_dash_frontend: False
         KAFKA: False
         KAFKA_topics: EMUV1py
         helics: 
-            deltat: 1
+            # deltat: 1 # This will be assigned in software
             subscription_topic: [status]
             publication_topic: [control]
             endpoints: []

@@ -2,17 +2,17 @@ import numpy as np
 import pandas as pd
 
 import datetime as dt
-from emu_python.federateaccesspoint import federateagent
+
 
 
 class Emulator():
 
-    def __init__(self, controller, emu_helics, py_sims):
+    def __init__(self, controller, emu_comms, py_sims):
         #TODO we think will receive instantiated classes for the py sims
 
         # Initialize components
         self.controller = controller
-        self.emu_helics = emu_helics
+        self.emu_comms = emu_comms
         self.py_sims = py_sims
 
 

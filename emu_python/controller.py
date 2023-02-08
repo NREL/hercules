@@ -4,12 +4,14 @@
 
 class Controller():
 
-    def __init__(self):
+    def __init__(self, input_dict):
         pass
 
-    def step(self, inputs):
+    def step(self, input_dict):
 
-        outputs = None
+        pass
 
-        return outputs
+    def get_controller_dict(self):
+
+        return {}
 

@@ -3,13 +3,13 @@ from emu_python.python_simulators.simple_solar import SimpleSolar
 
 class PySims():
 
-    def __init__(self, input_dictionary):
+    def __init__(self, input_dict):
 
         # Save timt step
-        self.dt = input_dictionary['dt']
+        self.dt = input_dict['dt']
 
         # Grab py sim details
-        self.py_sim_dict = input_dictionary['py_sims']
+        self.py_sim_dict = input_dict['py_sims']
         self.n_py_sim = len(self.py_sim_dict )
         self.py_sim_names = self.py_sim_dict.keys()
 
@@ -27,9 +27,12 @@ class PySims():
         if py_sim_obj_dict['py_sim_type'] == 'SimpleSolar':
             
             return SimpleSolar(py_sim_obj_dict, self.dt)
+        
+    def get_py_sim_dict(self):
+         return self.py_sim_dict
 
 
-    def step(self):
+    def step(self, input_dict):
 
         # Collect the py_sim objects
         for py_sim_name in self.py_sim_names:

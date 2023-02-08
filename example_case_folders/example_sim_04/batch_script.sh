@@ -21,8 +21,8 @@ helics_broker -t zmq  -f 2 --loglevel="debug" &
 
 # Need to set this to your emu_python folder
 # cd /home/pfleming/emu_python/emu_python
-python3 emu_runscript.py emu_input_000.yaml >> logemu & # Start the controller center and pass in input file
+python3 emu_runscript.py emu_input_000.yaml >> logemu 2>&1  & # Start the controller center and pass in input file
 
 # Now go back to scratch folder and launch the job
 # cd /scratch/pfleming/c2c/example_sim_02
-mpirun -n 72 /home/pfleming/amr-wind/build/amr_wind amr_input.inp >> logamr 
+mpirun -n 72 /home/pfleming/amr-wind/build/amr_wind amr_input.inp >> logamr 2>&1 

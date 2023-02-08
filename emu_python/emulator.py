@@ -112,15 +112,13 @@ class Emulator(federateagent):
             
 
         # TODO: Actually work this this out
-        for i in range(20):
+        for i in range(100):
 
 
             # Update controller and py sims
             self.controller.step(self.input_dict)
-            self.py_sims.step(self.input_dict)
-
-            # Update the input dict components
             self.input_dict['controller'] = self.controller.get_controller_dict()
+            self.py_sims.step(self.input_dict)
             self.input_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
             # Print the input dict

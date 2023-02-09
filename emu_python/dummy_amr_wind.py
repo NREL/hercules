@@ -170,6 +170,9 @@ class DummyAMRWind(federateagent):
             sim_time_s += 1
             self.sync_time_helics(self.deltat)
 
+            # Add a little pause to not run too fast
+            time.sleep(0.1)
+
     def process_endpoint_event(self, msg):
         pass
     def process_periodic_endpoint(self):

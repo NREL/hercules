@@ -1,11 +1,13 @@
 import pandas as pd
 
-import datetime as dt
+import datetime
 
 import numpy as np
 import json
 
 import ast
+
+import logging
 
 from emu_python.federateaccesspoint import federateagent
 
@@ -19,6 +21,14 @@ class Emulator(federateagent):
 
         # Save timt step
         self.dt = input_dict['dt']
+
+        # Set up logging
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                            datefmt='%Y-%m-%d %H:%M:%S',
+                            filename='emu_dict_log.log',
+                            filemode='w')
+        self.logger = logging.getLogger("emu_python")
 
         # Initialize components
         self.controller = controller
@@ -122,7 +132,7 @@ class Emulator(federateagent):
             self.input_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
             # Print the input dict
-            print(self.input_dict)
+            # print(self.input_dict)
 
             # Helics
             #TODO: What exactly does this do?  
@@ -174,7 +184,13 @@ class Emulator(federateagent):
             self.amr_wind_dict[self.amr_wind_names[0]]['turbine_powers'] = turbine_power_array
             self.turbine_power_array = turbine_power_array
 
+            # Log the dictionary
+            self.log_nested_dict()
+
             self.sync_time_helics(self.dt)
+
+ 
+
 
 
 
@@ -270,5 +286,11 @@ class Emulator(federateagent):
             }
 
             # print(return_dict)
+
+
+
         return return_dict
 
+    def log_nested_dict(self):
+
+        self.logger.info(self.input_dict)

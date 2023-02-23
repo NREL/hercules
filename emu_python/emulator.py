@@ -1,27 +1,21 @@
-import pandas as pd
-
+import ast
 import datetime as dt
-
-import numpy as np
 import json
 import os
 
-import ast
-
-from dav_kafka_python.producer import PythonProducer
-from dav_kafka_python.configuration import Configuration
-
+import numpy as np
+import pandas as pd
 
 from SEAS.federate_agent import FederateAgent
-import datetime as dt
 
 LOGFILE = str(dt.datetime.now()).replace(
     ":", "_").replace(" ", "_").replace(".", "_")
 
+
 class Emulator(FederateAgent):
 
     def __init__(self, controller, py_sims, input_dict):
-        
+
         # Save the input dict
         self.input_dict = input_dict
 
@@ -46,9 +40,9 @@ class Emulator(FederateAgent):
 
         # Initialize the Federate class for HELICS communitation
         super(Emulator, self).__init__(
-            name=self.helics_config_dict['name'], 
+            name=self.helics_config_dict['name'],
             starttime=self.helics_config_dict['starttime'],
-            endtime=self.helics_config_dict['stoptime'], 
+            endtime=self.helics_config_dict['stoptime'],
             config_dict=self.helics_config_dict
         )
 
@@ -58,6 +52,8 @@ class Emulator(FederateAgent):
 
         # TODO Copied direct from control_center.py but not actually ready yet
         if self.KAFKA:
+            from dav_kafka_python.configuration import Configuration
+            from dav_kafka_python.producer import PythonProducer
             # Kafka topic :
             self.topic = self.helics_config_dict["KAFKA_TOPIC"]
             print("KAFKA topic", self.topic)
@@ -69,7 +65,7 @@ class Emulator(FederateAgent):
         # Grab py sim details
         self.amr_wind_dict = self.emu_comms_dict['amr_wind']
 
-        self.n_amr_wind = len(self.amr_wind_dict )
+        self.n_amr_wind = len(self.amr_wind_dict)
         self.amr_wind_names = list(self.amr_wind_dict.keys())
 
         # Save information about amr_wind simulations
@@ -80,23 +76,28 @@ class Emulator(FederateAgent):
                 )
             )
 
-        #TODO For now, need to assume for simplicity there is one and only
+        # TODO For now, need to assume for simplicity there is one and only
         # one AMR_Wind simualtion
-        self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]]['num_turbines']
-        self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]]['rotor_diameter']
-        self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]]['turbine_locations']
-        self.turbine_labels = self.amr_wind_dict[self.amr_wind_names[0]]['turbine_labels']
+        self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]
+                                               ]['num_turbines']
+        self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]
+                                                 ]['rotor_diameter']
+        self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]
+                                                    ]['turbine_locations']
+        self.turbine_labels = self.amr_wind_dict[self.amr_wind_names[0]
+                                                 ]['turbine_labels']
 
         # TODO In fugure could cover multiple farms
         # Initialize the turbine power array
         self.turbine_power_array = np.zeros(self.num_turbines)
-        self.amr_wind_dict[self.amr_wind_names[0]]['turbine_powers'] = np.zeros(self.num_turbines)
+        self.amr_wind_dict[self.amr_wind_names[0]
+                           ]['turbine_powers'] = np.zeros(self.num_turbines)
 
-        #TODO Could set up logging here
+        # TODO Could set up logging here
 
-        #TODO Set interface comms to either dash or kenny's front end
+        # TODO Set interface comms to either dash or kenny's front end
 
-        #TODO Set comms to non-helics based things like http polling
+        # TODO Set comms to non-helics based things like http polling
 
         # TODO not positive if this is the right place but I think it is
         # Hold here and wait for AMR Wind to respond
@@ -108,20 +109,19 @@ class Emulator(FederateAgent):
         # list(self.pub.values())[0].publish(str("[-1,-1,-1]"))
         # self.logger.info(" #### Entering main loop #### ")
 
-
     def run(self):
 
-        #TODO In future code that doesnt insist on AMRWInd can make this optional
+        # TODO In future code that doesnt insist on AMRWInd can make this optional
         print("... waiting for initial connection from AMRWind")
         # Send initial connection signal to AMRWind
         # publish on topic: control
         self.send_via_helics("control", str("[-1,-1,-1]"))
         print(" #### Entering main loop #### ")
-            
+
         # Run simulation till  endtime
         while self.absolute_helics_time < self.endtime:
 
-            # Loop till we reach simulation startime. 
+            # Loop till we reach simulation startime.
             if (self.absolute_helics_time < self.starttime):
                 continue
 
@@ -137,12 +137,15 @@ class Emulator(FederateAgent):
             # Subscribe to helics messages:
             incoming_messages = self.helics_connector.get_all_waiting_messages()
             if incoming_messages != {}:
-                subscription_value  = self.process_subscription_messages(incoming_messages)    
+                subscription_value = self.process_subscription_messages(
+                    incoming_messages)
             else:
-                print("Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
-                subscription_value  = [0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
+                print(
+                    "Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
+                subscription_value = [
+                    0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
 
-            #TODO Parse returns from AMRWind
+            # TODO Parse returns from AMRWind
             sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = subscription_value[
                 :3]
             turbine_power_array = subscription_value[3:3+self.num_turbines]
@@ -150,7 +153,7 @@ class Emulator(FederateAgent):
             self.wind_speed = wind_speed_amr_wind
             self.wind_direction = wind_direction_amr_wind
 
-            #TODO F-Strings
+            # TODO F-Strings
             print("=======================================")
             print("AMRWindTime:", sim_time_s_amr_wind)
             print("AMRWindSpeed:", wind_speed_amr_wind)
@@ -160,27 +163,26 @@ class Emulator(FederateAgent):
             print("AMRWindTurbineWD:", turbine_wd_array)
             print("=======================================")
 
-            #Process periocdic functions. 
-            self.process_periodic_publication() 
+            # Process periocdic functions.
+            self.process_periodic_publication()
 
             if self.KAFKA:
                 key = json.dumps({"key": "wind_tower"})
                 value = json.dumps({"helics_time": self.absolute_helics_time, "bucket": "wind_tower", "AMRWind_speed": wind_speed_amr_wind,
                                     "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
                 self.python_producer.write(key=key, value=value,
-                                            topic=self.topic, token='test-token')
+                                           topic=self.topic, token='test-token')
 
             # Store turbine powers back to the dict
-            #TODO hard-coded for now assuming only one AMR-WIND
-            self.amr_wind_dict[self.amr_wind_names[0]]['turbine_powers'] = turbine_power_array
+            # TODO hard-coded for now assuming only one AMR-WIND
+            self.amr_wind_dict[self.amr_wind_names[0]
+                               ]['turbine_powers'] = turbine_power_array
             self.turbine_power_array = turbine_power_array
 
             self.sync_time_helics(self.absolute_helics_time + self.deltat)
 
-
     def parse_input_yaml(self, filename):
         pass
-
 
     def process_subscription_messages(self, msg):
         # process data from HELICS subscription
@@ -210,7 +212,6 @@ class Emulator(FederateAgent):
 
         self.send_via_helics("control", str(tmp))
 
-
     def process_endpoint_event(self, msg):
         pass
 
@@ -221,7 +222,7 @@ class Emulator(FederateAgent):
 
         # TODO this function is ugly and uncommented
 
-        #TODO Initialize to empty in case doesn't run
+        # TODO Initialize to empty in case doesn't run
         # Probably want a file not found error instead
         return_dict = {}
 
@@ -236,7 +237,7 @@ class Emulator(FederateAgent):
 
             self.num_turbines = num_turbines
             print("Number of turbines in amrwind: ", num_turbines)
-            
+
             aa = [f"power_{i}" for i in range(num_turbines)]
             xyz = ",".join(aa)
             bb = [f"turbine_wd_direction_{i}" for i in range(
@@ -259,14 +260,13 @@ class Emulator(FederateAgent):
                         locations = tuple([float(f)
                                           for f in line.split()[-3:-1]])
                         turbine_locations.append(locations)
-        
+
             return_dict = {
-                'num_turbines':num_turbines,
-                'turbine_labels':turbine_labels,
-                'rotor_diameter':D,
-                'turbine_locations':turbine_locations
+                'num_turbines': num_turbines,
+                'turbine_labels': turbine_labels,
+                'rotor_diameter': D,
+                'turbine_locations': turbine_locations
             }
 
             # print(return_dict)
         return return_dict
-

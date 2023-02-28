@@ -133,12 +133,10 @@ class Emulator(FederateAgent):
             self.input_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
             # Print the input dict
-            #print(self.input_dict)
-            print("Time in control centrer ",self.absolute_helics_time)
+            print(self.input_dict)
 
             # Subscribe to helics messages:
             incoming_messages = self.helics_connector.get_all_waiting_messages()
-            print("incomming  ",  incoming_messages)
             if incoming_messages != {}:
                 subscription_value = self.process_subscription_messages(
                     incoming_messages)
@@ -204,7 +202,7 @@ class Emulator(FederateAgent):
         # self.set_wind_speed_direction()
 
         #yaw_angles = [270 for t in range(self.num_turbines)]
-        yaw_angles = [270+random.random() for t in range(self.num_turbines)]
+        yaw_angles = [270 for t in range(self.num_turbines)]
         # log these in kafka
         #yaw_angles[1] = 260
 
@@ -271,5 +269,5 @@ class Emulator(FederateAgent):
                 'turbine_locations': turbine_locations
             }
 
-            # print(return_dict)
+            print(return_dict)
         return return_dict

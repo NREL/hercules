@@ -81,7 +81,10 @@ class DummyAMRWind(FederateAgent):
         # Subscribe to helics messages:
         incoming_messages = self.helics_connector.get_all_waiting_messages()
         if incoming_messages != {}:
-            message_from_server = list(ast.literal_eval(incoming_messages))
+            try:
+                message_from_server = list(ast.literal_eval(incoming_messages))
+            except Exception as e: 
+                message_from_server = None
         else:
             message_from_server = None
 

@@ -2,6 +2,7 @@ import ast
 import datetime as dt
 import json
 import os
+import random
 
 import numpy as np
 import pandas as pd
@@ -132,10 +133,12 @@ class Emulator(FederateAgent):
             self.input_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
             # Print the input dict
-            print(self.input_dict)
+            #print(self.input_dict)
+            print("Time in control centrer ",self.absolute_helics_time)
 
             # Subscribe to helics messages:
             incoming_messages = self.helics_connector.get_all_waiting_messages()
+            print("incomming  ",  incoming_messages)
             if incoming_messages != {}:
                 subscription_value = self.process_subscription_messages(
                     incoming_messages)
@@ -189,7 +192,7 @@ class Emulator(FederateAgent):
         print(
             f"{self.name}, {self.absolute_helics_time} subscribed to message {msg}", flush=True)
         try:
-            return list(ast.literal_eval(msg["status"]["message"]))
+            return list(ast.literal_eval(str(msg["status"]["message"])))
         except Exception as e:
             print(f"Subscription error:  {e} , returning 0s ", flush=True)
             return [0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
@@ -201,7 +204,7 @@ class Emulator(FederateAgent):
         # self.set_wind_speed_direction()
 
         #yaw_angles = [270 for t in range(self.num_turbines)]
-        yaw_angles = [270 for t in range(self.num_turbines)]
+        yaw_angles = [270+random.random() for t in range(self.num_turbines)]
         # log these in kafka
         #yaw_angles[1] = 260
 

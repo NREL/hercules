@@ -204,7 +204,7 @@ class Emulator(FederateAgent):
         # self.set_wind_speed_direction()
 
         #yaw_angles = [270 for t in range(self.num_turbines)]
-        yaw_angles = [270+random.random() for t in range(self.num_turbines)]
+        yaw_angles = [270 for t in range(self.num_turbines)]
         # log these in kafka
         #yaw_angles[1] = 260
 

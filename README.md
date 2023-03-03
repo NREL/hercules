@@ -15,6 +15,11 @@ git clone https://github.com/NREL/OpenOA.git
 pip install ./OpenOA
 pip install -e emu_python
 
+# Please install SEAS as follows: 
+
+``` pip install git+https://github.nrel.gov/SEAS/SEAS.git@dv/emuwind ```
+
+
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account
 
@@ -142,7 +147,8 @@ In 4 different terminals with location set to emu_python/, type the following co
 
 # TODO
 1. include dash license and copyright
-1.  make connection objects more robust
+2.  make connection objects more robust
+3.  install SEAS as part of emu_python install
 
 # Questions
 

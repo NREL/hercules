@@ -1,1 +1,0 @@
-Initial restart example provided by Deepthi

@@ -224,7 +224,7 @@ class Emulator(FederateAgent):
             return [0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
 
     def process_periodic_publication(self):
-        # Periodically publish data to the surrpogate
+        # Periodically publish data to the surrogate
 
         # self.get_signals_from_front_end()
         # self.set_wind_speed_direction()

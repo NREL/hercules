@@ -154,6 +154,17 @@ class Emulator(FederateAgent):
             self.wind_speed = wind_speed_amr_wind
             self.wind_direction = wind_direction_amr_wind
 
+            ## TODO add other parameters that need to be logged to csv here. 
+            # Write turbine power and turbine wind direction to csv logfile. 
+            aa = [str(xx) for xx in turbine_power_array]
+            xyz = ",".join(aa)
+            bb = [str(xx) for xx in turbine_wd_array]
+            zyx = ",".join(bb)
+            with open(f'{LOGFILE}.csv', 'a') as filex:
+                filex.write(str(self.absolute_helics_time) + ',' + str(sim_time_s_amr_wind) + ',' + str(
+                    wind_speed_amr_wind) + ',' + str(wind_direction_amr_wind) + ',' + xyz + ',' + zyx + os.linesep)
+
+
             # TODO F-Strings
             print("=======================================")
             print("AMRWindTime:", sim_time_s_amr_wind)
@@ -167,6 +178,7 @@ class Emulator(FederateAgent):
             # Process periocdic functions.
             self.process_periodic_publication()
 
+            # Send control center values through Kafka if enabled:
             if self.KAFKA:
                 key = json.dumps({"key": "wind_tower"})
                 value = json.dumps({"helics_time": self.absolute_helics_time, "bucket": "wind_tower", "AMRWind_speed": wind_speed_amr_wind,
@@ -180,7 +192,23 @@ class Emulator(FederateAgent):
                                ]['turbine_powers'] = turbine_power_array
             self.turbine_power_array = turbine_power_array
 
+            # Send turbine powers through Kafka if enabled:
+            if self.KAFKA:
+                if len(turbine_power_array) == 0:
+                    turbine_power_array = np.ones(self.num_turbines)*-1.0
+                for t in range(self.num_turbines):
+        
+                        keyname = f"wind_turbine_{t}"
+                        key = json.dumps({"key": keyname})
+                        value = json.dumps({"helics_time": self.currenttime, "bucket":  keyname, "turbine_wd_direction": turbine_wd_array[t], "power": turbine_power_array[
+                            t], "AMRWind_speed": wind_speed_amr_wind, "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
+                        self.python_producer.write(
+                            key=key, value=value, topic=self.topic, token='test-token')
+
             self.sync_time_helics(self.absolute_helics_time + self.deltat)
+
+
+
 
     def parse_input_yaml(self, filename):
         pass
@@ -270,4 +298,16 @@ class Emulator(FederateAgent):
             }
 
             print(return_dict)
+
+            # Write header for logfile: 
+            aa = [f"power_{i}" for i in range(self.num_turbines)]
+            xyz = ",".join(aa)
+            bb = [f"turbine_wd_direction_{i}" for i in range(
+                self.num_turbines)]
+            zyx = ",".join(bb)
+            with open(f'{LOGFILE}.csv', 'a') as filex:
+                filex.write('helics_time' + ',' + 'AMRwind_time' + ',' +
+                            'AMRWind_speed' + ',' + 'AMRWind_direction' + ',' + xyz + ',' + zyx + os.linesep)
+
+
         return return_dict

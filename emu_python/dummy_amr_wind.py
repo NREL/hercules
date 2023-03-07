@@ -22,21 +22,19 @@
 # - - Update the turbine measurements
 # - - Sleep for 1 s
 
-import sys
+import ast
+import datetime
 import logging
+import os
+import random
+import sys
 import time
 from io import StringIO
-import os
-import datetime
 
 import numpy as np
-import random
 import pandas as pd
-from io import StringIO
-
 import zmq
-import ast
-from emu_python.federateaccesspoint import federateagent
+from SEAS.federate_agent import FederateAgent
 
 # PARAMETERS
 num_turbines = 2
@@ -53,28 +51,15 @@ logging.basicConfig(level=logging.DEBUG,
                     filemode='w')
 logger = logging.getLogger("dummy_amr_wind")
 
-# Perhaps a small hack to also send log to the terminal outout 
+# Perhaps a small hack to also send log to the terminal outout
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 #  Make an announcement
-logger.info("Emulator dummy_amr_wind (standing in for AMR-Wind) connecting to server")
-
-# # Set up connection to the control_center
-# context = zmq.Context()
-
-# #  Socket to talk to server
-# logger.info("Starting ZMQ Connection ... ")
-# socket = context.socket(zmq.REQ)
-# socket.connect("tcp://localhost:1878")
-# logger.info("... Connected")
-
-# Before starting the main time loop need to do an initial connection to the 
-# Control center to get the starting wind speed and wind direction
-# Code the time step as -1 and -1 (to ensure it is an array)
+logger.info(
+    "Emulator dummy_amr_wind (standing in for AMR-Wind) connecting to server")
 
 
-
-class DummyAMRWind(federateagent):
+class DummyAMRWind(FederateAgent):
     def __init__(self, config_dict):
         super(DummyAMRWind, self).__init__(
             name=config_dict['name'], feeder_num=0, starttime=config_dict['starttime'], endtime=config_dict['stoptime'], agent_num=0, config_dict=config_dict)
@@ -82,48 +67,58 @@ class DummyAMRWind(federateagent):
 
     def run(self):
 
+        # Before starting the main time loop need to do an initial connection to the
+        # Control center to get the starting wind speed and wind direction
+        # Code the time step as -1 and -1 (to ensure it is an array)
         logger.info("** First communication with control center")
-        message_from_client_array = [0,-1, -1]
-        for y in self.pub.keys(): 
-            tmp = message_from_client_array
-            self.broadcast(self.pub[y], str(tmp))
-        logger.info("** Initial Message Sent: {}".format(message_from_client_array))
+        message_from_client_array = [0, -1, -1]
+        # Send initial message via helics
+        # publish on topic: status
+        self.send_via_helics("status", str(message_from_client_array))
+        logger.info(
+            "** Initial Message Sent: {}".format(message_from_client_array))
 
-        tmp = self.helics_get_all()
-        message_from_server = None
-        if tmp != []:
-            for msg in tmp:
-                try:
-                    message_from_server = ast.literal_eval(msg)
-                except:
-                    pass
+        # Subscribe to helics messages:
+        incoming_messages = self.helics_connector.get_all_waiting_messages()
+        if incoming_messages != {}:
+            try:
+                message_from_server = list(ast.literal_eval(incoming_messages))
+            except Exception as e: 
+                message_from_server = None
+        else:
+            message_from_server = None
 
-        self.sync_time_helics(self.deltat)
+        # Synchronize time bewteen control center and AMRWind
+        self.sync_time_helics(self.absolute_helics_time + self.deltat)
         logger.info("** Initial Received reply: {}".format(message_from_server))
+
         # # Unpack the reply and update wind speed and wind direction
         # Initialize variables
-        if message_from_server == None: # This case only happens in the first time-step. 
-            received_data = [7,270]
-        received_data = [7,270]
-        wind_speed = 8# float(received_data[0]) #TODO: HARDCODED
-        wind_direction = 270# float(received_data[1]) #TODO: HARDCODED
+        # This case only happens in the first time-step.
+        if message_from_server == None:
+            received_data = [7, 270]
+        received_data = [7, 270]
+        wind_speed = 8  # float(received_data[0]) #TODO: HARDCODED
+        wind_direction = 270  # float(received_data[1]) #TODO: HARDCODED
         logger.info("** Intial Wind Speed: {}".format(wind_speed))
         logger.info("** Intial Wind Direction: {}".format(wind_direction))
         logger.info("...STARTING TIME LOOP...")
 
-        sim_time_s = 0. # initialize time to 0
+        sim_time_s = 0.  # initialize time to 0
         self.message_from_server = None
         # while True:
-        while self.currenttime < (self.endtime - self.starttime  +1 ):
+        while self.absolute_helics_time < (self.endtime - self.starttime + 1):
 
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
             logger.info("Calculating simulation time: %.1f" % sim_time_s)
 
             # Compute the turbine power using a simple formula
-            turbine_powers = np.ones(num_turbines) * wind_speed**3 + np.random.rand(num_turbines) * 50
+            turbine_powers = np.ones(
+                num_turbines) * wind_speed**3 + np.random.rand(num_turbines) * 50
 
             # Scale down later turbines as if waked
-            turbine_powers[int(num_turbines/2):] = 0.75 * turbine_powers[int(num_turbines/2):]
+            turbine_powers[int(num_turbines/2):] = 0.75 * \
+                turbine_powers[int(num_turbines/2):]
 
             # Convert to a list
             turbine_powers = turbine_powers.tolist()
@@ -143,80 +138,85 @@ class DummyAMRWind(federateagent):
 
             # Pass the current simulation time and the turbine powers from the previous time step
             message_code = 0
-            message_from_client_array = [sim_time_s] + [wind_speed, wind_direction]  + turbine_powers # [34 + random.random(), 45.3+random.random() , 67+random.random()] 
-            # turbine_powers.tolist()
-            for y in self.pub.keys(): 
-                tmp = message_from_client_array
-                self.broadcast(self.pub[y], str(tmp))
-    
-            logger.info("** Message Sent: {}".format(message_from_client_array))
+            # [34 + random.random(), 45.3+random.random() , 67+random.random()]
+            message_from_client_array = [
+                sim_time_s] + [wind_speed, wind_direction] + turbine_powers
 
-            tmp = self.helics_get_all()
-            if tmp != {}:
-                print("subscribed Tmp ", tmp)
-                self.process_subscription_event(tmp)
-                
+            # Send helics message to Control Center
+            # publish on topic: status
+            self.send_via_helics("status", str(message_from_client_array))
+            logger.info(
+                "** Message Sent: {}".format(message_from_client_array))
+
+            # Subscribe to helics messages from control center:
+            incoming_messages = self.helics_connector.get_all_waiting_messages()
+            if incoming_messages != {}:
+                self.message_from_server = list(ast.literal_eval(
+                    incoming_messages["control"]["message"]))
+            else:
+                self.message_from_server = None
             #  Now get the wind speed and wind direction back
             if self.message_from_server != None:
-                logger.info("** Received reply {}: {}".format(sim_time_s, self.message_from_server))
+                logger.info(
+                    "** Received reply {}: {}".format(sim_time_s, self.message_from_server))
 
                 # Unpack the reply and update wind speed and wind direction
                 # Get wind speed and wind direction for the next time step
+
                 received_data = self.message_from_server
                 wind_speed = float(received_data[1])
                 wind_direction = float(received_data[2])
 
             # Advance simulation time
             sim_time_s += 1
-            self.sync_time_helics(self.deltat)
+            self.sync_time_helics(self.absolute_helics_time + self.deltat)
+
+    # TODO cleanup code to move publish and subscribe here.
 
     def process_endpoint_event(self, msg):
         pass
-    def process_periodic_endpoint(self):
-        pass    
 
-    def process_periodic_publication(self):
-        # Periodically publish data to the surrpogate 
+    def process_periodic_endpoint(self):
         pass
 
-    def process_subscription_event(self, msg):
-        # process data cobntrol center
-        try: 
-            # ast.literal_eval(msg['control'])[0]
-            self.message_from_server = ast.literal_eval(msg)
-        except:
-            self.message_from_server = None
-            
+    def process_periodic_publication(self):
+        # Periodically publish data to the surrpogate
+        pass
+
+    def process_subscription_messages(self, msg):
+        pass
+
 
 def launch_dummy_amr_wind():
     config = {
-            "name": "dummy_amr_wind",
-            "gridpack": {
-            },
-            "helics": {
-                "deltat": 1,
-                "subscription_topic": [
-                    "control"
+        "name": "dummy_amr_wind",
+        "gridpack": {
+        },
+        "helics": {
+            "deltat": 1,
+            "subscription_topics": [
+                "control"
 
-                ],
-                "publication_topic": [
-                    "status"
+            ],
+            "publication_topics": [
+                "status"
 
-                ],
-                "endpoints": [
-                ]
-            },
+            ],
+            "endpoints": [
+            ]
+        },
 
-            "publication_interval": 1,
-            "endpoint_interval": 1,
-            "starttime": 0,
-            "stoptime": 100000,
-            "Agent" : "dummy_amr_wind"
-        
-        }
+        "publication_interval": 1,
+        "endpoint_interval": 1,
+        "starttime": 0,
+        "stoptime": 100,
+        "Agent": "dummy_amr_wind"
+
+    }
     obj = DummyAMRWind(config)
     obj.run_helics_setup()
     obj.enter_execution(function_targets=[],
-                function_arguments=[[]])
+                        function_arguments=[[]])
+
 
 launch_dummy_amr_wind()

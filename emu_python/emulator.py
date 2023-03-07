@@ -1,19 +1,22 @@
-import pandas as pd
-
+import ast
 import datetime as dt
+import json
+import os
+import random
 
 import numpy as np
-import json
+import pandas as pd
 
-import ast
+from SEAS.federate_agent import FederateAgent
 
-from emu_python.federateaccesspoint import federateagent
+LOGFILE = str(dt.datetime.now()).replace(
+    ":", "_").replace(" ", "_").replace(".", "_")
 
 
-class Emulator(federateagent):
+class Emulator(FederateAgent):
 
     def __init__(self, controller, py_sims, input_dict):
-        
+
         # Save the input dict
         self.input_dict = input_dict
 
@@ -36,13 +39,11 @@ class Emulator(federateagent):
         # Write the time step into helics config dict
         self.helics_config_dict['helics']['deltat'] = self.dt
 
-        # TODO: Make sure to understand what this does
+        # Initialize the Federate class for HELICS communitation
         super(Emulator, self).__init__(
-            name=self.helics_config_dict['name'], 
-            feeder_num=0, 
+            name=self.helics_config_dict['name'],
             starttime=self.helics_config_dict['starttime'],
-            endtime=self.helics_config_dict['stoptime'], 
-            agent_num=0, 
+            endtime=self.helics_config_dict['stoptime'],
             config_dict=self.helics_config_dict
         )
 
@@ -51,19 +52,21 @@ class Emulator(federateagent):
         self.KAFKA = self.helics_config_dict["KAFKA"]
 
         # TODO Copied direct from control_center.py but not actually ready yet
-        # if self.KAFKA:
-        #     # Kafka topic :
-        #     self.topic = self.helics_config_dict["KAFKA_TOPIC"]
-        #     print("KAFKA topic", self.topic)
-        #     config = Configuration(env_path='./.env')
-        #     self.python_producer = PythonProducer(config)
-        #     self.python_producer.connect()
+        if self.KAFKA:
+            from dav_kafka_python.configuration import Configuration
+            from dav_kafka_python.producer import PythonProducer
+            # Kafka topic :
+            self.topic = self.helics_config_dict["KAFKA_TOPIC"]
+            print("KAFKA topic", self.topic)
+            config = Configuration(env_path='./.env')
+            self.python_producer = PythonProducer(config)
+            self.python_producer.connect()
 
         # AMR wind files
         # Grab py sim details
         self.amr_wind_dict = self.emu_comms_dict['amr_wind']
 
-        self.n_amr_wind = len(self.amr_wind_dict )
+        self.n_amr_wind = len(self.amr_wind_dict)
         self.amr_wind_names = list(self.amr_wind_dict.keys())
 
         # Save information about amr_wind simulations
@@ -74,23 +77,28 @@ class Emulator(federateagent):
                 )
             )
 
-        #TODO For now, need to assume for simplicity there is one and only
+        # TODO For now, need to assume for simplicity there is one and only
         # one AMR_Wind simualtion
-        self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]]['num_turbines']
-        self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]]['rotor_diameter']
-        self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]]['turbine_locations']
-        self.turbine_labels = self.amr_wind_dict[self.amr_wind_names[0]]['turbine_labels']
+        self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]
+                                               ]['num_turbines']
+        self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]
+                                                 ]['rotor_diameter']
+        self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]
+                                                    ]['turbine_locations']
+        self.turbine_labels = self.amr_wind_dict[self.amr_wind_names[0]
+                                                 ]['turbine_labels']
 
         # TODO In fugure could cover multiple farms
         # Initialize the turbine power array
         self.turbine_power_array = np.zeros(self.num_turbines)
-        self.amr_wind_dict[self.amr_wind_names[0]]['turbine_powers'] = np.zeros(self.num_turbines)
+        self.amr_wind_dict[self.amr_wind_names[0]
+                           ]['turbine_powers'] = np.zeros(self.num_turbines)
 
-        #TODO Could set up logging here
+        # TODO Could set up logging here
 
-        #TODO Set interface comms to either dash or kenny's front end
+        # TODO Set interface comms to either dash or kenny's front end
 
-        #TODO Set comms to non-helics based things like http polling
+        # TODO Set comms to non-helics based things like http polling
 
         # TODO not positive if this is the right place but I think it is
         # Hold here and wait for AMR Wind to respond
@@ -102,18 +110,21 @@ class Emulator(federateagent):
         # list(self.pub.values())[0].publish(str("[-1,-1,-1]"))
         # self.logger.info(" #### Entering main loop #### ")
 
-
     def run(self):
 
-        #TODO In future code that doesnt insist on AMRWInd can make this optional
+        # TODO In future code that doesnt insist on AMRWInd can make this optional
         print("... waiting for initial connection from AMRWind")
-        list(self.pub.values())[0].publish(str("[-1,-1,-1]"))
+        # Send initial connection signal to AMRWind
+        # publish on topic: control
+        self.send_via_helics("control", str("[-1,-1,-1]"))
         print(" #### Entering main loop #### ")
-            
 
-        # TODO: Actually work this this out
-        for i in range(100):
+        # Run simulation till  endtime
+        while self.absolute_helics_time < self.endtime:
 
+            # Loop till we reach simulation startime.
+            if (self.absolute_helics_time < self.starttime):
+                continue
 
             # Update controller and py sims
             self.controller.step(self.input_dict)
@@ -124,79 +135,96 @@ class Emulator(federateagent):
             # Print the input dict
             print(self.input_dict)
 
-            # Helics
-            #TODO: What exactly does this do?  
-            tmp = self.helics_get_all()
-            if tmp != {}:
-
-                #TODO Describe this line
-                subscription_value = self.process_subscription_event(tmp)
-
-                #TODO Parse returns from AMRWind
-                sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = subscription_value[
-                    :3]
-                turbine_power_array = subscription_value[3:3+self.num_turbines]
-                turbine_wd_array = subscription_value[3+self.num_turbines:]
-                self.wind_speed = wind_speed_amr_wind
-                self.wind_direction = wind_direction_amr_wind
-
-                #TODO F-Strings
-                print("=======================================")
-                print("AMRWindTime:", sim_time_s_amr_wind)
-                print("AMRWindSpeed:", wind_speed_amr_wind)
-                print("AMRWindDirection:", wind_direction_amr_wind)
-                print("AMRWindTurbinePowers:", turbine_power_array)
-                print(" AMRWIND number of turbines here: ", self.num_turbines)
-                print("AMRWindTurbineWD:", turbine_wd_array)
-                print("=======================================")
+            # Subscribe to helics messages:
+            incoming_messages = self.helics_connector.get_all_waiting_messages()
+            if incoming_messages != {}:
+                subscription_value = self.process_subscription_messages(
+                    incoming_messages)
             else:
-                print("Did not get any subs!! ", tmp)
-                sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = [
-                    0, 0, 0]
-                turbine_power_array = np.zeros(self.num_turbines).tolist()
-                turbine_wd_array = np.zeros(self.num_turbines).tolist()
-                self.wind_speed = wind_speed_amr_wind
-                self.wind_direction = wind_direction_amr_wind
+                print(
+                    "Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
+                subscription_value = [
+                    0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
 
-            #TODO Comment what this does
-            self.process_periodic_publication() 
+            # TODO Parse returns from AMRWind
+            sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = subscription_value[
+                :3]
+            turbine_power_array = subscription_value[3:3+self.num_turbines]
+            turbine_wd_array = subscription_value[3+self.num_turbines:]
+            self.wind_speed = wind_speed_amr_wind
+            self.wind_direction = wind_direction_amr_wind
 
+            ## TODO add other parameters that need to be logged to csv here. 
+            # Write turbine power and turbine wind direction to csv logfile. 
+            aa = [str(xx) for xx in turbine_power_array]
+            xyz = ",".join(aa)
+            bb = [str(xx) for xx in turbine_wd_array]
+            zyx = ",".join(bb)
+            with open(f'{LOGFILE}.csv', 'a') as filex:
+                filex.write(str(self.absolute_helics_time) + ',' + str(sim_time_s_amr_wind) + ',' + str(
+                    wind_speed_amr_wind) + ',' + str(wind_direction_amr_wind) + ',' + xyz + ',' + zyx + os.linesep)
+
+
+            # TODO F-Strings
+            print("=======================================")
+            print("AMRWindTime:", sim_time_s_amr_wind)
+            print("AMRWindSpeed:", wind_speed_amr_wind)
+            print("AMRWindDirection:", wind_direction_amr_wind)
+            print("AMRWindTurbinePowers:", turbine_power_array)
+            print(" AMRWIND number of turbines here: ", self.num_turbines)
+            print("AMRWindTurbineWD:", turbine_wd_array)
+            print("=======================================")
+
+            # Process periocdic functions.
+            self.process_periodic_publication()
+
+            # Send control center values through Kafka if enabled:
             if self.KAFKA:
                 key = json.dumps({"key": "wind_tower"})
-                value = json.dumps({"helics_time": self.currenttime, "bucket": "wind_tower", "AMRWind_speed": wind_speed_amr_wind,
+                value = json.dumps({"helics_time": self.absolute_helics_time, "bucket": "wind_tower", "AMRWind_speed": wind_speed_amr_wind,
                                     "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
                 self.python_producer.write(key=key, value=value,
-                                            topic=self.topic, token='test-token')
-
+                                           topic=self.topic, token='test-token')
 
             # Store turbine powers back to the dict
-            #TODO hard-coded for now assuming only one AMR-WIND
-            self.amr_wind_dict[self.amr_wind_names[0]]['turbine_powers'] = turbine_power_array
+            # TODO hard-coded for now assuming only one AMR-WIND
+            self.amr_wind_dict[self.amr_wind_names[0]
+                               ]['turbine_powers'] = turbine_power_array
             self.turbine_power_array = turbine_power_array
 
-            self.sync_time_helics(self.dt)
+            # Send turbine powers through Kafka if enabled:
+            if self.KAFKA:
+                if len(turbine_power_array) == 0:
+                    turbine_power_array = np.ones(self.num_turbines)*-1.0
+                for t in range(self.num_turbines):
+        
+                        keyname = f"wind_turbine_{t}"
+                        key = json.dumps({"key": keyname})
+                        value = json.dumps({"helics_time": self.currenttime, "bucket":  keyname, "turbine_wd_direction": turbine_wd_array[t], "power": turbine_power_array[
+                            t], "AMRWind_speed": wind_speed_amr_wind, "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
+                        self.python_producer.write(
+                            key=key, value=value, topic=self.topic, token='test-token')
+
+            self.sync_time_helics(self.absolute_helics_time + self.deltat)
+
 
 
 
     def parse_input_yaml(self, filename):
-
         pass
 
-
-    def process_subscription_event(self, msg):
-        # process data from subscription
+    def process_subscription_messages(self, msg):
+        # process data from HELICS subscription
         print(
-            f"{self.name}, {self.get_currenttime()} subscribed to message {msg}", flush=True)
-
+            f"{self.name}, {self.absolute_helics_time} subscribed to message {msg}", flush=True)
         try:
-            return list(ast.literal_eval(msg))
-
+            return list(ast.literal_eval(str(msg["status"]["message"])))
         except Exception as e:
-            print("SUBSCRIPTIION ERROR !!! ", e, flush=True)
+            print(f"Subscription error:  {e} , returning 0s ", flush=True)
             return [0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
 
     def process_periodic_publication(self):
-        # Periodically publish data to the surrpogate
+        # Periodically publish data to the surrogate
 
         # self.get_signals_from_front_end()
         # self.set_wind_speed_direction()
@@ -204,15 +232,14 @@ class Emulator(federateagent):
         #yaw_angles = [270 for t in range(self.num_turbines)]
         yaw_angles = [270 for t in range(self.num_turbines)]
         # log these in kafka
-
         #yaw_angles[1] = 260
 
-        tmp = np.array([self.get_currenttime(), self.wind_speed,
+        # Send timing and yaw information to AMRWind via helics
+        # publish on topic: control
+        tmp = np.array([self.absolute_helics_time, self.wind_speed,
                        self.wind_direction] + yaw_angles).tolist()
 
-        print("publishing  ", tmp)
-
-        list(self.pub.values())[0].publish(str(tmp))
+        self.send_via_helics("control", str(tmp))
 
     def process_endpoint_event(self, msg):
         pass
@@ -224,7 +251,7 @@ class Emulator(federateagent):
 
         # TODO this function is ugly and uncommented
 
-        #TODO Initialize to empty in case doesn't run
+        # TODO Initialize to empty in case doesn't run
         # Probably want a file not found error instead
         return_dict = {}
 
@@ -237,16 +264,17 @@ class Emulator(federateagent):
                     turbine_labels = line.split()[2:]
                     num_turbines = len(turbine_labels)
 
-            # self.num_turbines = 2
-            # print("Numer of turbine isn marwind: ", self.num_turbines)
-            # aa = [f"power_{i}" for i in range(num_turbines)]
-            # xyz = ",".join(aa)
-            # bb = [f"turbine_wd_direction_{i}" for i in range(
-            #     num_turbines)]
-            # zyx = ",".join(bb)
-            # with open(f'{LOGFILE}.csv', 'a') as filex:
-            #     filex.write('helics_time' + ',' + 'AMRwind_time' + ',' +
-            #                 'AMRWind_speed' + ',' + 'AMRWind_direction' + ',' + xyz + ',' + zyx + os.linesep)
+            self.num_turbines = num_turbines
+            print("Number of turbines in amrwind: ", num_turbines)
+
+            aa = [f"power_{i}" for i in range(num_turbines)]
+            xyz = ",".join(aa)
+            bb = [f"turbine_wd_direction_{i}" for i in range(
+                num_turbines)]
+            zyx = ",".join(bb)
+            with open(f'{LOGFILE}.csv', 'a') as filex:
+                filex.write('helics_time' + ',' + 'AMRwind_time' + ',' +
+                            'AMRWind_speed' + ',' + 'AMRWind_direction' + ',' + xyz + ',' + zyx + os.linesep)
 
             # Find the diameter
             for line in Lines:
@@ -261,14 +289,25 @@ class Emulator(federateagent):
                         locations = tuple([float(f)
                                           for f in line.split()[-3:-1]])
                         turbine_locations.append(locations)
-        
+
             return_dict = {
-                'num_turbines':num_turbines,
-                'turbine_labels':turbine_labels,
-                'rotor_diameter':D,
-                'turbine_locations':turbine_locations
+                'num_turbines': num_turbines,
+                'turbine_labels': turbine_labels,
+                'rotor_diameter': D,
+                'turbine_locations': turbine_locations
             }
 
-            # print(return_dict)
-        return return_dict
+            print(return_dict)
 
+            # Write header for logfile: 
+            aa = [f"power_{i}" for i in range(self.num_turbines)]
+            xyz = ",".join(aa)
+            bb = [f"turbine_wd_direction_{i}" for i in range(
+                self.num_turbines)]
+            zyx = ",".join(bb)
+            with open(f'{LOGFILE}.csv', 'a') as filex:
+                filex.write('helics_time' + ',' + 'AMRwind_time' + ',' +
+                            'AMRWind_speed' + ',' + 'AMRWind_direction' + ',' + xyz + ',' + zyx + os.linesep)
+
+
+        return return_dict

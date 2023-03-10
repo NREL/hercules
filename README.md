@@ -19,6 +19,11 @@ pip install -e emu_python
 
 ``` pip install git+https://github.nrel.gov/SEAS/SEAS.git@dv/emuwind ```
 
+Note from PF:
+Had trouble doing it this way on local machine so instead:
+cloned into a local folder
+checked out the emuwind branch
+pip install -e SEAS
 
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account

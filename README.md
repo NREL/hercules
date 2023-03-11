@@ -21,8 +21,12 @@ pip install -e emu_python
 
 Note from PF:
 Had trouble doing it this way on local machine so instead:
-cloned into a local folder
-checked out the emuwind branch
+# (Activate conda environment first)
+git clone git@github.nrel.gov:SEAS/SEAS.git
+cd SEAS
+git fetch --all
+git checkout dv/emuwind
+cd ..
 pip install -e SEAS
 
 # Other steps for era 5

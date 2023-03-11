@@ -4,7 +4,7 @@
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=36
 #SBATCH --account=ssc
-#SBATCH --qos=high
+# #SBATCH --qos=high
 
 # A lot of modules and conda stuff
 source /nopt/nrel/apps/anaconda/5.3/etc/profile.d/conda.sh

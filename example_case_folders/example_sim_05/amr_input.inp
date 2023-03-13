@@ -67,8 +67,6 @@ ABL.bndry_var_names = velocity temperature tke
 
 
 # Output boundary files
-ABL.bndry_file = "bndry_files"
-# ABL.bndry_io_mode = 0
 ABL.bndry_planes = ylo xlo
 ABL.bndry_output_start_time = 7200.0
 ABL.bndry_var_names = velocity temperature tke

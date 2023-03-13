@@ -61,14 +61,14 @@ ABL.surface_temp_flux                       = 0.00
 ABL.wall_shear_stress_type                  = "Moeng"
 
 ABL.bndry_file = "/projects/ssc/amr_precursors/005_abl_neutral_lowTI_redo/bndry_files"
-ABL.bndry_io_mode = 1
+ABL.bndry_io_mode = 1 # Input mode
 ABL.bndry_planes = ylo xlo # I'm (Paul) adding this but not sure if I have to
 ABL.bndry_var_names = velocity temperature tke
 
 
 # Output boundary files
 ABL.bndry_file = "bndry_files"
-ABL.bndry_io_mode = 0
+# ABL.bndry_io_mode = 0 Comment out output mode
 ABL.bndry_planes = ylo xlo
 ABL.bndry_output_start_time = 7200.0
 ABL.bndry_var_names = velocity temperature tke

@@ -3,6 +3,7 @@ import datetime as dt
 import json
 import os
 import random
+import time
 
 import numpy as np
 import pandas as pd
@@ -19,6 +20,12 @@ class Emulator(FederateAgent):
 
         # Save the input dict
         self.input_dict = input_dict
+
+        # Initialize the flattend input_dict
+        self.input_dict_flat = {}
+
+        # Initialize the output file
+        self.output_file = 'emu_output.csv'
 
         # Save timt step
         self.dt = input_dict['dt']
@@ -119,6 +126,9 @@ class Emulator(FederateAgent):
         self.send_via_helics("control", str("[-1,-1,-1]"))
         print(" #### Entering main loop #### ")
 
+        # Initialize the first iteration flag
+        self.first_iteration = True
+
         # Run simulation till  endtime
         while self.absolute_helics_time < self.endtime:
 
@@ -133,7 +143,7 @@ class Emulator(FederateAgent):
             self.input_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
             # Print the input dict
-            print(self.input_dict)
+            # print(self.input_dict)
 
             # Subscribe to helics messages:
             incoming_messages = self.helics_connector.get_all_waiting_messages()
@@ -207,6 +217,61 @@ class Emulator(FederateAgent):
 
             self.sync_time_helics(self.absolute_helics_time + self.deltat)
 
+            # Log the input dict
+            self.log_input_dict()
+
+            # If this is first iteration print the input dict
+            # And turn off the first iteration flag
+            if self.first_iteration:
+                print(self.input_dict)
+                self.first_iteration = False
+
+    def recursive_flatten_input_dict(self, nested_dict, prefix = ''):
+
+        # Recursively flatten the input dict
+        for k, v in nested_dict.items():
+            if isinstance(v, dict):
+                self.recursive_flatten_input_dict(v, prefix + k + '.')
+            else:
+                # If v is a list or np.array, enter each element seperately
+                if isinstance(v, (list, np.ndarray)):
+                    for i, vi in enumerate(v):
+                        if isinstance(vi, (int, float)):
+                            self.input_dict_flat[prefix + k + '.%03d' % i] = vi
+
+                # If v is a string, int, or float, enter it directly
+                if isinstance(v, (int, float)):
+                    self.input_dict_flat[prefix + k] = v
+
+
+    def log_input_dict(self):
+        
+        # Update the flattened input dict
+        self.recursive_flatten_input_dict(self.input_dict)
+
+        # Add the current time
+        self.input_dict_flat['clock_time'] = dt.datetime.now()
+
+        # The keys and values as two lists
+        keys = list(self.input_dict_flat.keys())
+        values = list(self.input_dict_flat.values())
+
+        # If this is first iteration, write the keys as csv header
+        if self.first_iteration:
+            with open(self.output_file, 'w') as filex:
+                filex.write(','.join(keys) + os.linesep)
+
+        # Load the csv header and check if it matches the current keys
+        with open(self.output_file, 'r') as filex:
+            header = filex.readline().strip().split(',')
+            if header != keys:
+                print("WARNING: Input dict keys have changed since first iteration.\
+                        Not writing to csv file.")
+                return
+
+        # Append the values to the csv file
+        with open(self.output_file, 'a') as filex:
+            filex.write(','.join([str(v) for v in values]) + os.linesep)
 
 
 

@@ -8,13 +8,16 @@
 
 # A lot of modules and conda stuff
 source /nopt/nrel/apps/anaconda/5.3/etc/profile.d/conda.sh
-module use /nopt/nrel/apps/modules/centos74/modulefiles
+# module use /nopt/nrel/apps/modules/centos74/modulefiles
 module purge
-module load conda/5.3
+# module load conda/5.3
+module load conda
 module load intel-mpi/2018.0.3
 module load helics/helics-3.1.0_openmpi
 module load netcdf-c/4.7.3/gcc-mpi
-conda activate emupy
+# module load mkl
+# module load mpt
+source activate emupy
 
 # Set up the helics broker
 helics_broker -t zmq  -f 2 --loglevel="debug" & 

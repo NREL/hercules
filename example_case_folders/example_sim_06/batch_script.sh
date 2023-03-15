@@ -12,12 +12,17 @@ source /nopt/nrel/apps/anaconda/5.3/etc/profile.d/conda.sh
 module purge
 # module load conda/5.3
 module load conda
+export PREFIX=~/.conda-envs/emupy
+export PATH=$PREFIX/bin:$PATH
+export FI_PROVIDER_PATH=$PREFIX/lib/libfabric/prov
+export LD_LIBRARY_PATH=$PREFIX/lib/libfabric:$PREFIX/lib/release_mt:$LD_LIBRARY_PATH
+source activate emupy
 module load intel-mpi/2018.0.3
 module load helics/helics-3.1.0_openmpi
 module load netcdf-c/4.7.3/gcc-mpi
 # module load mkl
 # module load mpt
-source activate emupy
+
 
 # Set up the helics broker
 helics_broker -t zmq  -f 2 --loglevel="debug" & 

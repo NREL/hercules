@@ -15,7 +15,7 @@ time.cfl              =   0.95               # CFL factor
 #.......................................#
 time.plot_interval            =  3600        # Steps between plot files
 time.checkpoint_interval      =  3600        # Steps between checkpoint files
-io.restart_file = "/projects/ssc/amr_precursors/005_abl_neutral_lowTI_redo/chk14400"
+io.restart_file = "/projects/ssc/amr_precursors/b_abl_neutral_lowTI_redo/chk14400"
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #               PHYSICS                 #
@@ -60,7 +60,7 @@ ABL.stats_output_frequency                  = 1
 ABL.surface_temp_flux                       = 0.00
 ABL.wall_shear_stress_type                  = "Moeng"
 
-ABL.bndry_file = "/projects/ssc/amr_precursors/005_abl_neutral_lowTI_redo/bndry_files"
+ABL.bndry_file = "/projects/ssc/amr_precursors/b_abl_neutral_lowTI_redo/bndry_files"
 ABL.bndry_io_mode = 1 #Input mode
 ABL.bndry_planes = ylo xlo # I'm (Paul) adding this but not sure if I have to
 ABL.bndry_var_names = velocity temperature tke

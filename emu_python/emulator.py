@@ -2,6 +2,7 @@ import ast
 import datetime as dt
 import json
 import os
+import sys
 import random
 import time
 
@@ -201,6 +202,8 @@ class Emulator(FederateAgent):
             self.amr_wind_dict[self.amr_wind_names[0]
                                ]['turbine_powers'] = turbine_power_array
             self.turbine_power_array = turbine_power_array
+            self.amr_wind_dict[self.amr_wind_names[0]
+                               ]['sim_time_s_amr_wind'] = sim_time_s_amr_wind
 
             # Send turbine powers through Kafka if enabled:
             if self.KAFKA:
@@ -225,6 +228,15 @@ class Emulator(FederateAgent):
             if self.first_iteration:
                 print(self.input_dict)
                 self.first_iteration = False
+
+                # Echo the dictionary to a seperate file in case it is helpful 
+                # to see full dictionary in interpreting log
+                
+                original_stdout = sys.stdout
+                with open('input_dict.echo', 'w') as f_i:
+                    sys.stdout = f_i # Change the standard output to the file we created.
+                    print(self.input_dict)
+                    sys.stdout = original_stdout # Reset the standard output to its original value
 
     def recursive_flatten_input_dict(self, nested_dict, prefix = ''):
 

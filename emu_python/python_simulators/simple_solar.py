@@ -1,7 +1,6 @@
 # Very simple solar farm model  
 import numpy as np
 
-
 class SimpleSolar():
 
     def __init__(self, input_dict, dt):

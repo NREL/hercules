@@ -15,6 +15,20 @@ git clone https://github.com/NREL/OpenOA.git
 pip install ./OpenOA
 pip install -e emu_python
 
+# Please install SEAS as follows: 
+
+``` pip install git+https://github.nrel.gov/SEAS/SEAS.git@dv/emuwind ```
+
+Note from PF:
+Had trouble doing it this way on local machine so instead:
+# (Activate conda environment first)
+git clone git@github.nrel.gov:SEAS/SEAS.git
+cd SEAS
+git fetch --all
+git checkout dv/emuwind
+cd ..
+pip install -e SEAS
+
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account
 
@@ -109,12 +123,41 @@ In 4 different terminals with location set to emu_python/, type the following co
     # Enter that address into a web browser on your local machine
 ```
 
+# Order of operations
 
-First 
+### Initialization
+
+1. Instantiate the py_sim modules, which sets the intial conditions
+
+2. Run get_outputs, which sets the initial outputs
+    
+3. Establish the helics connection to AMRwind (?)
+
+
+### Main run: for $k = 0, 1, 2, 3, \dots$
+
+1. Compute control actions in controller, [i.e. $u_k = h(y_k, d_k)$]
+
+2. Record all signals for time step $k$.
+
+3. Update state in py_sim [$x_{k+1} = f(x_k, u_k, d_k)$] and output in py_sim [$y_{k+1} = g(x_{k+1})$]
+
+4. Update state and output in helics/AMRwind, possibly using components from py_sim (TODO: what ordering should be used there?)
+    [$x_{k+1} = f(x_k, u_k, d_k)$, $y_{k+1} = g(x_{k+1})$]
+
+<!--5. Time step code [$x_{k} \leftarrow x_{k+1}$, $y_k \leftarrow y_{k+1}$]-->
+### Postprocessing
+
+1. Write outputs to files
+ 
+2. Shut down communication?
+
+
 
 # TODO
 1. include dash license and copyright
-1.  make connection objects more robust
+2.  make connection objects more robust
+3.  install SEAS as part of emu_python install
 
 # Questions
 

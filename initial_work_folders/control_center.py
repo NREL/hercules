@@ -86,7 +86,12 @@ class ControlCenter(federateagent):
         logger.info("Control Center Starting Up...")
 
         # Get the AMRWind info
-        amr_wind_input = os.path.join(os.path.dirname(os.path.abspath(__file__))+"/"+self.amrwindmodel)
+        # amr_wind_input = os.path.join(os.path.dirname(os.path.abspath(__file__))+"/"+self.amrwindmodel)
+
+        # Quick hack
+        amr_wind_input = self.amrwindmodel
+        print(amr_wind_input)
+
         with open(amr_wind_input) as fp:
             Lines = fp.readlines()
 
@@ -462,14 +467,15 @@ class ControlCenter(federateagent):
         pass
 
 
-def launch_control_center():
+def launch_control_center(amrwindmodel):
 
     config = {
         "name": "controlcenter",
         "use_dash_frontend": False,
         "KAFKA": False,
         "KAFKA_topics": "EMUV1py",
-        "amrwindmodel": "amrwind_runs/input_restart.i",
+        # "amrwindmodel": "amrwind_runs/input_restart.i",
+        "amrwindmodel": amrwindmodel,
         "helics": {
             "deltat": 1,
             "subscription_topic": [
@@ -497,4 +503,5 @@ def launch_control_center():
                         function_arguments=[[]])
 
 
-launch_control_center()
+# Note that the amr input file must be passed in now
+launch_control_center(sys.argv[1])

@@ -1,22 +1,22 @@
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #            SIMULATION STOP            #
 #.......................................#
-time.stop_time               =   36000.0     # Max (simulated) time to evolve
+time.stop_time               =   10800.0     # Max (simulated) time to evolve
 time.max_step                =   -1          # Max number of time steps
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #         TIME STEP COMPUTATION         #
 #.......................................#
-time.fixed_dt         =   0.5                # Use this constant dt if > 0
+time.fixed_dt         =   0.5               # Use this constant dt if > 0
 time.cfl              =   0.95               # CFL factor
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #            INPUT AND OUTPUT           #
 #.......................................#
 time.plot_interval            =  3600        # Steps between plot files
-#time.plot_interval            =  10        # Steps between plot files
 time.checkpoint_interval      =  3600        # Steps between checkpoint files
-io.restart_file = "/lustre/eaglefs/scratch/mbrazell/moa_python/initial_case_studies/004/chk64800"
+io.restart_file = "/projects/ssc/amr_precursors/b_abl_neutral_lowTI_redo/chk14400"
+
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #               PHYSICS                 #
 #.......................................#
@@ -25,34 +25,27 @@ incflo.density             = 1.0             # Reference density
 
 incflo.use_godunov = 1
 incflo.godunov_type = weno_z
-incflo.diffusion_type = 2
+incflo.diffusion_type = 1
 transport.viscosity = 1.0e-5
 transport.laminar_prandtl = 0.7
 transport.turbulent_prandtl = 0.3333
 turbulence.model = OneEqKsgsM84
 
 incflo.physics = ABL Actuator
-#ICNS.source_terms = ABLMeanBoussinesq BoussinesqBuoyancy CoriolisForcing ABLForcing ActuatorForcing
-ICNS.source_terms = ABLMeanBoussinesq BoussinesqBuoyancy CoriolisForcing ActuatorForcing
+ICNS.source_terms = BoussinesqBuoyancy CoriolisForcing ABLMeanBoussinesq ActuatorForcing
 TKE.source_terms = KsgsM84Src
 BoussinesqBuoyancy.reference_temperature = 300.0
 CoriolisForcing.latitude = 41.3
 ABLForcing.abl_forcing_height = 90
 incflo.velocity = 6.928203230275509 4.0 0.0
 
-ABL.bndry_file = "/lustre/eaglefs/scratch/mbrazell/moa_python/initial_case_studies/004/bndry_files"
-ABL.bndry_io_mode = 1
-ABL.bndry_planes = ylo xlo
-ABL.bndry_output_start_time = 30000.0
-ABL.bndry_var_names = velocity temperature tke
-ABL.bndry_output_format = native
 
 # Atmospheric boundary layer
 ABL.temperature_heights = 0.0 700.0 800.0 1280.0
 ABL.temperature_values = 300.0 300.0 308.0 309.44
 ABL.reference_temperature = 300.0
 ABL.kappa = .40
-ABL.surface_roughness_z0 = 0.15
+ABL.surface_roughness_z0 = 1.0E-4
 ABL.Uperiods                                = 25.0
 ABL.Vperiods                                = 25.0
 ABL.cutoff_height                           = 50.0
@@ -67,6 +60,22 @@ ABL.stats_output_frequency                  = 1
 ABL.surface_temp_flux                       = 0.00
 ABL.wall_shear_stress_type                  = "Moeng"
 
+ABL.bndry_file = "/projects/ssc/amr_precursors/b_abl_neutral_lowTI_redo/bndry_files"
+ABL.bndry_io_mode = 1 # Input mode
+ABL.bndry_planes = ylo xlo # I'm (Paul) adding this but not sure if I have to
+ABL.bndry_var_names = velocity temperature tke
+
+
+# Output boundary files
+ABL.bndry_planes = ylo xlo
+ABL.bndry_output_start_time = 7200.0
+ABL.bndry_var_names = velocity temperature tke
+ABL.bndry_output_format = native
+ABL.stats_output_frequency = 1                   
+ABL.stats_output_format = netcdf  
+
+# Whether to use helics
+helics.activated        =   true
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #        ADAPTIVE MESH REFINEMENT       #
@@ -79,21 +88,20 @@ amr.max_level           = 0           # Max AMR level in hierarchy
 #.......................................#
 geometry.prob_lo        =   0.       0.     0.  # Lo corner coordinates
 geometry.prob_hi        =   5120.  5120.  1280.  # Hi corner coordinates
-geometry.is_periodic    =   0 0 0   # Periodicity x y z (0/1)
-
-# Boundary conditions
+geometry.is_periodic  =   0 0 0
 xlo.type = "mass_inflow"
 xlo.density = 1.0
-xlo.temperature = 0.0
+xlo.temperature = 0.0 # value required but ignored
 xlo.tke = 0.0
 xhi.type = "pressure_outflow"
-
+ 
 ylo.type = "mass_inflow"
 ylo.density = 1.0
-ylo.temperature = 0.0 # value required but ignored
+ylo.temperature = 0.0
 ylo.tke = 0.0
 yhi.type = "pressure_outflow"
 
+# Boundary conditions
 zlo.type =   "wall_model"
 zlo.tke_type = "zero_gradient"
 
@@ -113,7 +121,7 @@ incflo.verbose          =   0          # incflo_level
 #.......................................#
 incflo.post_processing = samplingPlane samplingLine
 
-samplingPlane.output_frequency = 3600
+samplingPlane.output_frequency = 600
 samplingPlane.labels = z_plane
 samplingPlane.fields = velocity temperature
 samplingPlane.z_plane.type = PlaneSampler
@@ -133,6 +141,9 @@ samplingLine.z_line.num_points = 128
 samplingLine.z_line.start = 5.0 5.0 5.0
 samplingLine.z_line.end = 5.0 5.0 1275.0
 
+#¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
+#              TURBINES                 #
+#.......................................#
 
 Actuator.type = UniformCtDisk
 Actuator.UniformCtDisk.rotor_diameter = 126.0
@@ -146,8 +157,6 @@ Actuator.UniformCtDisk.num_points_r = 20
 Actuator.UniformCtDisk.num_points_t = 5
 
 
-
-# Actuator.type                              = JoukowskyDisk       
 Actuator.labels                            = T00 T01 
 # T02 T03 T04 T05 T06 T07
 Actuator.JoukowskyDisk.thrust_coeff        = 8.1672e-01 7.9044e-01 7.8393e-01 7.8624e-01 7.8824e-01 7.8942e-01 7.8902e-01 7.8740e-01 7.8503e-01 7.8237e-01 7.7955e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.7583e-01 7.6922e-01 7.4270e-01 5.5949e-01 4.6163e-01 3.8786e-01 3.2901e-01 2.8093e-01 2.4114e-01 2.0795e-01 1.8010e-01 1.5663e-01 1.3679e-01 1.1995e-01 1.0562e-01 9.3384e-02 8.2908e-02 7.3910e-02 6.6159e-02 5.9463e-02 5.3662e-02 4.8622e-02 4.4230e-02
@@ -166,27 +175,6 @@ Actuator.JoukowskyDisk.epsilon             = 5.0
 Actuator.JoukowskyDisk.vortex_core_size    = 24.0                
 
 Actuator.UniformCtDisk.yaw = 240.0
-#Actuator.UniformCtDisk.yaw = 270.0 # degrees (yaw is relative to north which defaults to {0,1,0})
-# Actuator.UniformCtDisk.sample_yaw = 270.0 # set velocity sampling to be in the normal flow direction
 
 Actuator.T00.base_position = 2000.0 2000.0 0.0
 Actuator.T01.base_position = 2500.0 2500.0 0.0
-
-# need to translate by 3200 and divide by 2
-#Actuator.T00.base_position               = -669.705627 -2027.350647 0.0
-# Actuator.T00.yaw                         = 270.0                   
-#Actuator.T01.base_position               = -1348.528137 -1348.528137 0.0             
-# Actuator.T01.yaw                         = 270.0               
-#Actuator.T02.base_position               = -2027.350647 -669.705627 0.0
-# Actuator.T02.yaw                         = 270.0           
-#Actuator.T03.base_position               = -160.588745 -839.411255 0.0
-# Actuator.T03.yaw                         = 270.0               
-#Actuator.T04.base_position               = -839.411255 -160.588745 0.0
-# Actuator.T04.yaw                         = 270.0               
-#Actuator.T05.base_position               = 1027.350647 -330.294373 0.0
-# Actuator.T05.yaw                         = 270.0               
-#Actuator.T06.base_position               = 348.528137 348.528137 0.0
-# Actuator.T06.yaw                         = 270.0               
-Actuator.T07.base_position               = -330.294373 1027.350647 0.0
-# Actuator.T07.yaw                         = 270.0 
-

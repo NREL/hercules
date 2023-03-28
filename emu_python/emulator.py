@@ -309,11 +309,20 @@ class Emulator(FederateAgent):
 
         # Hard coded to single wind farm for the moment
         wind_farm_name = list(self.input_dict["emu_comms"]["amr_wind"].keys())[0]
-        yaw_angles = self.input_dict["py_sims"]\
-            [self.input_dict["emu_comms"]["amr_wind"][wind_farm_name]
-                 ["yaw_simulator_name"]
-            ]\
-            ["outputs"]["turbine_yaws"]
+        if "yaw_simulator_name" in \
+            self.input_dict["emu_comms"]["amr_wind"][wind_farm_name].keys() and \
+            self.input_dict["emu_comms"]["amr_wind"][wind_farm_name]["yaw_simulator_name"] != \
+            "none":   
+
+            yaw_angles = self.input_dict["py_sims"]\
+                [self.input_dict["emu_comms"]["amr_wind"][wind_farm_name]["yaw_simulator_name"]
+                ]\
+                ["outputs"]["turbine_yaws"]
+        
+        else: # set yaw_angles based on self.wind_direction
+            yaw_angles = [self.wind_direction]*self.num_turbines
+
+        print(yaw_angles)
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control

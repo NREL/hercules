@@ -31,3 +31,4 @@ emu_python/local_amr_wind_demo/sample_copy.nc
 t_00*
 logdummy
 logemu
+input_dict.echo

@@ -38,6 +38,7 @@ from SEAS.federate_agent import FederateAgent
 
 # PARAMETERS
 num_turbines = 2
+np.random.seed(0)
 
 # Initialize to all zeros
 turbine_powers = np.zeros(num_turbines)
@@ -123,6 +124,11 @@ class DummyAMRWind(FederateAgent):
             # Convert to a list
             turbine_powers = turbine_powers.tolist()
 
+            # Set dummy wind directions to be passed out
+            turbine_wind_directions = list(
+                wind_direction + 5.*np.random.randn(num_turbines)
+            )
+
             # ================================================================
             # Communicate with control center
             # Send the turbine powers for this time step and get wind speed and wind direction for the
@@ -140,7 +146,7 @@ class DummyAMRWind(FederateAgent):
             message_code = 0
             # [34 + random.random(), 45.3+random.random() , 67+random.random()]
             message_from_client_array = [
-                sim_time_s] + [wind_speed, wind_direction] + turbine_powers
+                sim_time_s] + [wind_speed, wind_direction] + turbine_powers + turbine_wind_directions
 
             # Send helics message to Control Center
             # publish on topic: status

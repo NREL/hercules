@@ -1,0 +1,1 @@
+This example is using new framework trying to run a local (non-eagle) example with the dummy_amr_wind

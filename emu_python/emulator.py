@@ -101,6 +101,8 @@ class Emulator(FederateAgent):
         self.turbine_power_array = np.zeros(self.num_turbines)
         self.amr_wind_dict[self.amr_wind_names[0]
                            ]['turbine_powers'] = np.zeros(self.num_turbines)
+        self.amr_wind_dict[self.amr_wind_names[0]
+                           ]['turbine_wind_directions'] = [0.]*self.num_turbines
 
         # TODO Could set up logging here
 
@@ -201,6 +203,8 @@ class Emulator(FederateAgent):
             # TODO hard-coded for now assuming only one AMR-WIND
             self.amr_wind_dict[self.amr_wind_names[0]
                                ]['turbine_powers'] = turbine_power_array
+            self.amr_wind_dict[self.amr_wind_names[0]
+                               ]['turbine_wind_directions'] = turbine_wd_array
             self.turbine_power_array = turbine_power_array
             self.amr_wind_dict[self.amr_wind_names[0]
                                ]['sim_time_s_amr_wind'] = sim_time_s_amr_wind
@@ -303,13 +307,13 @@ class Emulator(FederateAgent):
     def process_periodic_publication(self):
         # Periodically publish data to the surrogate
 
-        # self.get_signals_from_front_end()
-        # self.set_wind_speed_direction()
-
-        #yaw_angles = [270 for t in range(self.num_turbines)]
-        yaw_angles = [240 for t in range(self.num_turbines)]
-        # log these in kafka
-        #yaw_angles[1] = 260
+        # Hard coded to single wind farm for the moment
+        wind_farm_name = list(self.input_dict["emu_comms"]["amr_wind"].keys())[0]
+        yaw_angles = self.input_dict["py_sims"]\
+            [self.input_dict["emu_comms"]["amr_wind"][wind_farm_name]
+                 ["yaw_simulator_name"]
+            ]\
+            ["outputs"]["turbine_yaws"]
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control

@@ -38,7 +38,6 @@ from SEAS.federate_agent import FederateAgent
 
 # PARAMETERS
 num_turbines = 2
-np.random.seed(0)
 
 # Initialize to all zeros
 turbine_powers = np.zeros(num_turbines)

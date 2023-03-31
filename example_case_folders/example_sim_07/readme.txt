@@ -1,0 +1,1 @@
+This is the first example meant to run on eagle with the new framework, it should do a basic AMR only type of sim

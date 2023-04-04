@@ -23,18 +23,16 @@
 # - - Sleep for 1 s
 
 import ast
-import datetime
 import logging
-import os
-import random
 import sys
-import time
-from io import StringIO
 
 import numpy as np
-import pandas as pd
-import zmq
+
 from SEAS.federate_agent import FederateAgent
+
+
+
+quit()
 
 # PARAMETERS
 num_turbines = 2
@@ -62,7 +60,13 @@ logger.info(
 class DummyAMRWind(FederateAgent):
     def __init__(self, config_dict):
         super(DummyAMRWind, self).__init__(
-            name=config_dict['name'], feeder_num=0, starttime=config_dict['starttime'], endtime=config_dict['stoptime'], agent_num=0, config_dict=config_dict)
+            name=config_dict['name'], 
+            feeder_num=0, 
+            starttime=config_dict['starttime'], 
+            endtime=config_dict['stoptime'], 
+            agent_num=0, 
+            config_dict=config_dict)
+        
         self.config_dict = config_dict
 
     def run(self):

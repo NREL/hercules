@@ -30,16 +30,6 @@ import numpy as np
 
 from SEAS.federate_agent import FederateAgent
 
-
-
-quit()
-
-# PARAMETERS
-num_turbines = 2
-
-# Initialize to all zeros
-turbine_powers = np.zeros(num_turbines)
-
 # Set up the logger
 # Useful for when running on eagle
 logging.basicConfig(level=logging.DEBUG,
@@ -56,9 +46,49 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 logger.info(
     "Emulator dummy_amr_wind (standing in for AMR-Wind) connecting to server")
 
+# Define a function to read the amrwind input file
+# Note simply copied from emulator
+def read_amr_wind_input(amr_wind_input):
+
+    # Probably want a file not found error instead
+    return_dict = {}
+
+    with open(amr_wind_input) as fp:
+        Lines = fp.readlines()
+
+        # Find the actuators
+        for line in Lines:
+            if 'Actuator.labels' in line:
+                turbine_labels = line.split()[2:]
+                num_turbines = len(turbine_labels)
+
+        # Find the diameter
+        for line in Lines:
+            if 'rotor_diameter' in line:
+                D = float(line.split()[-1])
+
+        # Get the turbine locations
+        turbine_locations = []
+        for label in turbine_labels:
+            for line in Lines:
+                if 'Actuator.%s.base_position' % label in line:
+                    locations = tuple([float(f)
+                                        for f in line.split()[-3:-1]])
+                    turbine_locations.append(locations)
+
+        return_dict = {
+            'num_turbines': num_turbines,
+            'turbine_labels': turbine_labels,
+            'rotor_diameter': D,
+            'turbine_locations': turbine_locations
+        }
+
+
+    return return_dict
+
 
 class DummyAMRWind(FederateAgent):
-    def __init__(self, config_dict):
+    def __init__(self, config_dict ,amr_wind_input):
         super(DummyAMRWind, self).__init__(
             name=config_dict['name'], 
             feeder_num=0, 
@@ -68,6 +98,18 @@ class DummyAMRWind(FederateAgent):
             config_dict=config_dict)
         
         self.config_dict = config_dict
+
+        # Read the amrwind input file
+        self.amr_wind_input = amr_wind_input
+        self.amr_wind_input_dict = read_amr_wind_input(self.amr_wind_input)
+
+        # Get the number of turbines
+        self.num_turbines = self.amr_wind_input_dict['num_turbines']
+
+        # Print the number of turbines
+        logger.info("Number of turbines: {}".format(self.num_turbines))
+
+        quit()
 
     def run(self):
 
@@ -191,7 +233,8 @@ class DummyAMRWind(FederateAgent):
         pass
 
 
-def launch_dummy_amr_wind():
+def launch_dummy_amr_wind(amr_input_file):
+
     config = {
         "name": "dummy_amr_wind",
         "gridpack": {
@@ -217,10 +260,22 @@ def launch_dummy_amr_wind():
         "Agent": "dummy_amr_wind"
 
     }
-    obj = DummyAMRWind(config)
+    obj = DummyAMRWind(config, amr_input_file)
     obj.run_helics_setup()
     obj.enter_execution(function_targets=[],
                         function_arguments=[[]])
 
 
-launch_dummy_amr_wind()
+    
+
+
+
+# # PARAMETERS
+# num_turbines = 2
+
+# # Initialize to all zeros
+# turbine_powers = np.zeros(num_turbines)
+
+
+
+

@@ -109,9 +109,14 @@ class DummyAMRWind(FederateAgent):
         # Print the number of turbines
         logger.info("Number of turbines: {}".format(self.num_turbines))
 
-        quit()
-
     def run(self):
+
+        # Initialize the values
+        turbine_powers = np.zeros(self.num_turbines)
+        sim_time_s = 0.  # initialize time to 0
+        amr_wind_speed = 8.0
+        amr_wind_direction = 240.0
+
 
         # Before starting the main time loop need to do an initial connection to the
         # Control center to get the starting wind speed and wind direction
@@ -138,21 +143,13 @@ class DummyAMRWind(FederateAgent):
         self.sync_time_helics(self.absolute_helics_time + self.deltat)
         logger.info("** Initial Received reply: {}".format(message_from_server))
 
-        # # Unpack the reply and update wind speed and wind direction
-        # Initialize variables
-        # This case only happens in the first time-step.
-        if message_from_server == None:
-            received_data = [7, 270]
-        received_data = [7, 270]
-        wind_speed = 8  # float(received_data[0]) #TODO: HARDCODED
-        wind_direction = 270  # float(received_data[1]) #TODO: HARDCODED
-        logger.info("** Intial Wind Speed: {}".format(wind_speed))
-        logger.info("** Intial Wind Direction: {}".format(wind_direction))
+        logger.info("** Intial Wind Speed: {}".format(amr_wind_speed))
+        logger.info("** Intial Wind Direction: {}".format(amr_wind_direction))
         logger.info("...STARTING TIME LOOP...")
 
-        sim_time_s = 0.  # initialize time to 0
+        
         self.message_from_server = None
-        # while True:
+
         while self.absolute_helics_time < (self.endtime - self.starttime + 1):
 
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
@@ -160,11 +157,11 @@ class DummyAMRWind(FederateAgent):
 
             # Compute the turbine power using a simple formula
             turbine_powers = np.ones(
-                num_turbines) * wind_speed**3 + np.random.rand(num_turbines) * 50
+                self.num_turbines) * amr_wind_speed**3 + np.random.rand(self.num_turbines) * 50
 
             # Scale down later turbines as if waked
-            turbine_powers[int(num_turbines/2):] = 0.75 * \
-                turbine_powers[int(num_turbines/2):]
+            turbine_powers[int(self.num_turbines/2):] = 0.75 * \
+                turbine_powers[int(self.num_turbines/2):]
 
             # Convert to a list
             turbine_powers = turbine_powers.tolist()
@@ -175,18 +172,8 @@ class DummyAMRWind(FederateAgent):
             # nex time step
             logger.info('Time step: %d' % sim_time_s)
             logger.info("** Communicating with control center")
-
-            # Write the turbine values to seperate files
-            for t_idx, p_val in enumerate(turbine_powers):
-                t_file = 't_%04d' % t_idx
-                with open(t_file, "a") as file_object:
-                    file_object.write('%.1f %.1f\n' % (sim_time_s, p_val))
-
-            # Pass the current simulation time and the turbine powers from the previous time step
-            message_code = 0
-            # [34 + random.random(), 45.3+random.random() , 67+random.random()]
             message_from_client_array = [
-                sim_time_s] + [wind_speed, wind_direction] + turbine_powers
+                sim_time_s, amr_wind_speed, amr_wind_direction] + turbine_powers
 
             # Send helics message to Control Center
             # publish on topic: status
@@ -206,12 +193,7 @@ class DummyAMRWind(FederateAgent):
                 logger.info(
                     "** Received reply {}: {}".format(sim_time_s, self.message_from_server))
 
-                # Unpack the reply and update wind speed and wind direction
-                # Get wind speed and wind direction for the next time step
-
-                received_data = self.message_from_server
-                wind_speed = float(received_data[1])
-                wind_direction = float(received_data[2])
+                # Note dummy doesn't currently use received info for anything
 
             # Advance simulation time
             sim_time_s += 1
@@ -264,18 +246,4 @@ def launch_dummy_amr_wind(amr_input_file):
     obj.run_helics_setup()
     obj.enter_execution(function_targets=[],
                         function_arguments=[[]])
-
-
-    
-
-
-
-# # PARAMETERS
-# num_turbines = 2
-
-# # Initialize to all zeros
-# turbine_powers = np.zeros(num_turbines)
-
-
-
 

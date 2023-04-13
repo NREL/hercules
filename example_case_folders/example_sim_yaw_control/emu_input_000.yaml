@@ -51,6 +51,7 @@ py_sims:
       power: 25 # MW
       irradiance: 1000
 
+  # REMOVE THE py_sim BELOW! REPLACING WITH CONTROLLER
   yaw_system_0: # The name of py_sim object 2 [TODO: one for each turbine?]
 
     py_sim_type: SimpleYaw
@@ -65,6 +66,11 @@ py_sims:
 
 
 controller:
+
+  controller_type: SimpleYawController # This may not be needed
+  num_turbines: 2 # Should match AMR-Wind! Ideally, would come from AMR-wind
+  initial_conditions:
+      yaw: 270. # degrees (same for all turbines) (will this work?)
 
 
 

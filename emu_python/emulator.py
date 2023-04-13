@@ -103,6 +103,11 @@ class Emulator(FederateAgent):
                            ]['turbine_powers'] = np.zeros(self.num_turbines)
         self.amr_wind_dict[self.amr_wind_names[0]
                            ]['turbine_wind_directions'] = [0.]*self.num_turbines
+        # Write to emu_comms so that controller can access
+        self.input_dict['emu_comms']['amr_wind'][self.amr_wind_names[0]]\
+            ['turbine_powers'] = [0.]*self.num_turbines
+        self.input_dict['emu_comms']['amr_wind'][self.amr_wind_names[0]]\
+            ['turbine_wind_directions'] = [0.]*self.num_turbines
 
         # TODO Could set up logging here
 
@@ -140,10 +145,20 @@ class Emulator(FederateAgent):
                 continue
 
             # Update controller and py sims
-            self.controller.step(self.input_dict)
+            self.input_dict = self.controller.step(self.input_dict)
             self.input_dict['controller'] = self.controller.get_controller_dict()
             self.py_sims.step(self.input_dict)
             self.input_dict['py_sims'] = self.py_sims.get_py_sim_dict()
+
+            # TODO: usage differs a little here between controller and py_sims.
+            # controller returns an altered input_dict directly (and alters 
+            # fields outside of input_dict['controller'], whereas py_sims.step
+            # returns None and then the 'py_sims' field of input_dict is populated
+            # using self.py_sims.get_py_sim_dict(). This is consistent with 
+            # the sims (and amr_wind) running as individual systems, with the 
+            # controller coordinating them. As well as handling controllable 
+            # inputs, the controller should then also pass other signals between
+            # amr-wind/py_sims (such as the turbines' powers).
 
             # Print the input dict
             # print(self.input_dict)
@@ -184,7 +199,7 @@ class Emulator(FederateAgent):
             print("AMRWindSpeed:", wind_speed_amr_wind)
             print("AMRWindDirection:", wind_direction_amr_wind)
             print("AMRWindTurbinePowers:", turbine_power_array)
-            print(" AMRWIND number of turbines here: ", self.num_turbines)
+            print("AMRWIND number of turbines here: ", self.num_turbines)
             print("AMRWindTurbineWD:", turbine_wd_array)
             print("=======================================")
 
@@ -208,6 +223,12 @@ class Emulator(FederateAgent):
             self.turbine_power_array = turbine_power_array
             self.amr_wind_dict[self.amr_wind_names[0]
                                ]['sim_time_s_amr_wind'] = sim_time_s_amr_wind
+            # TODO: write these to the emu_comms object, too?
+            self.input_dict['emu_comms']['amr_wind'][self.amr_wind_names[0]]\
+                ['turbine_powers'] = turbine_power_array            
+            self.input_dict['emu_comms']['amr_wind'][self.amr_wind_names[0]]\
+                ['turbine_wind_directions'] = turbine_wd_array
+            
 
             # Send turbine powers through Kafka if enabled:
             if self.KAFKA:
@@ -308,21 +329,15 @@ class Emulator(FederateAgent):
         # Periodically publish data to the surrogate
 
         # Hard coded to single wind farm for the moment
-        wind_farm_name = list(self.input_dict["emu_comms"]["amr_wind"].keys())[0]
-        if "yaw_simulator_name" in \
-            self.input_dict["emu_comms"]["amr_wind"][wind_farm_name].keys() and \
-            self.input_dict["emu_comms"]["amr_wind"][wind_farm_name]["yaw_simulator_name"] != \
-            "none":   
-
-            yaw_angles = self.input_dict["py_sims"]\
-                [self.input_dict["emu_comms"]["amr_wind"][wind_farm_name]["yaw_simulator_name"]
-                ]\
-                ["outputs"]["turbine_yaws"]
-        
+        if "turbine_yaw_angles" in self.input_dict["emu_comms"]\
+                                                  ["amr_wind"]\
+                                                  [self.amr_wind_names[0]]:
+            yaw_angles = self.input_dict["emu_comms"]\
+                                        ["amr_wind"]\
+                                        [self.amr_wind_names[0]]\
+                                        ["turbine_yaw_angles"]
         else: # set yaw_angles based on self.wind_direction
             yaw_angles = [self.wind_direction]*self.num_turbines
-
-        print(yaw_angles)
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control

@@ -1,1 +1,2 @@
-This example is using new framework trying to run a local (non-eagle) example with the dummy_amr_wind
+This example demonstrates the use of SimpleYawController, either using the 
+dummy or the real AMR-Wind.

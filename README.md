@@ -11,12 +11,15 @@ use pyenv
 -->
 
 # Installation
+Create a new conda environment for emu_python:
 ```
 conda create --name emupy python=3.8
 conda activate emupy
+```
+<!--
 git clone https://github.com/NREL/OpenOA.git
 pip install ./OpenOA
-```
+-->
 If you haven't already cloned emu_python:
 ```
 git clone https://github.com/NREL/emu_python

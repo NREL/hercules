@@ -1,6 +1,7 @@
 from abc import abstractmethod
+from emu_python.controllers.controller_base import Controller
 
-class SimpleYawController():
+class SimpleYawController(Controller):
 
     def __init__(self, input_dict):
 

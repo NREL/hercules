@@ -3,32 +3,65 @@
 # emu_python
 Python (python >=3.6) front-end to emulator
 
+<!--
 # Recommended install
 set up emupy (eum_python) conda environment and pip install me into it
 OR
 use pyenv
+-->
 
-# New recommended install to work with era 5
+# Installation
+```
 conda create --name emupy python=3.8
 conda activate emupy
 git clone https://github.com/NREL/OpenOA.git
 pip install ./OpenOA
+```
+If you haven't already cloned emu_python:
+```
+git clone https://github.com/NREL/emu_python
+```
+Then,
+```
 pip install -e emu_python
+```
+Possibly, `cd` into emu_python and switch to the 
+develop branch.
 
-# Please install SEAS as follows: 
+
+SEAS is also required for emu_python. To install 
+SEAS, use
 
 ``` pip install git+https://github.nrel.gov/SEAS/SEAS.git@dv/emuwind ```
 
+If this fails, the following may work instead:
+
+<!--
 Note from PF:
 Had trouble doing it this way on local machine so instead:
 # (Activate conda environment first)
+-->
+<!--
 git clone git@github.nrel.gov:SEAS/SEAS.git
+-->
+
+```
+git clone https://github.nrel.gov/SEAS/SEAS
 cd SEAS
 git fetch --all
+git switch dv/emuwind
+```
+Older versions of git (e.g. the one on Eagle) don't have the `switch` feature; instead, use 
+```
 git checkout dv/emuwind
+```
+Then,
+```
 cd ..
 pip install -e SEAS
+```
 
+<!--
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account
 
@@ -39,9 +72,38 @@ But I found I also had to copy it down to here:
 /Users/pfleming/opt/anaconda3/envs/emupy/lib/python3.8/site-packages/operational_analysis/toolkits/
 
 Col
+-->
 
 # Running [Local]
 
+To run locally using a dummy placeholder for AMR-Wind, launch 3 separate 
+terminals. In each, `conda activate` your emu_python environment (`conda 
+activate emu_python`). 
+
+In the first terminal, run
+```
+helics_broker -t zmq  -f 2 --loglevel="debug"
+```
+from any directory.
+
+In the second and third terminals, navigate to 
+emu_python/example_case_folders/example_sim_05 (you'll need to be on the 
+develop branch of emu_python). Then, in one of these 
+terminals, run 
+```
+python emu_runscript_dummy_amr.py amr_input.inp
+```
+and in the other, run
+```
+python emu_runscript.py emu_input_000.yaml
+```
+
+The first of these launches the dummy stand-in for AMR-wind, and the second 
+launches the emu_python emulator. These will connect to the helics_broker and 
+run the co-simulation. You should see printout from both the dummy AMR-wind 
+process and the emu_python emulator printed to your screen.
+
+<!--
 In 4 different terminals with location set to emu_python/, type the following commands
 (This is more and more out of date)
 
@@ -49,6 +111,7 @@ In 4 different terminals with location set to emu_python/, type the following co
 - Terminal 2: `python testclient.py`
 - Terminal 3: `python vis_client.py`
 - Terminal 4: `python front_end_dash.py`
+-->
 
 # Running [Eagle]
 

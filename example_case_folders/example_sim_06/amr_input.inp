@@ -76,6 +76,8 @@ ABL.stats_output_format = netcdf
 
 # Whether to use helics
 helics.activated        =   true
+helics.broker_port = 23404
+helics.broker_address = "127.0.0.1"
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #        ADAPTIVE MESH REFINEMENT       #

@@ -25,8 +25,14 @@ module load netcdf-c/4.7.3/gcc-mpi
 # module load mpt
 
 
+# Set the helics port to use: 
+export HELICS_PORT=23405
+
+#make sure you use the same port number in the amr_input.inp and emu_input_000.yaml files. 
+
 # Set up the helics broker
-helics_broker -t zmq  -f 2 --loglevel="debug" & 
+helics_broker -f 2 --consoleloglevel=trace --loglevel=debug   --local_port=23405 &
+
 
 # Need to set this to your emu_python folder
 # cd /home/pfleming/emu_python/emu_python

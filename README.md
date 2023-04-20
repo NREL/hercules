@@ -115,8 +115,71 @@ In 4 different terminals with location set to emu_python/, type the following co
 
 # Running [Eagle]
 
-### Setting up AMR-WIND
+Running emu_python in full requires installing AMR-Wind (likely on eagle/HPC).
+The steps are detailed below, and assume that you have already installed 
+the other parts of emu_python as described above under **Installation**. 
 
+### Setting up AMR-WIND 
+
+First, `deactive` your conda environment using 
+```
+conda deactivate
+```
+
+Then, clone AMR-Wind and install its required submodules. This can be done 
+using
+
+EITHER
+```
+git clone https://github.com/Exawind/amr-wind
+cd amr-wind
+git submodule update --init
+cd ..
+``` 
+OR
+``` 
+git clone --recursive https://github.com/Exawind/amr-wind
+```
+
+Now, create a new directory `build` within the main AMR-Wind repository
+```
+mkdir amr-wind/build
+```
+and copy amr-wind_buildme.sh from emu_python into it, naming the copied file 
+buildme.sh
+```
+cp emu_python/amr-wind_buildme.sh amr-wind/build/buildme.sh
+```
+
+`cd` into the build directory, set executable permissions for buildme.sh, and
+run buildme.sh
+```
+cd amrwind/build
+chmod +x buildme.sh
+./buildme.sh
+```
+
+This will begin compiling an AMR-Wind executable. The process could take 
+several minutes, during which progress updates will print to the terminal. 
+Once complete, the build directory will contain an executable named amr_wind.
+
+### Running a job
+
+For an example of running emu_python with AMR-Wind, `cd` to 
+emu_python/example_case_folders/example_sim_06/. 
+
+Change the line beginning `mpirun` to point to your compiled amr-wind 
+executable. This will appear something like:
+```
+mpirun -n 72 /path/to/amr-wind/build/amr_wind amr_input.inp >> logamr 2>&1
+```
+Make any other necessary changes to batch_script.sh, and submit it to the 
+jobs queue using
+```
+sbatch batch_script.sh
+```
+
+<!--
 ```bash
     # After connecting to eagle, reconnect or start a new screen (helpful for disconnects)
     # To detach later while keeping session: ctrl+a d
@@ -185,6 +248,7 @@ In 4 different terminals with location set to emu_python/, type the following co
     # The terminal running front_end_dash.py will show a web address
     # Enter that address into a web browser on your local machine
 ```
+-->
 
 # Order of operations
 

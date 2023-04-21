@@ -1,5 +1,4 @@
 from emu_python.python_simulators.simple_solar import SimpleSolar
-from emu_python.python_simulators.simple_yaw import SimpleYaw
 from emu_python.python_simulators.simple_battery import SimpleBattery
 
 
@@ -31,11 +30,7 @@ class PySims():
             return SimpleSolar(py_sim_obj_dict, self.dt)
 
         if py_sim_obj_dict['py_sim_type'] == 'SimpleBattery':
-            
             return SimpleBattery(py_sim_obj_dict, self.dt)
-        
-        if py_sim_obj_dict['py_sim_type'] == 'SimpleYaw':
-            return SimpleYaw(py_sim_obj_dict, self.dt)
         
     def get_py_sim_dict(self):
          return self.py_sim_dict
@@ -43,23 +38,6 @@ class PySims():
 
     def step(self, input_dict):
 
-        # Exchange information between objects
-        self.set_pysim_inputs(input_dict)
-
         # Collect the py_sim objects
         for py_sim_name in self.py_sim_names:
             self.py_sim_dict[py_sim_name]['outputs'] = self.py_sim_dict[py_sim_name]['object'].step(self.py_sim_dict[py_sim_name]['inputs'])
-
-    def set_pysim_inputs(self, input_dict):
-        
-        # TODO: should this logic be handled INSIDE the py_sim object?
-        for py_sim_name in self.py_sim_names:
-            if self.py_sim_dict[py_sim_name]['py_sim_type'] == 'SimpleYaw':
-                # Need access to the wind directions from AMR-Wind
-                wind_directions = input_dict['emu_comms']['amr_wind']\
-                        [self.py_sim_dict[py_sim_name]['object'].wind_farm_name]\
-                        ['turbine_wind_directions']
-
-                self.py_sim_dict[py_sim_name]['inputs'] = {
-                    'turbine_wind_directions': wind_directions
-                }

@@ -81,7 +81,7 @@ Col
 
 To run locally using a dummy placeholder for AMR-Wind, launch 3 separate 
 terminals. In each, `conda activate` your emu_python environment (`conda 
-activate emu_python`). 
+activate emupy`). 
 
 In the first terminal, run
 ```

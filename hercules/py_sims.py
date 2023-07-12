@@ -11,18 +11,26 @@ class PySims():
 
         # Grab py sim details
         self.py_sim_dict = input_dict['py_sims']
-        self.n_py_sim = len(self.py_sim_dict )
-        self.py_sim_names = self.py_sim_dict.keys()
-        print(self.py_sim_names)
 
-        # Collect the py_sim objects, inputs and outputs
-        for py_sim_name in self.py_sim_names:
-            print((self.py_sim_dict[py_sim_name]))
-            self.py_sim_dict[py_sim_name]['object'] = self.get_py_sim(self.py_sim_dict[py_sim_name])
-            self.py_sim_dict[py_sim_name]['outputs'] =  self.py_sim_dict[py_sim_name]['object'].return_outputs()
-            self.py_sim_dict[py_sim_name]['inputs'] = {}
+        # If None n_py_sim = 0
+        if input_dict['py_sims'] is None:
+             self.n_py_sim = 0
+             self.py_sim_names = []
 
-        # print(self.py_sim_dict['solar_farm_0']['object'])
+        else:
+
+            self.n_py_sim = len(self.py_sim_dict )
+            self.py_sim_names = self.py_sim_dict.keys()
+            print(self.py_sim_names)
+
+            # Collect the py_sim objects, inputs and outputs
+            for py_sim_name in self.py_sim_names:
+                print((self.py_sim_dict[py_sim_name]))
+                self.py_sim_dict[py_sim_name]['object'] = self.get_py_sim(self.py_sim_dict[py_sim_name])
+                self.py_sim_dict[py_sim_name]['outputs'] =  self.py_sim_dict[py_sim_name]['object'].return_outputs()
+                self.py_sim_dict[py_sim_name]['inputs'] = {}
+
+            # print(self.py_sim_dict['solar_farm_0']['object'])
 
     def get_py_sim(self, py_sim_obj_dict):
 

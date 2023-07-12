@@ -2,7 +2,7 @@
 import numpy as np
 import json
 
-from emu_python.federateaccesspoint import federateagent
+from hercules.federateaccesspoint import federateagent
 
 class EmuComms(federateagent):
 

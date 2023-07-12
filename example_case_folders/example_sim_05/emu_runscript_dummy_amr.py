@@ -1,5 +1,5 @@
 import sys
-from emu_python.dummy_amr_wind import launch_dummy_amr_wind
+from hercules.dummy_amr_wind import launch_dummy_amr_wind
 
 # Check that one command line argument was given
 if len(sys.argv) != 2:

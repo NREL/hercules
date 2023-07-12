@@ -12,17 +12,17 @@ a.out
 *.plist
 test_client.dSYM
 *checkpoint.ipynb
-emu_python/sampling00000.nc
-emu_python/front_end.db
-emu_python/control_center.db
-emu_python/test_client_cpp/test_client
-emu_python/df_flow.p
-emu_python/flow_data.p
+hercules/sampling00000.nc
+hercules/front_end.db
+hercules/control_center.db
+hercules/test_client_cpp/test_client
+hercules/df_flow.p
+hercules/flow_data.p
 
 t_*.txt
-emu_python/sample_copy.nc
-emu_python/t_0*
-emu_python/local_amr_wind_demo/sample_copy.nc
+hercules/sample_copy.nc
+hercules/t_0*
+hercules/local_amr_wind_demo/sample_copy.nc
 
 #Ignore csv files
 *.csv

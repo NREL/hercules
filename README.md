@@ -1,17 +1,17 @@
 # Initial README
 
-# emu_python
+# hercules
 Python (python >=3.6) front-end to emulator
 
 <!--
 # Recommended install
-set up emupy (eum_python) conda environment and pip install me into it
+set up hercules conda environment and pip install me into it
 OR
 use pyenv
 -->
 
 # Installation
-Create a new conda environment for emu_python:
+Create a new conda environment for hercules:
 ```
 conda create --name emupy python=3.8
 conda activate emupy
@@ -20,19 +20,19 @@ conda activate emupy
 git clone https://github.com/NREL/OpenOA.git
 pip install ./OpenOA
 -->
-If you haven't already cloned emu_python:
+If you haven't already cloned hercules:
 ```
-git clone https://github.com/NREL/emu_python
+git clone https://github.com/NREL/hercules
 ```
 Then,
 ```
-pip install -e emu_python
+pip install -e hercules
 ```
-Possibly, `cd` into emu_python and switch to the 
+Possibly, `cd` into hercules and switch to the 
 develop branch.
 
 
-SEAS is also required for emu_python. To install 
+SEAS is also required for hercules. To install 
 SEAS, use
 
 ``` pip install git+https://github.nrel.gov/SEAS/SEAS.git@dv/emuwind ```
@@ -80,7 +80,7 @@ Col
 # Running [Local]
 
 To run locally using a dummy placeholder for AMR-Wind, launch 3 separate 
-terminals. In each, `conda activate` your emu_python environment (`conda 
+terminals. In each, `conda activate` your hercules environment (`conda 
 activate emupy`). 
 
 In the first terminal, run
@@ -90,8 +90,8 @@ helics_broker -t zmq  -f 2 --loglevel="debug"
 from any directory.
 
 In the second and third terminals, navigate to 
-emu_python/example_case_folders/example_sim_05 (you'll need to be on the 
-develop branch of emu_python). Then, in one of these 
+hercules/example_case_folders/example_sim_05 (you'll need to be on the 
+develop branch of hercules). Then, in one of these 
 terminals, run 
 ```
 python emu_runscript_dummy_amr.py amr_input.inp
@@ -102,12 +102,12 @@ python emu_runscript.py emu_input_000.yaml
 ```
 
 The first of these launches the dummy stand-in for AMR-wind, and the second 
-launches the emu_python emulator. These will connect to the helics_broker and 
+launches the hercules emulator. These will connect to the helics_broker and 
 run the co-simulation. You should see printout from both the dummy AMR-wind 
-process and the emu_python emulator printed to your screen.
+process and the hercules emulator printed to your screen.
 
 <!--
-In 4 different terminals with location set to emu_python/, type the following commands
+In 4 different terminals with location set to hercules/, type the following commands
 (This is more and more out of date)
 
 - Terminal 1: `python control_center.py`
@@ -118,9 +118,9 @@ In 4 different terminals with location set to emu_python/, type the following co
 
 # Running [Eagle]
 
-Running emu_python in full requires installing AMR-Wind (likely on eagle/HPC).
+Running hercules in full requires installing AMR-Wind (likely on eagle/HPC).
 The steps are detailed below, and assume that you have already installed 
-the other parts of emu_python as described above under **Installation**. 
+the other parts of hercules as described above under **Installation**. 
 
 ### Setting up AMR-WIND 
 
@@ -148,10 +148,10 @@ Now, create a new directory `build` within the main AMR-Wind repository
 ```
 mkdir amr-wind/build
 ```
-and copy amr-wind_buildme.sh from emu_python into it, naming the copied file 
+and copy amr-wind_buildme.sh from hercules into it, naming the copied file 
 buildme.sh
 ```
-cp emu_python/amr-wind_buildme.sh amr-wind/build/buildme.sh
+cp hercules/amr-wind_buildme.sh amr-wind/build/buildme.sh
 ```
 
 `cd` into the build directory, set executable permissions for buildme.sh, and
@@ -168,8 +168,8 @@ Once complete, the build directory will contain an executable named amr_wind.
 
 ### Running a job
 
-For an example of running emu_python with AMR-Wind, `cd` to 
-emu_python/example_case_folders/example_sim_06/. 
+For an example of running hercules with AMR-Wind, `cd` to 
+hercules/example_case_folders/example_sim_06/. 
 
 Change the line beginning `mpirun` to point to your compiled amr-wind 
 executable. This will appear something like:
@@ -287,7 +287,7 @@ sbatch batch_script.sh
 # TODO
 1. include dash license and copyright
 2.  make connection objects more robust
-3.  install SEAS as part of emu_python install
+3.  install SEAS as part of hercules install
 
 # Questions
 

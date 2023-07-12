@@ -1,14 +1,8 @@
-# Initial README
+# README
 
 # hercules
-Python (python >=3.6) front-end to emulator
+Hybrid Energy and Control Using Large Eddy Simulations
 
-<!--
-# Recommended install
-set up hercules conda environment and pip install me into it
-OR
-use pyenv
--->
 
 # Installation
 Create a new conda environment for hercules:
@@ -16,10 +10,7 @@ Create a new conda environment for hercules:
 conda create --name hercules python
 conda activate hercules
 ```
-<!--
-git clone https://github.com/NREL/OpenOA.git
-pip install ./OpenOA
--->
+
 If you haven't already cloned hercules:
 ```
 git clone https://github.com/NREL/hercules
@@ -39,14 +30,6 @@ SEAS, use
 
 If this fails, the following may work instead:
 
-<!--
-Note from PF:
-Had trouble doing it this way on local machine so instead:
-# (Activate conda environment first)
--->
-<!--
-git clone git@github.nrel.gov:SEAS/SEAS.git
--->
 
 ```
 git clone https://github.nrel.gov/SEAS/SEAS

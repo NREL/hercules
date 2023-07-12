@@ -9,7 +9,7 @@ description: Just a solar plant
 
 dt: 0.5
 
-emu_comms:
+hercules_comms:
 
   amr_wind:
 

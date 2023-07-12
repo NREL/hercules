@@ -26,7 +26,7 @@ class Emulator(FederateAgent):
         self.input_dict_flat = {}
 
         # Initialize the output file
-        self.output_file = 'emu_output.csv'
+        self.output_file = 'hercules_output.csv'
 
         # Save timt step
         self.dt = input_dict['dt']
@@ -40,9 +40,9 @@ class Emulator(FederateAgent):
         self.input_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
         # HELICS dicts
-        self.emu_comms_dict = input_dict['emu_comms']
-        self.emu_helics_dict = self.emu_comms_dict['helics']
-        self.helics_config_dict = self.emu_comms_dict['helics']['config']
+        self.hercules_comms_dict = input_dict['hercules_comms']
+        self.hercules_helics_dict = self.hercules_comms_dict['helics']
+        self.helics_config_dict = self.hercules_comms_dict['helics']['config']
 
         # Write the time step into helics config dict
         self.helics_config_dict['helics']['deltat'] = self.dt
@@ -72,7 +72,7 @@ class Emulator(FederateAgent):
 
         # AMR wind files
         # Grab py sim details
-        self.amr_wind_dict = self.emu_comms_dict['amr_wind']
+        self.amr_wind_dict = self.hercules_comms_dict['amr_wind']
 
         self.n_amr_wind = len(self.amr_wind_dict)
         self.amr_wind_names = list(self.amr_wind_dict.keys())

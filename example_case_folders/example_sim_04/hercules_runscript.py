@@ -1,6 +1,6 @@
 from hercules.emulator import Emulator
 from hercules.controller import Controller
-# from hercules.emu_comms import EmuComms
+# from hercules.hercules_comms import EmuComms
 from hercules.py_sims import PySims
 from hercules.utilities import load_yaml
 

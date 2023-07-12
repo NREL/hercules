@@ -31,8 +31,8 @@ helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT &
 
 # Need to set this to your hercules folder
 # cd /home/pfleming/hercules/hercules
-python3 emu_runscript.py emu_input_000.yaml >> logemu 2>&1  & # Start the controller center and pass in input file
+python3 hercules_runscript.py hercules_input_000.yaml >> logemu 2>&1  & # Start the controller center and pass in input file
 
 # Now go back to scratch folder and launch the job
 # cd /scratch/pfleming/c2c/example_sim_02
-mpirun -n 72 /home/msinner/emu_moa_dev/amr-wind/build/amr_wind amr_input.inp >> logamr 2>&1 
+mpirun -n 72 /home/msinner/hercules_moa_dev/amr-wind/build/amr_wind amr_input.inp >> logamr 2>&1 

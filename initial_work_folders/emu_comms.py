@@ -15,9 +15,9 @@ class EmuComms(federateagent):
         self.dt = input_dictionary['dt']
 
         # Grab py sim details
-        self.emu_comms_dict = input_dictionary['emu_comms']
-        self.emu_helics_dict = self.emu_comms_dict ['helics']
-        self.helics_config_dict = self.emu_comms_dict['helics']['config']
+        self.hercules_comms_dict = input_dictionary['hercules_comms']
+        self.hercules_helics_dict = self.hercules_comms_dict ['helics']
+        self.helics_config_dict = self.hercules_comms_dict['helics']['config']
 
         # Write the time step into helics config dict
         self.helics_config_dict['helics']['deltat'] = self.dt
@@ -47,7 +47,7 @@ class EmuComms(federateagent):
 
         # AMR wind files
         # Grab py sim details
-        self.amr_wind_dict = self.emu_comms_dict['amr_wind']
+        self.amr_wind_dict = self.hercules_comms_dict['amr_wind']
 
         self.n_amr_wind = len(self.amr_wind_dict )
         self.amr_wind_names = list(self.amr_wind_dict.keys())
@@ -96,9 +96,9 @@ class EmuComms(federateagent):
         print(" #### Entering main loop #### ")
 
 
-    def get_emu_comms_dict(self):
+    def get_hercules_comms_dict(self):
 
-        return self.emu_comms_dict
+        return self.hercules_comms_dict
 
     def step(self, input_dict):
 

@@ -94,11 +94,11 @@ hercules/example_case_folders/example_sim_05 (you'll need to be on the
 develop branch of hercules). Then, in one of these 
 terminals, run 
 ```
-python emu_runscript_dummy_amr.py amr_input.inp
+python hercules_runscript_dummy_amr.py amr_input.inp
 ```
 and in the other, run
 ```
-python emu_runscript.py emu_input_000.yaml
+python hercules_runscript.py hercules_input_000.yaml
 ```
 
 The first of these launches the dummy stand-in for AMR-wind, and the second 
@@ -231,7 +231,7 @@ sbatch batch_script.sh
 
     # Probably you then need to setup your conda environment, in my case 
     # I call a function saved to my profile
-    emu_go
+    hercules_go
 
     # Launch the helics broker
     helics_broker -f 2

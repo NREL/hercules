@@ -13,7 +13,7 @@ use pyenv
 # Installation
 Create a new conda environment for hercules:
 ```
-conda create --name hercules python=3.8
+conda create --name hercules python
 conda activate hercules
 ```
 <!--

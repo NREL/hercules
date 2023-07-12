@@ -18,6 +18,8 @@ export LD_LIBRARY_PATH=$PREFIX/lib/libfabric:$PREFIX/lib/release_mt:$LD_LIBRARY_
 source activate hercules
 module load helics/helics-3.1.0_openmpi
 module load netcdf-c/4.7.3/gcc-mpi
+module load mkl
+module load mpt
 
 export HELICS_PORT=32000
 

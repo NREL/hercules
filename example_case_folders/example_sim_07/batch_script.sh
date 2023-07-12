@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=emu
+#SBATCH --job-name=hercules
 #SBATCH --time=1:00:00
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=36

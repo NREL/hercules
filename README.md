@@ -13,8 +13,8 @@ use pyenv
 # Installation
 Create a new conda environment for hercules:
 ```
-conda create --name emupy python=3.8
-conda activate emupy
+conda create --name hercules python=3.8
+conda activate hercules
 ```
 <!--
 git clone https://github.com/NREL/OpenOA.git

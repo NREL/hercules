@@ -1,8 +1,8 @@
-from emu_python.emulator import Emulator
-from emu_python.controller import Controller
-# from emu_python.emu_comms import EmuComms
-from emu_python.py_sims import PySims
-from emu_python.utilities import load_yaml
+from hercules.emulator import Emulator
+from hercules.controller import Controller
+# from hercules.emu_comms import EmuComms
+from hercules.py_sims import PySims
+from hercules.utilities import load_yaml
 
 import sys
 

@@ -1,5 +1,5 @@
-from emu_python.python_simulators.simple_solar import SimpleSolar
-from emu_python.python_simulators.simple_battery import SimpleBattery
+from hercules.python_simulators.simple_solar import SimpleSolar
+from hercules.python_simulators.simple_battery import SimpleBattery
 
 
 class PySims():

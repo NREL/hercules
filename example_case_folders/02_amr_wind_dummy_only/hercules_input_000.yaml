@@ -5,7 +5,7 @@ name: example_000
 
 ###
 # Describe this emulator setup
-description: Just a solar plant
+description: AMR-wind (Dummy) Only
 
 dt: 0.5
 
@@ -29,26 +29,15 @@ hercules_comms:
             subscription_topics: [status]
             publication_topics: [control]
             endpoints: []
-            helicsport: 23405
+            helicsport : 32000
         publication_interval: 1
         endpoint_interval: 1
         starttime: 0
-        stoptime: 36000
+        stoptime: 100
+        
         Agent: ControlCenter
 
 py_sims:
-
-  solar_farm_0: # The name of py_sim object 1
-
-    py_sim_type: SimpleSolar
-    capacity: 50 # MW
-    efficiency: 0.5 #Fraction
-
-    initial_conditions:
-
-      power: 25 # MW
-      irradiance: 1000
-
 
 controller:
 

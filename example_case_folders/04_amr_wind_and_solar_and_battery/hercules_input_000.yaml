@@ -5,7 +5,7 @@ name: example_000
 
 ###
 # Describe this emulator setup
-description: A wind and battery simulation
+description: AMR Wind Only
 
 dt: 0.5
 
@@ -29,7 +29,7 @@ hercules_comms:
             subscription_topics: [status]
             publication_topics: [control]
             endpoints: []
-            helicsport: 23405
+            helicsport: 32000
         publication_interval: 1
         endpoint_interval: 1
         starttime: 0
@@ -61,7 +61,6 @@ py_sims:
 
     initial_conditions:
       SOC: 0.5   # initial state of charge of the battery in percentage of total size
-
 
 controller:
 

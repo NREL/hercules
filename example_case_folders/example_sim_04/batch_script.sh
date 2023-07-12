@@ -36,7 +36,7 @@ helics_broker -f 2 --consoleloglevel=trace --loglevel=debug   --local_port=$HELI
 
 # Need to set this to your hercules folder
 # cd /home/pfleming/hercules/hercules
-python3 hercules_runscript.py hercules_input_000.yaml >> logemu 2>&1  & # Start the controller center and pass in input file
+python3 hercules_runscript.py hercules_input_000.yaml >> loghercules 2>&1  & # Start the controller center and pass in input file
 
 # Now go back to scratch folder and launch the job
 # cd /scratch/pfleming/c2c/example_sim_02

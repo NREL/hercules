@@ -9,7 +9,7 @@ import argparse
 parser = argparse.ArgumentParser()
 
 
-topic = "EmupyV0.1"
+topic = "herculesV0.1"
 print("KAFKA topic", topic)
 config = Configuration(env_path='./.env')
 python_producer = PythonProducer(config)

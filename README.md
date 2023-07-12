@@ -72,7 +72,7 @@ The instructions said to place it in the folder
 OpenOA/operational_analysis/toolkits
 
 But I found I also had to copy it down to here:
-/Users/pfleming/opt/anaconda3/envs/emupy/lib/python3.8/site-packages/operational_analysis/toolkits/
+/Users/pfleming/opt/anaconda3/envs/hercules/lib/python3.8/site-packages/operational_analysis/toolkits/
 
 Col
 -->
@@ -81,7 +81,7 @@ Col
 
 To run locally using a dummy placeholder for AMR-Wind, launch 3 separate 
 terminals. In each, `conda activate` your hercules environment (`conda 
-activate emupy`). 
+activate hercules`). 
 
 In the first terminal, run
 ```

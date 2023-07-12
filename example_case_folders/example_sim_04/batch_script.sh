@@ -13,11 +13,11 @@ module use /not/nrel/apps/modules/default/modulefiles
 module purge
 # module load conda/5.3
 module load conda
-export PREFIX=~/.conda-envs/emupy
+export PREFIX=~/.conda-envs/hercules
 export PATH=$PREFIX/bin:$PATH
 export FI_PROVIDER_PATH=$PREFIX/lib/libfabric/prov
 export LD_LIBRARY_PATH=$PREFIX/lib/libfabric:$PREFIX/lib/release_mt:$LD_LIBRARY_PATH
-source activate emupy
+source activate hercules
 # module load intel-mpi/2018.0.3
 module load helics/helics-3.1.0_openmpi
 module load netcdf-c/4.7.3/gcc-mpi

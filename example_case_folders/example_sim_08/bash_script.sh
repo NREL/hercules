@@ -2,7 +2,7 @@
 # I just run these one at a t time
 
 # A lot of modules and conda stuff
-conda activate emupy
+conda activate hercules
 
 # Set up the helics broker
 helics_broker -t zmq  -f 2 --loglevel="debug" & 

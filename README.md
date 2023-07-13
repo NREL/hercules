@@ -47,6 +47,25 @@ cd ..
 pip install -e SEAS
 ```
 
+A python electrolyzer model is also required for hercules. To install 
+the electrolyzer, use
+
+```
+git clone git@github.com:NREL/electrolyzer.git
+cd electrolyzer
+git fetch --all
+git switch develop
+```
+Older versions of git (e.g. the one on Eagle) don't have the `switch` feature; instead, use 
+```
+git checkout develop
+```
+Then,
+```
+cd ..
+pip install -e electrolyzer
+```
+
 <!--
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account

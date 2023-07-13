@@ -19,11 +19,11 @@ class Emulator(FederateAgent):
 
     def __init__(self, controller, py_sims, input_dict):
 
-        # Save the input dict
-        self.input_dict = input_dict
+        # Save the input dict to main dict
+        self.main_dict = input_dict
 
-        # Initialize the flattend input_dict
-        self.input_dict_flat = {}
+        # Initialize the flattend main_dict
+        self.main_dict_flat = {}
 
         # Initialize the output file
         self.output_file = 'hercules_output.csv'
@@ -36,8 +36,8 @@ class Emulator(FederateAgent):
         self.py_sims = py_sims
 
         # Update the input dict components
-        self.input_dict['controller'] = self.controller.get_controller_dict()
-        self.input_dict['py_sims'] = self.py_sims.get_py_sim_dict()
+        self.main_dict['controller'] = self.controller.get_controller_dict()
+        self.main_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
         # HELICS dicts
         self.hercules_comms_dict = input_dict['hercules_comms']
@@ -138,10 +138,10 @@ class Emulator(FederateAgent):
                 continue
 
             # Update controller and py sims
-            self.controller.step(self.input_dict)
-            self.input_dict['controller'] = self.controller.get_controller_dict()
-            self.py_sims.step(self.input_dict)
-            self.input_dict['py_sims'] = self.py_sims.get_py_sim_dict()
+            self.controller.step(self.main_dict)
+            self.main_dict['controller'] = self.controller.get_controller_dict()
+            self.py_sims.step(self.main_dict)
+            self.main_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
             # Print the input dict
             # print(self.input_dict)
@@ -164,6 +164,11 @@ class Emulator(FederateAgent):
             turbine_wd_array = subscription_value[3+self.num_turbines:]
             self.wind_speed = wind_speed_amr_wind
             self.wind_direction = wind_direction_amr_wind
+
+            # Assign Py_sim outputs
+            if self.main_dict['py_sims']:
+                self.main_dict['py_sims']['inputs']['available_power'] = sum(turbine_power_array)
+
 
             ## TODO add other parameters that need to be logged to csv here. 
             # Write turbine power and turbine wind direction to csv logfile. 
@@ -221,52 +226,52 @@ class Emulator(FederateAgent):
             self.sync_time_helics(self.absolute_helics_time + self.deltat)
 
             # Log the input dict
-            self.log_input_dict()
+            self.log_main_dict()
 
             # If this is first iteration print the input dict
             # And turn off the first iteration flag
             if self.first_iteration:
-                print(self.input_dict)
+                print(self.main_dict)
                 self.first_iteration = False
 
                 # Echo the dictionary to a seperate file in case it is helpful 
                 # to see full dictionary in interpreting log
                 
                 original_stdout = sys.stdout
-                with open('input_dict.echo', 'w') as f_i:
+                with open('main_dict.echo', 'w') as f_i:
                     sys.stdout = f_i # Change the standard output to the file we created.
-                    print(self.input_dict)
+                    print(self.main_dict)
                     sys.stdout = original_stdout # Reset the standard output to its original value
 
-    def recursive_flatten_input_dict(self, nested_dict, prefix = ''):
+    def recursive_flatten_main_dict(self, nested_dict, prefix = ''):
 
         # Recursively flatten the input dict
         for k, v in nested_dict.items():
             if isinstance(v, dict):
-                self.recursive_flatten_input_dict(v, prefix + k + '.')
+                self.recursive_flatten_main_dict(v, prefix + k + '.')
             else:
                 # If v is a list or np.array, enter each element seperately
                 if isinstance(v, (list, np.ndarray)):
                     for i, vi in enumerate(v):
                         if isinstance(vi, (int, float)):
-                            self.input_dict_flat[prefix + k + '.%03d' % i] = vi
+                            self.main_dict_flat[prefix + k + '.%03d' % i] = vi
 
                 # If v is a string, int, or float, enter it directly
                 if isinstance(v, (int, float)):
-                    self.input_dict_flat[prefix + k] = v
+                    self.main_dict_flat[prefix + k] = v
 
 
-    def log_input_dict(self):
+    def log_main_dict(self):
         
         # Update the flattened input dict
-        self.recursive_flatten_input_dict(self.input_dict)
+        self.recursive_flatten_main_dict(self.main_dict)
 
         # Add the current time
-        self.input_dict_flat['clock_time'] = dt.datetime.now()
+        self.main_dict_flat['clock_time'] = dt.datetime.now()
 
         # The keys and values as two lists
-        keys = list(self.input_dict_flat.keys())
-        values = list(self.input_dict_flat.values())
+        keys = list(self.main_dict_flat.keys())
+        values = list(self.main_dict_flat.values())
 
         # If this is first iteration, write the keys as csv header
         if self.first_iteration:

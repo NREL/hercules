@@ -23,6 +23,9 @@ class SimpleBattery():
         self.max_capacity = self.max_SOC*self.total_battery_capacity
         self.min_capacity = self.min_SOC*self.total_battery_capacity
 
+        # Define needed inputs as empty dict
+        self.needed_inputs = {}
+
         self.power_mw = 0
         print('battery', self.size, self.charge_rate, self.discharge_rate)
 

@@ -23,6 +23,9 @@ class SimpleSolar():
         self.power_mw = input_dict['initial_conditions']['power']
         self.irradiance = input_dict['initial_conditions']['irradiance']
 
+        # Define needed inputs as empty dict
+        self.needed_inputs = {}
+
         # # compute power output of solar panels
         # self.compute_power()
 

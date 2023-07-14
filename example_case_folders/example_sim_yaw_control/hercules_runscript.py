@@ -1,7 +1,7 @@
-from emu_python.emulator import Emulator
-from emu_python.controllers.simple_yaw_controller import SimpleYawController
-from emu_python.py_sims import PySims
-from emu_python.utilities import load_yaml
+from hercules.emulator import Emulator
+from hercules.controllers.simple_yaw_controller import SimpleYawController
+from hercules.py_sims import PySims
+from hercules.utilities import load_yaml
 
 import sys
 

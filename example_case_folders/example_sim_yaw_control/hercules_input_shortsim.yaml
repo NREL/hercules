@@ -9,7 +9,7 @@ description: Just a solar plant
 
 dt: 0.5
 
-emu_comms:
+hercules_comms:
 
   amr_wind:
 
@@ -21,7 +21,7 @@ emu_comms:
   helics:
 
     config:
-        name: emu_python # What is the purpose of this name
+        name: hercules # What is the purpose of this name
         use_dash_frontend: False
         KAFKA: False
         KAFKA_topics: EMUV1py

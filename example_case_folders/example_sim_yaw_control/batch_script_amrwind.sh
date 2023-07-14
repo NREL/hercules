@@ -28,4 +28,4 @@ helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT &
 python hercules_runscript.py hercules_input_longsim.yaml >> loghercules 2>&1  & # Start the controller center and pass in input file
 
 # Now go back to scratch folder and launch the job
-mpirun -n 36 /home/msinner/emu_moa_dev/amr-wind/build/amr_wind amr_input.inp >> logamr 2>&1 
+mpirun -n 72 /home/msinner/emu_moa_dev/amr-wind/build/amr_wind amr_input.inp >> logamr 2>&1 

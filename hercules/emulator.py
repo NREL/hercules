@@ -103,10 +103,10 @@ class Emulator(FederateAgent):
                            ]['turbine_powers'] = np.zeros(self.num_turbines)
         self.amr_wind_dict[self.amr_wind_names[0]
                            ]['turbine_wind_directions'] = [0.]*self.num_turbines
-        # Write to emu_comms so that controller can access
-        self.input_dict['emu_comms']['amr_wind'][self.amr_wind_names[0]]\
+        # Write to hercules_comms so that controller can access
+        self.input_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
             ['turbine_powers'] = [0.]*self.num_turbines
-        self.input_dict['emu_comms']['amr_wind'][self.amr_wind_names[0]]\
+        self.input_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
             ['turbine_wind_directions'] = [0.]*self.num_turbines
 
         # TODO Could set up logging here
@@ -228,10 +228,10 @@ class Emulator(FederateAgent):
             self.turbine_power_array = turbine_power_array
             self.amr_wind_dict[self.amr_wind_names[0]
                                ]['sim_time_s_amr_wind'] = sim_time_s_amr_wind
-            # TODO: write these to the emu_comms object, too?
-            self.input_dict['emu_comms']['amr_wind'][self.amr_wind_names[0]]\
+            # TODO: write these to the hercules_comms object, too?
+            self.input_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
                 ['turbine_powers'] = turbine_power_array            
-            self.input_dict['emu_comms']['amr_wind'][self.amr_wind_names[0]]\
+            self.input_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
                 ['turbine_wind_directions'] = turbine_wd_array
             
 
@@ -334,10 +334,10 @@ class Emulator(FederateAgent):
         # Periodically publish data to the surrogate
 
         # Hard coded to single wind farm for the moment
-        if "turbine_yaw_angles" in self.input_dict["emu_comms"]\
+        if "turbine_yaw_angles" in self.input_dict["hercules_comms"]\
                                                   ["amr_wind"]\
                                                   [self.amr_wind_names[0]]:
-            yaw_angles = self.input_dict["emu_comms"]\
+            yaw_angles = self.input_dict["hercules_comms"]\
                                         ["amr_wind"]\
                                         [self.amr_wind_names[0]]\
                                         ["turbine_yaw_angles"]

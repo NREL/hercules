@@ -27,9 +27,9 @@ from setuptools import setup, find_packages
 
 
 # Package meta-data.
-NAME = "emu_python"
+NAME = "hercules"
 DESCRIPTION = "Python front-end to the emulator."
-URL = "https://github.com/NREL/emu_python"
+URL = "https://github.com/NREL/hercules"
 EMAIL = "paul.fleming@nrel.gov"
 AUTHOR = "NREL National Wind Technology Center"
 REQUIRES_PYTHON = ">=3.6.0"
@@ -83,7 +83,7 @@ except FileNotFoundError:
 
 # Load the package's VERSION module
 ROOT = Path(__file__).parent
-with open(ROOT / "emu_python" / "version.py") as version_file:
+with open(ROOT / "hercules" / "version.py") as version_file:
     VERSION = version_file.read().strip()
 
 setup(
@@ -96,7 +96,7 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    # package_dir={"": "emu_python"},
+    # package_dir={"": "hercules"},
     packages=find_packages( exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],

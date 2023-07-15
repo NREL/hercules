@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from emu_python.controllers.controller_base import Controller
+from hercules.controllers.controller_base import Controller
 
 class SimpleYawController(Controller):
 
@@ -34,17 +34,17 @@ class SimpleYawController(Controller):
         # Still, to demonstrate, we can save the current wind directions.
 
         # Grab name of wind farm (assumes there is only one!)
-        wf_name = list(input_dict["emu_comms"]["amr_wind"].keys())[0]
+        wf_name = list(input_dict["hercules_comms"]["amr_wind"].keys())[0]
 
-        # How would we do this part, if not saved in emu_comms? might be though?
-        self.wind_directions = input_dict["emu_comms"]\
+        # How would we do this part, if not saved in hercules_comms? might be though?
+        self.wind_directions = input_dict["hercules_comms"]\ 
                                          ["amr_wind"]\
                                          [wf_name]\
                                          ["turbine_wind_directions"]
 
         # Now, set the amr-wind yaw angles
         yaw_angles = self.wind_directions # Yaws instantaneously
-        input_dict["emu_comms"]\
+        input_dict["hercules_comms"]\
                   ["amr_wind"]\
                   [wf_name]\
                   ["turbine_yaw_angles"] = yaw_angles

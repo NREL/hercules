@@ -37,7 +37,7 @@ class SimpleYawController(Controller):
         wf_name = list(input_dict["hercules_comms"]["amr_wind"].keys())[0]
 
         # How would we do this part, if not saved in hercules_comms? might be though?
-        self.wind_directions = input_dict["hercules_comms"]\ 
+        self.wind_directions = input_dict["hercules_comms"]\
                                          ["amr_wind"]\
                                          [wf_name]\
                                          ["turbine_wind_directions"]

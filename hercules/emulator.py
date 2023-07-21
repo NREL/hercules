@@ -104,9 +104,9 @@ class Emulator(FederateAgent):
         self.amr_wind_dict[self.amr_wind_names[0]
                            ]['turbine_wind_directions'] = [0.]*self.num_turbines
         # Write to hercules_comms so that controller can access
-        self.input_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
+        self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
             ['turbine_powers'] = [0.]*self.num_turbines
-        self.input_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
+        self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
             ['turbine_wind_directions'] = [0.]*self.num_turbines
 
         # TODO Could set up logging here
@@ -161,7 +161,7 @@ class Emulator(FederateAgent):
             # amr-wind/py_sims (such as the turbines' powers).
 
             # Print the input dict
-            # print(self.input_dict)
+            # print(self.main_dict)
 
             # Subscribe to helics messages:
             incoming_messages = self.helics_connector.get_all_waiting_messages()
@@ -229,9 +229,9 @@ class Emulator(FederateAgent):
             self.amr_wind_dict[self.amr_wind_names[0]
                                ]['sim_time_s_amr_wind'] = sim_time_s_amr_wind
             # TODO: write these to the hercules_comms object, too?
-            self.input_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
+            self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
                 ['turbine_powers'] = turbine_power_array            
-            self.input_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
+            self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
                 ['turbine_wind_directions'] = turbine_wd_array
             
 
@@ -334,13 +334,13 @@ class Emulator(FederateAgent):
         # Periodically publish data to the surrogate
 
         # Hard coded to single wind farm for the moment
-        if "turbine_yaw_angles" in self.input_dict["hercules_comms"]\
-                                                  ["amr_wind"]\
-                                                  [self.amr_wind_names[0]]:
-            yaw_angles = self.input_dict["hercules_comms"]\
-                                        ["amr_wind"]\
-                                        [self.amr_wind_names[0]]\
-                                        ["turbine_yaw_angles"]
+        if "turbine_yaw_angles" in self.main_dict["hercules_comms"]\
+                                                 ["amr_wind"]\
+                                                 [self.amr_wind_names[0]]:
+            yaw_angles = self.main_dict["hercules_comms"]\
+                                       ["amr_wind"]\
+                                       [self.amr_wind_names[0]]\
+                                       ["turbine_yaw_angles"]
         else: # set yaw_angles based on self.wind_direction
             yaw_angles = [self.wind_direction]*self.num_turbines
 

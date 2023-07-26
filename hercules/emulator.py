@@ -57,18 +57,6 @@ class Emulator(FederateAgent):
 
         # TODO: Store other things
         self.use_dash_frontend = self.helics_config_dict["use_dash_frontend"]
-        self.KAFKA = self.helics_config_dict["KAFKA"]
-
-        # TODO Copied direct from control_center.py but not actually ready yet
-        if self.KAFKA:
-            from dav_kafka_python.configuration import Configuration
-            from dav_kafka_python.producer import PythonProducer
-            # Kafka topic :
-            self.topic = self.helics_config_dict["KAFKA_TOPIC"]
-            print("KAFKA topic", self.topic)
-            config = Configuration(env_path='./.env')
-            self.python_producer = PythonProducer(config)
-            self.python_producer.connect()
 
         # AMR wind files
         # Grab py sim details
@@ -109,6 +97,9 @@ class Emulator(FederateAgent):
         self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
             ['turbine_wind_directions'] = [0.]*self.num_turbines
 
+        self.wind_speed = 0
+        self.wind_direction = 0
+
         # TODO Could set up logging here
 
         # TODO Set interface comms to either dash or kenny's front end
@@ -145,128 +136,94 @@ class Emulator(FederateAgent):
                 continue
 
             # Update controller and py sims
+            #self.main_dict = 
             self.controller.step(self.main_dict)
             self.main_dict['controller'] = self.controller.get_controller_dict()
             self.py_sims.step(self.main_dict)
             self.main_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
-            # TODO: usage differs a little here between controller and py_sims.
-            # controller returns an altered input_dict directly (and alters 
-            # fields outside of input_dict['controller'], whereas py_sims.step
-            # returns None and then the 'py_sims' field of input_dict is populated
-            # using self.py_sims.get_py_sim_dict(). This is consistent with 
-            # the sims (and amr_wind) running as individual systems, with the 
-            # controller coordinating them. As well as handling controllable 
-            # inputs, the controller should then also pass other signals between
-            # amr-wind/py_sims (such as the turbines' powers).
+            # Send inputs (initiates the AMRWind step)
+            self.send_data_to_amrwind()
 
-            # Print the input dict
-            # print(self.main_dict)
-
-            # Subscribe to helics messages:
-            incoming_messages = self.helics_connector.get_all_waiting_messages()
-            if incoming_messages != {}:
-                subscription_value = self.process_subscription_messages(
-                    incoming_messages)
-            else:
-                print(
-                    "Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
-                subscription_value = [
-                    0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
-
-            # TODO Parse returns from AMRWind
-            sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = subscription_value[
-                :3]
-            turbine_power_array = subscription_value[3:3+self.num_turbines]
-            turbine_wd_array = subscription_value[3+self.num_turbines:]
-            self.wind_speed = wind_speed_amr_wind
-            self.wind_direction = wind_direction_amr_wind
-
-            # Assign Py_sim outputs
-            if self.main_dict['py_sims']:
-                self.main_dict['py_sims']['inputs']['available_power'] = sum(turbine_power_array)
-
-
-            ## TODO add other parameters that need to be logged to csv here. 
-            # Write turbine power and turbine wind direction to csv logfile. 
-            aa = [str(xx) for xx in turbine_power_array]
-            xyz = ",".join(aa)
-            bb = [str(xx) for xx in turbine_wd_array]
-            zyx = ",".join(bb)
-            with open(f'{LOGFILE}.csv', 'a') as filex:
-                filex.write(str(self.absolute_helics_time) + ',' + str(sim_time_s_amr_wind) + ',' + str(
-                    wind_speed_amr_wind) + ',' + str(wind_direction_amr_wind) + ',' + xyz + ',' + zyx + os.linesep)
-
-
-            # TODO F-Strings
-            print("=======================================")
-            print("AMRWindTime:", sim_time_s_amr_wind)
-            print("AMRWindSpeed:", wind_speed_amr_wind)
-            print("AMRWindDirection:", wind_direction_amr_wind)
-            print("AMRWindTurbinePowers:", turbine_power_array)
-            print("AMRWIND number of turbines here: ", self.num_turbines)
-            print("AMRWindTurbineWD:", turbine_wd_array)
-            print("=======================================")
-
-            # Process periocdic functions.
-            self.process_periodic_publication()
-
-            # Send control center values through Kafka if enabled:
-            if self.KAFKA:
-                key = json.dumps({"key": "wind_tower"})
-                value = json.dumps({"helics_time": self.absolute_helics_time, "bucket": "wind_tower", "AMRWind_speed": wind_speed_amr_wind,
-                                    "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
-                self.python_producer.write(key=key, value=value,
-                                           topic=self.topic, token='test-token')
-
-            # Store turbine powers back to the dict
-            # TODO hard-coded for now assuming only one AMR-WIND
-            self.amr_wind_dict[self.amr_wind_names[0]
-                               ]['turbine_powers'] = turbine_power_array
-            self.amr_wind_dict[self.amr_wind_names[0]
-                               ]['turbine_wind_directions'] = turbine_wd_array
-            self.turbine_power_array = turbine_power_array
-            self.amr_wind_dict[self.amr_wind_names[0]
-                               ]['sim_time_s_amr_wind'] = sim_time_s_amr_wind
-            # TODO: write these to the hercules_comms object, too?
-            self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
-                ['turbine_powers'] = turbine_power_array            
-            self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
-                ['turbine_wind_directions'] = turbine_wd_array
-            
-
-            # Send turbine powers through Kafka if enabled:
-            if self.KAFKA:
-                if len(turbine_power_array) == 0:
-                    turbine_power_array = np.ones(self.num_turbines)*-1.0
-                for t in range(self.num_turbines):
-        
-                        keyname = f"wind_turbine_{t}"
-                        key = json.dumps({"key": keyname})
-                        value = json.dumps({"helics_time": self.currenttime, "bucket":  keyname, "turbine_wd_direction": turbine_wd_array[t], "power": turbine_power_array[
-                            t], "AMRWind_speed": wind_speed_amr_wind, "AMRWind_direction": wind_direction_amr_wind, "AMRWind_time": sim_time_s_amr_wind})
-                        self.python_producer.write(
-                            key=key, value=value, topic=self.topic, token='test-token')
-
-            self.sync_time_helics(self.absolute_helics_time + self.deltat)
-
-            # Log the input dict
+            # Log the current state
             self.log_main_dict()
+
+            # Update time to next time step (TODO: check logging for pysims?)
+            self.sync_time_helics(self.absolute_helics_time + self.deltat)
+                       
+            # Receive outputs back (for next time step)
+            self.receive_amrwind_data()
 
             # If this is first iteration print the input dict
             # And turn off the first iteration flag
             if self.first_iteration:
                 print(self.main_dict)
+                self.save_main_dict_as_text()
                 self.first_iteration = False
 
-                # Echo the dictionary to a seperate file in case it is helpful 
-                # to see full dictionary in interpreting log
-                
-                original_stdout = sys.stdout
-                with open('main_dict.echo', 'w') as f_i:
-                    sys.stdout = f_i # Change the standard output to the file we created.
-                    print(self.main_dict)
-                    sys.stdout = original_stdout # Reset the standard output to its original value
+    def receive_amrwind_data(self):
+
+        # Subscribe to helics messages:
+        incoming_messages = self.helics_connector.get_all_waiting_messages()
+        if incoming_messages != {}:
+            subscription_value = self.process_subscription_messages(
+                incoming_messages)
+        else:
+            print(
+                "Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
+            subscription_value = [
+                0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
+
+        # TODO Parse returns from AMRWind
+        sim_time_s_amr_wind, wind_speed_amr_wind, wind_direction_amr_wind = subscription_value[
+            :3]
+        turbine_power_array = subscription_value[3:3+self.num_turbines]
+        turbine_wd_array = subscription_value[3+self.num_turbines:]
+        self.wind_speed = wind_speed_amr_wind
+        self.wind_direction = wind_direction_amr_wind
+
+        # Assign Py_sim outputs
+        if self.main_dict['py_sims']:
+            self.main_dict['py_sims']['inputs']['available_power'] = sum(turbine_power_array)
+
+        ## TODO add other parameters that need to be logged to csv here. 
+        # Write turbine power and turbine wind direction to csv logfile. 
+        # TODO: should this be in this method, or its own method?
+        aa = [str(xx) for xx in turbine_power_array]
+        xyz = ",".join(aa)
+        bb = [str(xx) for xx in turbine_wd_array]
+        zyx = ",".join(bb)
+        with open(f'{LOGFILE}.csv', 'a') as filex:
+            filex.write(str(self.absolute_helics_time) + ',' + str(sim_time_s_amr_wind) + ',' + str(
+                wind_speed_amr_wind) + ',' + str(wind_direction_amr_wind) + ',' + xyz + ',' + zyx + os.linesep)
+
+        # Printouts related to message received from AMRWind
+        print("=======================================")
+        print("AMRWindTime:", sim_time_s_amr_wind)
+        print("AMRWindSpeed:", wind_speed_amr_wind)
+        print("AMRWindDirection:", wind_direction_amr_wind)
+        print("AMRWindTurbinePowers:", turbine_power_array)
+        print("AMRWIND number of turbines here: ", self.num_turbines)
+        print("AMRWindTurbineWD:", turbine_wd_array)
+        print("=======================================")
+
+        # Store turbine powers back to the dict
+        # TODO hard-coded for now assuming only one AMR-WIND
+        self.amr_wind_dict[self.amr_wind_names[0]
+                            ]['turbine_powers'] = turbine_power_array
+        self.amr_wind_dict[self.amr_wind_names[0]
+                            ]['turbine_wind_directions'] = turbine_wd_array
+        self.turbine_power_array = turbine_power_array
+        self.amr_wind_dict[self.amr_wind_names[0]
+                            ]['sim_time_s_amr_wind'] = sim_time_s_amr_wind
+        # TODO: write these to the hercules_comms object, too?
+        self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
+            ['turbine_powers'] = turbine_power_array            
+        self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
+            ['turbine_wind_directions'] = turbine_wd_array
+
+
+        return None
 
     def recursive_flatten_main_dict(self, nested_dict, prefix = ''):
 
@@ -315,6 +272,16 @@ class Emulator(FederateAgent):
         with open(self.output_file, 'a') as filex:
             filex.write(','.join([str(v) for v in values]) + os.linesep)
 
+    def save_main_dict_as_text(self):
+        # Echo the dictionary to a seperate file in case it is helpful 
+        # to see full dictionary in interpreting log
+        
+        original_stdout = sys.stdout
+        with open('main_dict.echo', 'w') as f_i:
+            sys.stdout = f_i # Change the standard output to the file we created.
+            print(self.main_dict)
+            sys.stdout = original_stdout # Reset the standard output to its original value
+
 
 
     def parse_input_yaml(self, filename):
@@ -330,6 +297,9 @@ class Emulator(FederateAgent):
             print(f"Subscription error:  {e} , returning 0s ", flush=True)
             return [0, 0, 0] + [0 for t in range(self.num_turbines)] + [0 for t in range(self.num_turbines)]
 
+    def send_data_to_amrwind(self):
+        self.process_periodic_publication()
+    
     def process_periodic_publication(self):
         # Periodically publish data to the surrogate
 

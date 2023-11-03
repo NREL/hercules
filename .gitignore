@@ -5,6 +5,7 @@
 data.db
 *.python-version
 *.DS_Store
+*.conda
 slices
 
 # Some c++ stuff

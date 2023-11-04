@@ -2,89 +2,199 @@
 
 import numpy as np
 
-class SimpleBattery():
 
-    # def __init__(self, size, charge_rate, discharge_rate):
+class SimpleBattery:
     def __init__(self, input_dict, dt):
-
-        # properties of the storage
         self.dt = dt
-        self.size = input_dict['size']
-        self.energy_capacity = input_dict['energy_capacity']
-        self.charge_rate = input_dict['charge_rate'] # MW/hr  -> need these for dynamics
-        self.discharge_rate = input_dict['discharge_rate'] # MW
-        self.SOC = input_dict['initial_conditions']['SOC']
 
-        self.max_SOC = input_dict['max_SOC']
-        self.min_SOC = input_dict['min_SOC']
+        size = input_dict["size"]
+        self.energy_capacity = input_dict["energy_capacity"]
+
+        # Charge (Energy) limits
+        self.E_min = 0
+        self.E_max = self.energy_capacity
+
+        charge_rate = input_dict["charge_rate"]
+        discharge_rate = input_dict["discharge_rate"]
+
+        # Charge/discharge (Power) limits
+        self.P_min = -discharge_rate
+        self.P_max = charge_rate
+
+        # Ramp up/down limits
+        self.R_min = -1e9 / self.dt  # make this huge so it doesn't limit at first
+        self.R_max = 1e9 / self.dt
+
+        inititial_conditions = input_dict["initial_conditions"]
+
+        self.SOC = inititial_conditions["SOC"]
+
+        self.SOC_max = input_dict["max_SOC"]
+        self.SOC_min = input_dict["min_SOC"]
 
         self.total_battery_capacity = 3600 * self.energy_capacity / self.dt
         self.current_batt_state = self.SOC * self.total_battery_capacity
-        self.max_capacity = self.max_SOC*self.total_battery_capacity
-        self.min_capacity = self.min_SOC*self.total_battery_capacity
-
-        # Define needed inputs as empty dict
-        self.needed_inputs = {}
+        self.max_capacity = self.SOC_max * self.total_battery_capacity
+        self.min_capacity = self.SOC_min * self.total_battery_capacity
 
         self.power_mw = 0
-        print('battery', self.size, self.charge_rate, self.discharge_rate)
+        self.P_reject = 0
+        self.P_charge = 0
 
-        # initialize storage
-        # self.SOC = np.random.rand(1) * self.size
-        # self.SOC = 0.5 * self.size
+        self.needed_inputs = {}
 
     def return_outputs(self):
-
-        return {'power': self.power_mw,
-                'soc': self.SOC
-        }
+        return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC}
 
     def step(self, inputs):
+        P_signal = inputs["controller"][
+            "signal"
+        ]  # power available for the battery to use for charging (should be >=0)
+        P_avail = inputs["py_sims"]["inputs"][
+            "available_power"
+        ]  # power signal desired by the controller
 
-        # storage module
+        self.control(P_avail, P_signal)
 
-        ## Note: signal, available_power, charge_rate, and discharge_rate need to have consistent units ##
-        ####### Currently in MW ###########
-        # Decides based on total power available and signal what to do 
-        """ Battery step function
-        Necessary inputs: 
-            signal: power signal asked of the total plant
-            available power: total available power from the plant
+        self.current_batt_state += self.P_charge * self.dt
 
-        Returns:
-            power_mw: power output, positive or negative, from the battery (discharging or charging)
-            soc: current state of charge of the battery
-        """
-        signal = inputs['signal']
-        available_power = inputs['available_power']
-
-        diff = available_power  - signal
-
-        amount_charged = 0.0
-        if signal > 0:
-            if diff > 0:
-                # charge
-                if self.current_batt_state == self.max_capacity:
-                    amount_charged = 0
-                else:
-                    diff_value = np.min([self.charge_rate, diff])
-                    amount_charged = np.min([self.charge_rate, diff_value, self.max_capacity-self.current_batt_state])
-                    self.current_batt_state = np.min(self.current_batt_state+amount_charged, self.max_capacity)
-
-            elif diff < 0:
-                # discharge
-                if self.SOC == 0:
-                    amount_charged = 0
-                else:
-                    diff_value = np.min([self.discharge_rate, np.abs(diff)])
-                    amount_charged = -np.min([self.discharge_rate, diff_value, self.current_batt_state])
-                    self.current_batt_state = np.min(self.current_batt_state+amount_charged, self.min_capacity)
-
+        self.power_mw = self.P_charge
         self.SOC = self.current_batt_state / self.total_battery_capacity
-        self.power_mw = -amount_charged
-        power_left = available_power - amount_charged
-        signal_left = signal + amount_charged     
 
         return self.return_outputs()
 
- 
+    def control(self, P_avail, P_signal):
+        """
+        Low-level controller to enforce charging and energy constraints
+
+        This method calculates
+        - P_charge: (positive of negative) the charging/discharging power
+        - P_reject: (positive or negative) either the extra power that the battery cannot absorb (positive) or the power required but not provided for the battery to charge/discharge without violating constraints (negative)
+        """
+
+        # TODO battery state in SI units like J, kJ, or MJ
+        self.E = self.current_batt_state * self.dt / 3600
+
+        c_hi1 = (self.E_max - self.E) / self.dt
+        c_hi2 = self.P_max
+        c_hi3 = self.R_max * self.dt + self.P_charge
+
+        c_lo1 = (self.E_min - self.E) / self.dt
+        c_lo2 = self.P_min
+        c_lo3 = self.R_min * self.dt + self.P_charge
+
+        # High constraint is the most restrictive of the high constraints
+        c_hi = np.min([c_hi1, c_hi2, c_hi3, P_avail])
+        c_hi = 3600 / self.dt * c_hi
+
+        # Low constraint is the most restrictive of the lof constraints
+        c_lo = np.max([c_lo1, c_lo2, c_lo3])
+        c_lo = 3600 / self.dt * c_lo
+        # TODO: force low constraint to be no higher than lowest high constraint
+
+        if c_lo > c_hi:
+            print("battery problem: low constraint is higher than high constraint")
+
+        if (P_signal >= c_lo) & (P_signal <= c_hi):
+            self.P_charge = P_signal
+            self.P_reject = 0
+        elif P_signal < c_lo:
+            self.P_charge = c_lo
+            self.P_reject = P_avail - self.P_charge
+        elif P_signal > c_hi:
+            self.P_charge = c_hi
+            self.P_reject = P_avail - self.P_charge
+
+
+# class SimpleBattery:
+#     # def __init__(self, size, charge_rate, discharge_rate):
+#     def __init__(self, input_dict, dt):
+#         # properties of the storage
+#         self.dt = dt
+#         self.size = input_dict["size"]
+#         self.energy_capacity = input_dict["energy_capacity"]
+#         self.charge_rate = input_dict[
+#             "charge_rate"
+#         ]  # MW/hr  -> need these for dynamics
+#         self.discharge_rate = input_dict["discharge_rate"]  # MW
+#         self.SOC = input_dict["initial_conditions"]["SOC"]
+
+#         self.max_SOC = input_dict["max_SOC"]
+#         self.min_SOC = input_dict["min_SOC"]
+
+#         self.total_battery_capacity = 3600 * self.energy_capacity / self.dt
+#         self.current_batt_state = self.SOC * self.total_battery_capacity
+#         self.max_capacity = self.max_SOC * self.total_battery_capacity
+#         self.min_capacity = self.min_SOC * self.total_battery_capacity
+
+#         # Define needed inputs as empty dict
+#         self.needed_inputs = {}
+
+#         self.power_mw = 0
+#         print("battery", self.size, self.charge_rate, self.discharge_rate)
+
+#         # initialize storage
+#         # self.SOC = np.random.rand(1) * self.size
+#         # self.SOC = 0.5 * self.size
+
+#     def return_outputs(self):
+#         return {"power": self.power_mw, "soc": self.SOC}
+
+#     def step(self, inputs):
+#         # storage module
+
+#         ## Note: signal, available_power, charge_rate, and discharge_rate need to have consistent units ##
+#         ####### Currently in MW ###########
+#         # Decides based on total power available and signal what to do
+#         """Battery step function
+#         Necessary inputs:
+#             signal: power signal asked of the total plant
+#             available power: total available power from the plant
+
+#         Returns:
+#             power_mw: power output, positive or negative, from the battery (discharging or charging)
+#             soc: current state of charge of the battery
+#         """
+#         signal = inputs["controller"]["signal"]
+#         available_power = inputs["py_sims"]["inputs"]["available_power"]
+
+#         diff = available_power - signal
+
+#         amount_charged = 0.0
+#         if signal > 0:
+#             if diff > 0:
+#                 # charge
+#                 if self.current_batt_state == self.max_capacity:
+#                     amount_charged = 0
+#                 else:
+#                     diff_value = np.min([self.charge_rate, diff])
+#                     amount_charged = np.min(
+#                         [
+#                             self.charge_rate,
+#                             diff_value,
+#                             self.max_capacity - self.current_batt_state,
+#                         ]
+#                     )
+#                     self.current_batt_state = np.min(
+#                         self.current_batt_state + amount_charged, self.max_capacity
+#                     )
+
+#             elif diff < 0:
+#                 # discharge
+#                 if self.SOC == 0:
+#                     amount_charged = 0
+#                 else:
+#                     diff_value = np.min([self.discharge_rate, np.abs(diff)])
+#                     amount_charged = -np.min(
+#                         [self.discharge_rate, diff_value, self.current_batt_state]
+#                     )
+#                     self.current_batt_state = np.min(
+#                         self.current_batt_state + amount_charged, self.min_capacity
+#                     )
+
+#         self.SOC = self.current_batt_state / self.total_battery_capacity
+#         self.power_mw = -amount_charged
+#         power_left = available_power - amount_charged
+#         signal_left = signal + amount_charged
+
+#         return self.return_outputs()

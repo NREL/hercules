@@ -17,3 +17,6 @@ zmq
 
 # NETCDF
 netCDF4
+
+#yaml
+pyyaml

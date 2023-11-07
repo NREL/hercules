@@ -1,4 +1,4 @@
-# Requirements list for floris
+# Requirements list for hercules
 
 numpy
 matplotlib

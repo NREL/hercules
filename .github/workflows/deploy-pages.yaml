@@ -27,7 +27,7 @@ jobs:
 
     # Build the book
     - name: Build the book
-      working-directory: ${{runner.workspace}}/floris/docs/
+      working-directory: ${{runner.workspace}}/hercules/docs/
       run: |
         jupyter-book build .
 

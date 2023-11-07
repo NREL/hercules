@@ -53,7 +53,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation on Kestrel" href="install_on_kestrel.html" />
-    <link rel="prev" title="Hercules" href="intro.html" />
+    <link rel="prev" title="Installation" href="install_instructions.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="python">
     
@@ -127,6 +127,11 @@ const thebe_selector_output = ".output, .cell_output"
  </span>
 </p>
 <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="install_instructions.html">
+   Installation
+  </a>
+ </li>
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
    Old installation instructions
@@ -135,6 +140,11 @@ const thebe_selector_output = ".output, .cell_output"
  <li class="toctree-l1">
   <a class="reference internal" href="install_on_kestrel.html">
    Installation on Kestrel
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="install_spack.html">
+   Spack installation
   </a>
  </li>
 </ul>
@@ -326,12 +336,63 @@ title="Print to PDF"
     </ul>
   </div>
 </div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
 
     </div>
 </div>
 
 <!-- Table of contents -->
 <div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Old installation instructions
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#installation">
+   Installation
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-local">
+   Running [Local]
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-eagle">
+   Running [Eagle]
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#setting-up-amr-wind">
+     Setting up AMR-WIND
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#running-a-job">
+     Running a job
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </nav>
 </div>
     </div>
     <div class="article row">
@@ -343,6 +404,46 @@ title="Print to PDF"
                 <div id="print-main-content">
                     <div id="jb-print-toc">
                         
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Old installation instructions
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#installation">
+   Installation
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-local">
+   Running [Local]
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-eagle">
+   Running [Eagle]
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#setting-up-amr-wind">
+     Setting up AMR-WIND
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#running-a-job">
+     Running a job
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -353,6 +454,235 @@ title="Print to PDF"
   <section class="tex2jax_ignore mathjax_ignore" id="old-installation-instructions">
 <h1>Old installation instructions<a class="headerlink" href="#old-installation-instructions" title="Permalink to this headline">#</a></h1>
 <p><em>Note these instructions are likely out of date, saving for now</em></p>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
+<p>Create a new conda environment for hercules:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">hercules</span> <span class="n">python</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">hercules</span>
+</pre></div>
+</div>
+<p>If you haven't already cloned hercules:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NREL</span><span class="o">/</span><span class="n">hercules</span>
+</pre></div>
+</div>
+<p>Then,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">hercules</span>
+</pre></div>
+</div>
+<p>Possibly, <code class="docutils literal notranslate"><span class="pre">cd</span></code> into hercules and switch to the
+develop branch.</p>
+<p>SEAS is also required for hercules. To install
+SEAS, use</p>
+<p><code class="docutils literal notranslate"><span class="pre">pip install git+https://github.nrel.gov/SEAS/SEAS.git&#64;dv/emuwind</span></code></p>
+<p>If this fails, the following may work instead:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">nrel</span><span class="o">.</span><span class="n">gov</span><span class="o">/</span><span class="n">SEAS</span><span class="o">/</span><span class="n">SEAS</span>
+<span class="n">cd</span> <span class="n">SEAS</span>
+<span class="n">git</span> <span class="n">fetch</span> <span class="o">--</span><span class="nb">all</span>
+<span class="n">git</span> <span class="n">switch</span> <span class="n">dv</span><span class="o">/</span><span class="n">emuwind</span>
+</pre></div>
+</div>
+<p>Older versions of git (e.g. the one on Eagle) don't have the <code class="docutils literal notranslate"><span class="pre">switch</span></code> feature; instead, use</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">dv</span><span class="o">/</span><span class="n">emuwind</span>
+</pre></div>
+</div>
+<p>Then,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">..</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">SEAS</span>
+</pre></div>
+</div>
+<p>A python electrolyzer model is also required for hercules. To install
+the electrolyzer, use</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">NREL</span><span class="o">/</span><span class="n">electrolyzer</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">electrolyzer</span>
+<span class="n">git</span> <span class="n">fetch</span> <span class="o">--</span><span class="nb">all</span>
+<span class="n">git</span> <span class="n">switch</span> <span class="n">develop</span>
+</pre></div>
+</div>
+<p>Older versions of git (e.g. the one on Eagle) don't have the <code class="docutils literal notranslate"><span class="pre">switch</span></code> feature; instead, use</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">develop</span>
+</pre></div>
+</div>
+<p>Then,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">..</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">electrolyzer</span>
+</pre></div>
+</div>
+<!--
+# Other steps for era 5
+Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account
+
+The instructions said to place it in the folder
+OpenOA/operational_analysis/toolkits
+
+But I found I also had to copy it down to here:
+/Users/pfleming/opt/anaconda3/envs/hercules/lib/python3.8/site-packages/operational_analysis/toolkits/
+
+Col
+-->
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="running-local">
+<h1>Running [Local]<a class="headerlink" href="#running-local" title="Permalink to this headline">#</a></h1>
+<p>To run locally using a dummy placeholder for AMR-Wind, launch 3 separate
+terminals. In each, <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span></code> your hercules environment (<code class="docutils literal notranslate"><span class="pre">conda</span>&#160; <span class="pre">activate</span> <span class="pre">hercules</span></code>).</p>
+<p>In the first terminal, run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helics_broker</span> <span class="o">-</span><span class="n">t</span> <span class="n">zmq</span>  <span class="o">-</span><span class="n">f</span> <span class="mi">2</span> <span class="o">--</span><span class="n">loglevel</span><span class="o">=</span><span class="s2">&quot;debug&quot;</span>
+</pre></div>
+</div>
+<p>from any directory.</p>
+<p>In the second and third terminals, navigate to
+hercules/example_case_folders/example_sim_05 (you'll need to be on the
+develop branch of hercules). Then, in one of these
+terminals, run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">hercules_runscript_dummy_amr</span><span class="o">.</span><span class="n">py</span> <span class="n">amr_input</span><span class="o">.</span><span class="n">inp</span>
+</pre></div>
+</div>
+<p>and in the other, run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">hercules_runscript</span><span class="o">.</span><span class="n">py</span> <span class="n">hercules_input_000</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>The first of these launches the dummy stand-in for AMR-wind, and the second
+launches the hercules emulator. These will connect to the helics_broker and
+run the co-simulation. You should see printout from both the dummy AMR-wind
+process and the hercules emulator printed to your screen.</p>
+<!--
+In 4 different terminals with location set to hercules/, type the following commands
+(This is more and more out of date)
+
+- Terminal 1: `python control_center.py`
+- Terminal 2: `python testclient.py`
+- Terminal 3: `python vis_client.py`
+- Terminal 4: `python front_end_dash.py`
+-->
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="running-eagle">
+<h1>Running [Eagle]<a class="headerlink" href="#running-eagle" title="Permalink to this headline">#</a></h1>
+<p>Running hercules in full requires installing AMR-Wind (likely on eagle/HPC).
+The steps are detailed below, and assume that you have already installed
+the other parts of hercules as described above under <strong>Installation</strong>.</p>
+<section id="setting-up-amr-wind">
+<h2>Setting up AMR-WIND<a class="headerlink" href="#setting-up-amr-wind" title="Permalink to this headline">#</a></h2>
+<p>First, <code class="docutils literal notranslate"><span class="pre">deactive</span></code> your conda environment using</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">deactivate</span>
+</pre></div>
+</div>
+<p>Then, clone AMR-Wind and install its required submodules. This can be done
+using</p>
+<p>EITHER</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Exawind</span><span class="o">/</span><span class="n">amr</span><span class="o">-</span><span class="n">wind</span>
+<span class="n">cd</span> <span class="n">amr</span><span class="o">-</span><span class="n">wind</span>
+<span class="n">git</span> <span class="n">submodule</span> <span class="n">update</span> <span class="o">--</span><span class="n">init</span>
+<span class="n">cd</span> <span class="o">..</span>
+</pre></div>
+</div>
+<p>OR</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">recursive</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Exawind</span><span class="o">/</span><span class="n">amr</span><span class="o">-</span><span class="n">wind</span>
+</pre></div>
+</div>
+<p>Now, create a new directory <code class="docutils literal notranslate"><span class="pre">build</span></code> within the main AMR-Wind repository</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">amr</span><span class="o">-</span><span class="n">wind</span><span class="o">/</span><span class="n">build</span>
+</pre></div>
+</div>
+<p>and copy amr-wind_buildme.sh from hercules into it, naming the copied file
+<a class="reference external" href="http://buildme.sh">buildme.sh</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="n">hercules</span><span class="o">/</span><span class="n">amr</span><span class="o">-</span><span class="n">wind_buildme</span><span class="o">.</span><span class="n">sh</span> <span class="n">amr</span><span class="o">-</span><span class="n">wind</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">buildme</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">cd</span></code> into the build directory, set executable permissions for <a class="reference external" href="http://buildme.sh">buildme.sh</a>, and
+run <a class="reference external" href="http://buildme.sh">buildme.sh</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">amrwind</span><span class="o">/</span><span class="n">build</span>
+<span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">buildme</span><span class="o">.</span><span class="n">sh</span>
+<span class="o">./</span><span class="n">buildme</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>This will begin compiling an AMR-Wind executable. The process could take
+several minutes, during which progress updates will print to the terminal.
+Once complete, the build directory will contain an executable named amr_wind.</p>
+</section>
+<section id="running-a-job">
+<h2>Running a job<a class="headerlink" href="#running-a-job" title="Permalink to this headline">#</a></h2>
+<p>For an example of running hercules with AMR-Wind, <code class="docutils literal notranslate"><span class="pre">cd</span></code> to
+hercules/example_case_folders/example_sim_06/.</p>
+<p>Change the line beginning <code class="docutils literal notranslate"><span class="pre">mpirun</span></code> to point to your compiled amr-wind
+executable. This will appear something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mpirun</span> <span class="o">-</span><span class="n">n</span> <span class="mi">72</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">amr</span><span class="o">-</span><span class="n">wind</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">amr_wind</span> <span class="n">amr_input</span><span class="o">.</span><span class="n">inp</span> <span class="o">&gt;&gt;</span> <span class="n">logamr</span> <span class="mi">2</span><span class="o">&gt;&amp;</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>Make any other necessary changes to batch_script.sh, and submit it to the
+jobs queue using</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sbatch</span> <span class="n">batch_script</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<!--
+```bash
+    # After connecting to eagle, reconnect or start a new screen (helpful for disconnects)
+    # To detach later while keeping session: ctrl+a d
+    screen -r emulator # If already exists, otherwise: screen -S emulator
+
+    # Next request nodes, in my case I use a saved alias from Matt C
+    interactive_4node_high # Requesting 4 nodes
+
+    # When you have the interactive node, note the name of the node in the command line, 
+    # You will need this, it will be something like rXXXnXX or something
+
+    # Once these are granted can run AMRWind, first need to call the setup function
+    # Defined in your .bashrc or .bash_profile:
+    # amr_env_emulator <- what I used to do
+    module purge
+    module load helics
+    --or--
+    module load helics/helics-3.1.0_openmpi
+    
+    module load netcdf-c/4.7.3/gcc-mpi
+
+    # Go to the AMR-Wind case folder
+    cd test_folder
+
+    # When ready to run AMR wind, something like:
+    # srun -n 144 amr_wind input.i # Where 144 comes from nodes=4 * 36
+    mpirun -n 1 ~/c2c/amr-wind/build/amr_wind input.i
+    --or--
+    mpirun -n 1 /projects/aumc/mbrazell/amr-wind/build4/amr_wind input.i
+    
+```
+
+### Setting up tunnel for serving the front end
+```bash
+    # Use the name of the node in the command, run locally from your machine
+    # In a new terminal
+    ssh -L 8050:rXXXnXX:8050 el1.hpc.nrel.gov
+```
+
+### Running the python codes
+```bash
+    # Will now need 4 additional terminals logged into eagle, in each case:
+
+    # ssh all 4 into the same node
+    ssh rXXXnXX
+
+    # Probably you then need to setup your conda environment, in my case 
+    # I call a function saved to my profile
+    hercules_go
+
+    # Launch the helics broker
+    helics_broker -f 2
+
+    # Finally launch one of these in each terminal
+    python control_center.py
+    # OR #
+    python vis_client.py
+    # OR #
+    python front_end_dash.py
+```
+
+### Final setps
+```bash
+    # If not already running, run amr_wind
+
+    # The terminal running front_end_dash.py will show a web address
+    # Enter that address into a web browser on your local machine
+```
+--></section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -382,11 +712,11 @@ title="Print to PDF"
                 
     <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="intro.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="install_instructions.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Hercules</p>
+            <p class="prev-next-title">Installation</p>
         </div>
     </a>
     <a class='right-next' id="next-link" href="install_on_kestrel.html" title="next page">

@@ -126,14 +126,6 @@ cmake -DAMR_WIND_ENABLE_CUDA:BOOL=OFF \
       ..
 
 nice make -j32
-      -DAMR_WIND_ENABLE_TESTS:BOOL=ON \
-      -DAMR_WIND_ENABLE_FORTRAN:BOOL=OFF \
-      -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
-      -DAMR_WIND_ENABLE_ALL_WARNINGS:BOOL=ON \
-      -DBUILD_SHARED_LIBS:BOOL=ON \
-      ..
-
-nice make -j32
 ```
 
 Run via:
@@ -203,6 +195,7 @@ git clone git@github.com:NREL/electrolyzer.git
 cd electrolyzer
 git fetch --all
 git switch develop
+pip install -e .
 ```
 
 ## Try an example!

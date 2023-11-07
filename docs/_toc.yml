@@ -8,3 +8,6 @@ parts:
     chapters:
     - file: install_old
     - file: install_on_kestrel
+  - caption: Usage
+    - file: examples
+    - file: order_of_op

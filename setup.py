@@ -62,8 +62,19 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    "docs": {"readthedocs-sphinx-ext", "Sphinx", "sphinxcontrib-napoleon"},
-    "develop": {"pre-commit", "black", "isort", "flake8", "flake8-docstrings"},
+    "docs": {
+        "jupyter-book<=0.13.3",
+        "sphinx-book-theme",
+        "sphinx-autodoc-typehints",
+        "sphinxcontrib-autoyaml",
+        "sphinxcontrib.mermaid",
+    },
+    "develop": {
+        "pytest",
+        "pre-commit",
+        "ruff",
+        "isort",
+    },
 }
 
 # The rest you shouldn't have to touch too much :)

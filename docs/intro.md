@@ -1,5 +1,5 @@
 # Hercules
 
-Test line
+Hybrid Energy and Control Using Large Eddy Simulations
 
-Another line
+Online documentation for Hercules

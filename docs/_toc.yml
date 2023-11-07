@@ -4,6 +4,7 @@
 format: jb-book
 root: intro
 parts:
-  - caption: Getting Started
+  - caption: Installation
     chapters:
-    - file: installation
+    - file: install_old
+    - file: install_on_kestrel

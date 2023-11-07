@@ -3,6 +3,9 @@
 # hercules
 Hybrid Energy and Control Using Large Eddy Simulations
 
+# Documentation
+
+For detailed instructions see the [online documentation](https://nrel.github.io/hercules/intro.html)
 
 # Installation
 Create a new conda environment for hercules:
@@ -184,76 +187,6 @@ jobs queue using
 sbatch batch_script.sh
 ```
 
-<!--
-```bash
-    # After connecting to eagle, reconnect or start a new screen (helpful for disconnects)
-    # To detach later while keeping session: ctrl+a d
-    screen -r emulator # If already exists, otherwise: screen -S emulator
-
-    # Next request nodes, in my case I use a saved alias from Matt C
-    interactive_4node_high # Requesting 4 nodes
-
-    # When you have the interactive node, note the name of the node in the command line, 
-    # You will need this, it will be something like rXXXnXX or something
-
-    # Once these are granted can run AMRWind, first need to call the setup function
-    # Defined in your .bashrc or .bash_profile:
-    # amr_env_emulator <- what I used to do
-    module purge
-    module load helics
-    --or--
-    module load helics/helics-3.1.0_openmpi
-    
-    module load netcdf-c/4.7.3/gcc-mpi
-
-    # Go to the AMR-Wind case folder
-    cd test_folder
-
-    # When ready to run AMR wind, something like:
-    # srun -n 144 amr_wind input.i # Where 144 comes from nodes=4 * 36
-    mpirun -n 1 ~/c2c/amr-wind/build/amr_wind input.i
-    --or--
-    mpirun -n 1 /projects/aumc/mbrazell/amr-wind/build4/amr_wind input.i
-    
-```
-
-### Setting up tunnel for serving the front end
-```bash
-    # Use the name of the node in the command, run locally from your machine
-    # In a new terminal
-    ssh -L 8050:rXXXnXX:8050 el1.hpc.nrel.gov
-```
-
-### Running the python codes
-```bash
-    # Will now need 4 additional terminals logged into eagle, in each case:
-
-    # ssh all 4 into the same node
-    ssh rXXXnXX
-
-    # Probably you then need to setup your conda environment, in my case 
-    # I call a function saved to my profile
-    hercules_go
-
-    # Launch the helics broker
-    helics_broker -f 2
-
-    # Finally launch one of these in each terminal
-    python control_center.py
-    # OR #
-    python vis_client.py
-    # OR #
-    python front_end_dash.py
-```
-
-### Final setps
-```bash
-    # If not already running, run amr_wind
-
-    # The terminal running front_end_dash.py will show a web address
-    # Enter that address into a web browser on your local machine
-```
--->
 
 # Order of operations
 
@@ -277,21 +210,3 @@ sbatch batch_script.sh
 4. Update state and output in helics/AMRwind, possibly using components from py_sim (TODO: what ordering should be used there?)
     [$x_{k+1} = f(x_k, u_k, d_k)$, $y_{k+1} = g(x_{k+1})$]
 
-<!--5. Time step code [$x_{k} \leftarrow x_{k+1}$, $y_k \leftarrow y_{k+1}$]-->
-### Postprocessing
-
-1. Write outputs to files
- 
-2. Shut down communication?
-
-
-
-# TODO
-1. include dash license and copyright
-2.  make connection objects more robust
-3.  install SEAS as part of hercules install
-
-# Questions
-
-1. what if the speed/dir don't change: still need to send them to receive data?
-1. 

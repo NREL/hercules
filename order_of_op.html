@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Old installation instructions &#8212; HERCULES</title>
+    <title>Order of operations &#8212; HERCULES</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -50,10 +50,11 @@ const thebe_selector_input = "pre"
 const thebe_selector_output = ".output, .cell_output"
 </script>
     <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation on Kestrel" href="install_on_kestrel.html" />
-    <link rel="prev" title="Hercules" href="intro.html" />
+    <link rel="prev" title="Information about examples" href="examples.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="python">
     
@@ -126,9 +127,9 @@ const thebe_selector_output = ".output, .cell_output"
   Installation
  </span>
 </p>
-<ul class="current nav bd-sidenav">
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="install_old.html">
    Old installation instructions
   </a>
  </li>
@@ -143,14 +144,14 @@ const thebe_selector_output = ".output, .cell_output"
   Usage
  </span>
 </p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="examples.html">
    Information about examples
   </a>
  </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="order_of_op.html">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
    Order of operations
   </a>
  </li>
@@ -244,7 +245,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://github.com/NREL/hercules/issues/new?title=Issue%20on%20page%20%2Finstall_old.html&body=Your%20issue%20content%20here."
+        <a href="https://github.com/NREL/hercules/issues/new?title=Issue%20on%20page%20%2Forder_of_op.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -261,7 +262,7 @@ title="Open an issue"
       </li>
       
       <li>
-        <a href="https://github.com/NREL/hercules/edit/main/docs/install_old.md"
+        <a href="https://github.com/NREL/hercules/edit/main/docs/order_of_op.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -289,7 +290,7 @@ title="Edit this page"
   <div class="menu-dropdown__content">
     <ul>
       <li>
-        <a href="_sources/install_old.md"
+        <a href="_sources/order_of_op.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -326,23 +327,76 @@ title="Print to PDF"
     </ul>
   </div>
 </div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
 
     </div>
 </div>
 
 <!-- Table of contents -->
 <div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#initialization">
+   Initialization
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#main-run-for-k-0-1-2-3-dots">
+   Main run: for
+   <span class="math notranslate nohighlight">
+    \(k = 0, 1, 2, 3, \dots\)
+   </span>
+  </a>
+ </li>
+</ul>
+
+    </nav>
 </div>
     </div>
     <div class="article row">
         <div class="col pl-md-3 pl-lg-5 content-container">
             <!-- Table of contents that is only displayed when printing the page -->
             <div id="jb-print-docs-body" class="onlyprint">
-                <h1>Old installation instructions</h1>
+                <h1>Order of operations</h1>
                 <!-- Table of contents -->
                 <div id="print-main-content">
                     <div id="jb-print-toc">
                         
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#initialization">
+   Initialization
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#main-run-for-k-0-1-2-3-dots">
+   Main run: for
+   <span class="math notranslate nohighlight">
+    \(k = 0, 1, 2, 3, \dots\)
+   </span>
+  </a>
+ </li>
+</ul>
+
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -350,9 +404,29 @@ title="Print to PDF"
                 
               <div>
                 
-  <section class="tex2jax_ignore mathjax_ignore" id="old-installation-instructions">
-<h1>Old installation instructions<a class="headerlink" href="#old-installation-instructions" title="Permalink to this headline">#</a></h1>
-<p><em>Note these instructions are likely out of date, saving for now</em></p>
+  <ul class="simple">
+<li><p>Saving the order of operations discussion from original readme*</p></li>
+</ul>
+<section class="tex2jax_ignore mathjax_ignore" id="order-of-operations">
+<h1>Order of operations<a class="headerlink" href="#order-of-operations" title="Permalink to this headline">#</a></h1>
+<section id="initialization">
+<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this headline">#</a></h2>
+<ol class="simple">
+<li><p>Instantiate the py_sim modules, which sets the intial conditions</p></li>
+<li><p>Run get_outputs, which sets the initial outputs</p></li>
+<li><p>Establish the helics connection to AMRwind (?)</p></li>
+</ol>
+</section>
+<section id="main-run-for-k-0-1-2-3-dots">
+<h2>Main run: for <span class="math notranslate nohighlight">\(k = 0, 1, 2, 3, \dots\)</span><a class="headerlink" href="#main-run-for-k-0-1-2-3-dots" title="Permalink to this headline">#</a></h2>
+<ol class="simple">
+<li><p>Compute control actions in controller, [i.e. <span class="math notranslate nohighlight">\(u_k = h(y_k, d_k)\)</span>]</p></li>
+<li><p>Record all signals for time step <span class="math notranslate nohighlight">\(k\)</span>.</p></li>
+<li><p>Update state in py_sim [<span class="math notranslate nohighlight">\(x_{k+1} = f(x_k, u_k, d_k)\)</span>] and output in py_sim [<span class="math notranslate nohighlight">\(y_{k+1} = g(x_{k+1})\)</span>]</p></li>
+<li><p>Update state and output in helics/AMRwind, possibly using components from py_sim (TODO: what ordering should be used there?)
+[<span class="math notranslate nohighlight">\(x_{k+1} = f(x_k, u_k, d_k)\)</span>, <span class="math notranslate nohighlight">\(y_{k+1} = g(x_{k+1})\)</span>]</p></li>
+</ol>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -382,19 +456,12 @@ title="Print to PDF"
                 
     <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="intro.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="examples.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Hercules</p>
+            <p class="prev-next-title">Information about examples</p>
         </div>
-    </a>
-    <a class='right-next' id="next-link" href="install_on_kestrel.html" title="next page">
-    <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Installation on Kestrel</p>
-    </div>
-    <i class="fas fa-angle-right"></i>
     </a>
 </div>
             </footer>

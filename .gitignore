@@ -33,3 +33,5 @@ t_00*
 logdummy
 loghercules
 *echo
+
+.vscode/*

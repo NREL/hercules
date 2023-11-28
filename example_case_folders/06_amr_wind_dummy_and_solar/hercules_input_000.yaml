@@ -42,7 +42,7 @@ py_sims:
 
     py_sim_type: SimpleSolar
     capacity: 50 # MW
-    efficiency: 0.5 #Fraction
+    efficiency: 0.2 #Fraction
 
     initial_conditions:
 

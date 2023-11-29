@@ -36,27 +36,26 @@ REQUIRES_PYTHON = ">=3.6.0"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    "numpy>=1.20",
-    "matplotlib>=3",
-    "pandas",
-    "seaborn",
-    "dash>=2.0.0",
+    "numpy~=1.20",
+    "matplotlib~=3.8",
+    "pandas~=2.1",
+    # "dash>=2.0.0",
 
     #GUI Stuff
     # "tkinter", # Comes with python?
-    "plotly==5.5.0",
-    "dash",
-    "dash-daq==0.5.0",
-    "scikit-image",
+    # "plotly==5.5.0",
+    # "dash",
+    # "dash-daq==0.5.0",
+    # "scikit-image",
 
     #ZMQ stuff
-    "zmq",
+    # "zmq",
 
     # NETCDF
-    "netCDF4",
+    # "netCDF4",
 
     #YAML
-    "pyyaml"
+    # "pyyaml"
 
 ]
 

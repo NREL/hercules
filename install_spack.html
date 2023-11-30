@@ -336,12 +336,63 @@ title="Print to PDF"
     </ul>
   </div>
 </div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
 
     </div>
 </div>
 
 <!-- Table of contents -->
 <div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#initial-steps">
+   Initial steps
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#installing-spack">
+   Installing spack
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#adding-spack-to-bash-profile">
+     Adding spack to bash_profile
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#starting-spack">
+   Starting spack
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#creating-a-hercules-environment">
+   Creating a Hercules environment
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-hercules">
+   Running Hercules
+  </a>
+ </li>
+</ul>
+
+    </nav>
 </div>
     </div>
     <div class="article row">
@@ -353,6 +404,46 @@ title="Print to PDF"
                 <div id="print-main-content">
                     <div id="jb-print-toc">
                         
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#initial-steps">
+   Initial steps
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#installing-spack">
+   Installing spack
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#adding-spack-to-bash-profile">
+     Adding spack to bash_profile
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#starting-spack">
+   Starting spack
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#creating-a-hercules-environment">
+   Creating a Hercules environment
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-hercules">
+   Running Hercules
+  </a>
+ </li>
+</ul>
+
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -362,7 +453,81 @@ title="Print to PDF"
                 
   <section class="tex2jax_ignore mathjax_ignore" id="spack-installation">
 <h1>Spack installation<a class="headerlink" href="#spack-installation" title="Permalink to this headline">#</a></h1>
-<p>TBD</p>
+<p>This document outlines the process for installing Hercules onto NREL's Kestrel HPC system using spack package manager. For more information on Spack, see <a class="reference external" href="https://spack.io/"></a></p>
+<section id="initial-steps">
+<h2>Initial steps<a class="headerlink" href="#initial-steps" title="Permalink to this headline">#</a></h2>
+<ol class="simple">
+<li><p>Log into Kestrel</p></li>
+<li><p>Go to the directory where you want to install spack, for example <code class="docutils literal notranslate"><span class="pre">/home/{user-name}/repos</span></code></p></li>
+</ol>
+</section>
+<section id="installing-spack">
+<h2>Installing spack<a class="headerlink" href="#installing-spack" title="Permalink to this headline">#</a></h2>
+<p>First, you will need to install spack package manager. This can be achieved by running the following lines:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">recursive</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sandialabs</span><span class="o">/</span><span class="n">spack</span><span class="o">-</span><span class="n">manager</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">spack</span><span class="o">-</span><span class="n">manager</span>
+</pre></div>
+</div>
+<p>Next, you need to pull the version of spack set up with the helics module:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">origin</span> <span class="n">pull</span><span class="o">/</span><span class="mi">578</span><span class="o">/</span><span class="n">head</span><span class="p">:</span><span class="n">sm_helics</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">sm_helics</span>
+</pre></div>
+</div>
+<section id="adding-spack-to-bash-profile">
+<h3>Adding spack to bash_profile<a class="headerlink" href="#adding-spack-to-bash-profile" title="Permalink to this headline">#</a></h3>
+<p>Although not strictly necessary, it can be handy to add spack manager to your bash_profile for a quick start every time you open a terminal on Kestrel. To do this, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vim</span> <span class="o">~/.</span><span class="n">bash_profile</span>
+</pre></div>
+</div>
+<p>In the VIM editor, do the following:</p>
+<ol class="simple">
+<li><p>Start inserting text by pressing <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p></li>
+<li><p>Add the following line: <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">SPACK_MANAGER=&lt;absolute</span> <span class="pre">path</span> <span class="pre">to</span> <span class="pre">spack-manager&gt;</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">SPACK_MANAGER=/home/{user-name}/repos/spack-manager</span></code>.</p></li>
+<li><p>Press ESC to stop inserting text</p></li>
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">:wq</span></code> to save and quit.</p></li>
+</ol>
+</section>
+</section>
+<section id="starting-spack">
+<h2>Starting spack<a class="headerlink" href="#starting-spack" title="Permalink to this headline">#</a></h2>
+<p>The steps described next are to start spack manager. These steps are necessary <em>every time</em> you reopen a terminal on Kestrel and want to run Hercules, as well as for the installation of Hercules. Note that you can also include these in your bash_script if you want spack to automatically start when you open a terminal.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>source ~/.bash_profile
+source $SPACK_MANAGER/start.sh
+spack-start
+</pre></div>
+</div>
+</section>
+<section id="creating-a-hercules-environment">
+<h2>Creating a Hercules environment<a class="headerlink" href="#creating-a-hercules-environment" title="Permalink to this headline">#</a></h2>
+<p>The last step to installing Hercules and all its dependencies is creating a Hercules spack environment by following these steps.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">directory</span> <span class="n">where</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">install</span> <span class="n">hercules</span><span class="o">&gt;</span>
+<span class="n">mkdir</span> <span class="n">environment_hercules</span>
+<span class="n">cd</span> <span class="n">environment_hercules</span>
+
+<span class="n">quick</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="n">dev</span> <span class="o">-</span><span class="n">d</span> <span class="o">.</span> <span class="o">-</span><span class="n">s</span> <span class="s2">&quot;amr-wind@main+helics+openfast helics@3.3.2+mpi openfast@3.4.0+rosco&quot;</span>
+</pre></div>
+</div>
+<p>Note that this last line will take a little while, as spack will clone all repositories necessary for Hercules. Finally, you can install all repos (but be sure you are not in a rush, because this will take some time!) by running:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spack</span> <span class="n">install</span>
+</pre></div>
+</div>
+</section>
+<section id="running-hercules">
+<h2>Running Hercules<a class="headerlink" href="#running-hercules" title="Permalink to this headline">#</a></h2>
+<p>Now that you have successfully installed Hercules, you can start running some simulations. Before starting a simulation, of if you want to submit batch scripts, be sure to activate the spack environment by running the following lines:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export SPACK_MANAGER=&quot;&lt;absolute path to spack-manager&gt;&quot;
+source $SPACK_MANAGER/start.sh
+spack-start
+quick-activate &lt;absolute path to hercules environment&gt;
+PATH=$PATH:&lt;path to where amr-wind is built&gt;
+</pre></div>
+</div>
+<p>The amr-wind build can be found in a spack-build folder inside your hercules enviroment, e.g. in <code class="docutils literal notranslate"><span class="pre">environment_hercules/amr-wind/spack-build-gsmvjb3</span></code>.</p>
+<p>Finally, if you want to run simulations with OpenFAST turbine models controlled by ROSCO, you will need to point towards your spack-installed ROSCO library inside your ServoDyn OpenFAST input file. Locating this library can be tricky, for me it lived in <code class="docutils literal notranslate"><span class="pre">&lt;absolute</span> <span class="pre">path</span> <span class="pre">to</span> <span class="pre">spack-manager&gt;</span> <span class="pre">/spack/opt/spack/linux-rhel8-icelake/gcc-8.5.0/</span> <span class="pre">rosco-2.8.0-weyrffl5hydj6eep6ndkezes4iejmzqu/lib/libdiscon.so</span></code>. So in your ServoDyn input file, change:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">where</span> <span class="n">libdiscon</span> <span class="ow">is</span> <span class="n">located</span><span class="o">&gt;/</span><span class="n">libdiscon</span><span class="o">.</span><span class="n">so</span>  <span class="n">DLL_FileName</span> <span class="o">-</span> <span class="n">Name</span><span class="o">/</span><span class="n">location</span> <span class="n">of</span> <span class="n">the</span> <span class="n">dynamic</span> <span class="n">library</span> <span class="p">{</span><span class="o">.</span><span class="n">dll</span> <span class="p">[</span><span class="n">Windows</span><span class="p">]</span> <span class="ow">or</span> <span class="o">.</span><span class="n">so</span> <span class="p">[</span><span class="n">Linux</span><span class="p">]}</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">Bladed</span><span class="o">-</span><span class="n">DLL</span> <span class="nb">format</span> <span class="p">(</span><span class="o">-</span><span class="p">)</span> <span class="p">[</span><span class="n">used</span> <span class="n">only</span> <span class="k">with</span> <span class="n">Bladed</span> <span class="n">Interface</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
 </section>
 
     <script type="text/x-thebe-config">

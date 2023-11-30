@@ -9,4 +9,4 @@ For detailed instructions see the [online documentation](https://nrel.github.io/
 
 # Installation
 
-For installition instructions see: [installation instructions](https://nrel.github.io/hercules/install_instructions.html)
+For installation instructions see: [installation instructions](https://nrel.github.io/hercules/install_instructions.html)

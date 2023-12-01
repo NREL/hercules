@@ -187,7 +187,7 @@ class Emulator(FederateAgent):
             print("AMRWindSpeed:", wind_speed_amr_wind)
             print("AMRWindDirection:", wind_direction_amr_wind)
             print("AMRWindTurbinePowers:", turbine_power_array)
-            print(" AMRWIND number of turbines here: ", self.num_turbines)
+            print("AMRWIND number of turbines here: ", self.num_turbines)
             print("AMRWindTurbineWD:", turbine_wd_array)
             print("=======================================")
 

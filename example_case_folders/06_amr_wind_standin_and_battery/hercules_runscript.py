@@ -8,16 +8,6 @@ import sys
 
 import os
 
-# os.system("bash helics_amr.sh")
-
-# time.sleep(5)
-
-# abs_path = os.path.dirname(__file__)
-# fname = "hercules_input_000.yaml"
-# full_path = os.path.join(abs_path, fname)
-
-# input_dict = load_yaml(full_path)
-
 input_dict = load_yaml(sys.argv[1])
 
 controller = Controller(input_dict)

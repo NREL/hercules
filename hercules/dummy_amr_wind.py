@@ -88,7 +88,7 @@ def read_amr_wind_input(amr_wind_input):
 
 
 class DummyAMRWind(FederateAgent):
-    def __init__(self, config_dict, amr_wind_input):
+    def __init__(self, config_dict, amr_wind_input, amr_standin_data_file=None):
         super(DummyAMRWind, self).__init__(
             name=config_dict["name"],
             feeder_num=0,
@@ -109,6 +109,12 @@ class DummyAMRWind(FederateAgent):
 
         # Print the number of turbines
         logger.info("Number of turbines: {}".format(self.num_turbines))
+
+        if amr_standin_data_file != None:
+            self.standin_data = pd.read_csv(amr_standin_data_file)
+
+
+
 
     def run(self):
         # Initialize the values
@@ -279,14 +285,10 @@ def launch_dummy_amr_wind(amr_input_file, amr_standin_data_file=None):
         "Agent": "dummy_amr_wind",
     }
 
-    obj = DummyAMRWind(config, amr_input_file)
-
-    # TODO: put this in the initialization
-    if amr_standin_data_file:
-        obj.standin_data = pd.read_csv(amr_standin_data_file)
+    if amr_standin_data_file != None:
+        obj = DummyAMRWind(config, amr_input_file, amr_standin_data_file)
     else:
-        # obj.standin_data = None
-        pass
+        obj = DummyAMRWind(config, amr_input_file)
 
     obj.run_helics_setup()
     obj.enter_execution(function_targets=[], function_arguments=[[]])

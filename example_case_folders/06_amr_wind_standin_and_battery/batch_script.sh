@@ -5,7 +5,7 @@ helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS
 
 
 
-cd example_case_folders/06_amr_wind_standin_and_battery &
+cd example_case_folders/06_amr_wind_standin_and_battery 
 
 python hercules_runscript_dummy_amr.py amr_input.inp amr_standin_windpower.csv >> logdummy 2>&1 &
 

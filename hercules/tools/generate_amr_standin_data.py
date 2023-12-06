@@ -38,9 +38,9 @@ class StandinData:
         self.parse_hercules_input(self.hercules_input_path)
         self.parse_amr_input(self.amr_input_path)
 
-    def generate_standin_data(self):
+    def generate_standin_data(self, user_inputs=None):
         if self.method == "user":
-            self.from_user_definition()
+            self.from_user_definition(**user_inputs)
         elif self.method == "amr_actuator":
             self.from_amr_actuators()
         elif self.method == "amr_openfast":
@@ -54,10 +54,10 @@ class StandinData:
         turbine_powers=None,
     ):
         if (
-            (time != None)
-            & (amr_wind_speed != None)
-            & (amr_wind_direction != None)
-            & (turbine_powers != None)
+            (time is not None)
+            & (amr_wind_speed is not None)
+            & (amr_wind_direction is not None)
+            & (turbine_powers is not None)
         ):
             pass
         else:
@@ -184,17 +184,62 @@ class StandinData:
         self.time_delta = hercules_input["dt"]
 
 
+# Example usage
 if __name__ == "__main__":
+    # # generate standin data file from amr-wind outputs
+    # fpaths = {
+    #     "amr_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
+    #     "amr_out_path": "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
+    #     "herc_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
+    #     "save_path": "example_case_folders/06_amr_wind_standin_and_battery",
+    # }
+
+    # SD = StandinData(method="amr_actuator", **fpaths)
+    # SD.generate_standin_data()
+    # SD.save()
+    # SD.plot()
+
+    # generate standin data file from user-defined timeseries
     fpaths = {
         "amr_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
-        "amr_out_path": "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
+        # "amr_out_path": "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
         "herc_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
         "save_path": "example_case_folders/06_amr_wind_standin_and_battery",
     }
+    SD = StandinData(method="user", **fpaths)
 
-    SD = StandinData(method="amr_actuator", **fpaths)
-    SD.generate_standin_data()
+    # generate user inputs
+
+    num_turbines = 2
+    time_start = 0
+    time_stop = 900
+    time_delta = 0.5
+
+    turb_rating = 1000
+    time = np.arange(time_start, time_stop, time_delta)
+    amr_wind_speed = np.linspace(0, 20, len(time))
+    amr_wind_direction = np.linspace(200, 240, len(time))
+
+    turbine_powers = np.zeros([len(time), num_turbines])
+    for i in range(len(time)):
+        turb_powers = (
+            np.ones(num_turbines) * amr_wind_speed[i] ** 3
+            + np.random.rand(num_turbines) * 50
+        )
+        turb_powers[int(num_turbines / 2) :] = (
+            0.75 * turb_powers[int(num_turbines / 2) :]
+        )
+        turb_powers = [np.min([turb_rating, tp]) for tp in turb_powers]
+        turbine_powers[i, :] = turb_powers
+
+    my_inputs = {
+        "time": time,
+        "amr_wind_speed": amr_wind_speed,
+        "amr_wind_direction": amr_wind_direction,
+        "turbine_powers": turbine_powers,
+    }
+
+    SD.generate_standin_data(my_inputs)
     SD.save()
-    # SD.plot()
 
-    []
+    

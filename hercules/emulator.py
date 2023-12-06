@@ -96,6 +96,8 @@ class Emulator(FederateAgent):
             ['turbine_powers'] = [0.]*self.num_turbines
         self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
             ['turbine_wind_directions'] = [0.]*self.num_turbines
+        self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
+            ['wind_direction'] = 0
 
         self.wind_speed = 0
         self.wind_direction = 0
@@ -136,8 +138,7 @@ class Emulator(FederateAgent):
                 continue
 
             # Update controller and py sims
-            #self.main_dict = 
-            self.controller.step(self.main_dict)
+            self.main_dict = self.controller.step(self.main_dict)
             self.main_dict['controller'] = self.controller.get_controller_dict()
             self.py_sims.step(self.main_dict)
             self.main_dict['py_sims'] = self.py_sims.get_py_sim_dict()
@@ -221,6 +222,8 @@ class Emulator(FederateAgent):
             ['turbine_powers'] = turbine_power_array            
         self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
             ['turbine_wind_directions'] = turbine_wd_array
+        self.main_dict['hercules_comms']['amr_wind'][self.amr_wind_names[0]]\
+            ['wind_direction'] = wind_direction_amr_wind
 
 
         return None
@@ -304,20 +307,20 @@ class Emulator(FederateAgent):
         # Periodically publish data to the surrogate
 
         # Hard coded to single wind farm for the moment
-        if "turbine_yaw_angles" in self.main_dict["hercules_comms"]\
-                                                 ["amr_wind"]\
-                                                 [self.amr_wind_names[0]]:
-            yaw_angles = self.main_dict["hercules_comms"]\
-                                       ["amr_wind"]\
-                                       [self.amr_wind_names[0]]\
-                                       ["turbine_yaw_angles"]
-        else: # set yaw_angles based on self.wind_direction
-            yaw_angles = [self.wind_direction]*self.num_turbines
+        # if "turbine_yaw_angles" in self.main_dict["hercules_comms"]\
+        #                                          ["amr_wind"]\
+        #                                          [self.amr_wind_names[0]]:
+        yaw_angles = self.main_dict["hercules_comms"]\
+                                   ["amr_wind"]\
+                                   [self.amr_wind_names[0]]\
+                                   ["turbine_yaw_angles"]
+        # else: # set yaw_angles based on self.wind_direction
+        #     yaw_angles = [self.wind_direction]*self.num_turbines
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control
         tmp = np.array([self.absolute_helics_time, self.wind_speed,
-                       self.wind_direction] + yaw_angles).tolist()
+                        self.wind_direction] + yaw_angles).tolist()
 
         self.send_via_helics("control", str(tmp))
 

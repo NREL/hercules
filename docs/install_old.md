@@ -25,9 +25,9 @@ develop branch.
 SEAS is also required for hercules. To install 
 SEAS, use
 
-``` pip install git+https://github.nrel.gov/SEAS/SEAS.git@dv/emuwind ```
+``` pip install https://github.com/NREL/SEAS/blob/main/SEAS.tar.gz?raw=true ```
 
-If this fails, the following may work instead:
+If this fails, the following may work instead (but you need permissions):
 
 
 ```

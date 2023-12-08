@@ -137,7 +137,8 @@ class Emulator(FederateAgent):
                 continue
 
             # Update controller and py sims
-            # TODO: Update this to be the AMR-Wind time, rather than helics time
+            # TODO: Should 'time' in the main dict be AMR-wind time or 
+            # helics time? Why aren't they the same?
             self.main_dict['time'] = self.absolute_helics_time
             self.main_dict = self.controller.step(self.main_dict)
             self.py_sims.step(self.main_dict)

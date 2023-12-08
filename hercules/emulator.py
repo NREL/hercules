@@ -36,7 +36,6 @@ class Emulator(FederateAgent):
         self.py_sims = py_sims
 
         # Update the input dict components
-        self.main_dict['controller'] = self.controller.get_controller_dict()
         self.main_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
         # HELICS dicts
@@ -138,8 +137,9 @@ class Emulator(FederateAgent):
                 continue
 
             # Update controller and py sims
+            # TODO: Update this to be the AMR-Wind time, rather than helics time
+            self.main_dict['time'] = self.absolute_helics_time
             self.main_dict = self.controller.step(self.main_dict)
-            self.main_dict['controller'] = self.controller.get_controller_dict()
             self.py_sims.step(self.main_dict)
             self.main_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 

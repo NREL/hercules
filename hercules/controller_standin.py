@@ -10,10 +10,27 @@ class ControllerStandin():
     """
 
     def __init__(self, input_dict):
-        pass
+
+        # Get wind farm information (assumes exactly one wind farm)
+        self.wf_name = list(input_dict["hercules_comms"]["amr_wind"].keys())[0]
 
     @abstractmethod
     def step(self, main_dict):
+
+        num_turbines = main_dict["hercules_comms"]\
+                                ["amr_wind"]\
+                                [self.wf_name]\
+                                ["num_turbines"]
+        
+        # Set turbine yaw angles based on current AMR-Wind wind direction
+        wd = main_dict["hercules_comms"]\
+                      ["amr_wind"]\
+                      [self.wf_name]\
+                      ["wind_direction"]
+        main_dict["hercules_comms"]\
+                 ["amr_wind"]\
+                 [self.wf_name]\
+                 ["turbine_yaw_angles"] = num_turbines*[wd]
 
         # TODO: does there need to be a seperate "controller" dict?
         # Might make understanding the log easier?

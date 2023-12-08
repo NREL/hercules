@@ -1,5 +1,5 @@
 from hercules.emulator import Emulator
-from hercules.controllers.controller_base import Controller
+from hercules.controller_standin import ControllerStandin
 from hercules.py_sims import PySims
 from hercules.utilities import load_yaml
 
@@ -10,7 +10,7 @@ import numpy as np
 
 input_dict = load_yaml(sys.argv[1])
 
-controller = Controller(input_dict)
+controller = ControllerStandin(input_dict)
 py_sims = PySims(input_dict)
 
 

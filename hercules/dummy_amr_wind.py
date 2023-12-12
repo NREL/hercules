@@ -63,6 +63,11 @@ def read_amr_wind_input(amr_wind_input):
             if "time.fixed_dt" in line:
                 dt = float(line.split()[2])
 
+        # Get the simulation time step
+        for line in Lines:
+            if "time.fixed_dt" in line:
+                dt = float(line.split()[2])
+
         # Find the actuators
         for line in Lines:
             if "Actuator.labels" in line:
@@ -82,12 +87,18 @@ def read_amr_wind_input(amr_wind_input):
                     locations = tuple([float(f) for f in line.split()[-3:-1]])
                     turbine_locations.append(locations)
 
+        # Get the helics port
+        for line in Lines:
+            if "helics.broker_port" in line:
+                broker_port = int(line.split()[2])
+
         return_dict = {
             "dt": dt,
             "num_turbines": num_turbines,
             "turbine_labels": turbine_labels,
             "rotor_diameter": D,
             "turbine_locations": turbine_locations,
+            "helics_port": broker_port,
         }
 
     return return_dict
@@ -123,14 +134,10 @@ class DummyAMRWind(FederateAgent):
         if amr_standin_data_file != None:
             self.standin_data = pd.read_csv(amr_standin_data_file)
 
-
-
-
     def run(self):
         # Initialize the values
         turbine_powers = np.zeros(self.num_turbines)
         sim_time_s = 0.0  # initialize time to 0
-        time_step = 0  # Initialize time step counter to 0
         amr_wind_speed = 8.0
         amr_wind_direction = 240.0
 
@@ -168,6 +175,7 @@ class DummyAMRWind(FederateAgent):
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
             logger.info("Calculating simulation time: %.1f" % sim_time_s)
 
+            # Compute the turbine power using a simple formula
             (
                 amr_wind_speed,
                 amr_wind_direction,
@@ -179,7 +187,7 @@ class DummyAMRWind(FederateAgent):
             # Communicate with control center
             # Send the turbine powers for this time step and get wind speed and wind direction for the
             # nex time step
-            logger.info("Time step: %d" % time_step)
+            logger.info("Time step: %d" % sim_time_s)
             logger.info("** Communicating with control center")
             message_from_client_array = (
                 [
@@ -214,6 +222,9 @@ class DummyAMRWind(FederateAgent):
 
                 # Note dummy doesn't currently use received info for anything
 
+            # Advance simulation time and time step counter
+            sim_time_s += self.dt
+            time_step += 1
             # Advance simulation time and time step counter
             sim_time_s += self.dt
             time_step += 1
@@ -300,14 +311,17 @@ class DummyAMRWind(FederateAgent):
 
 
 def launch_dummy_amr_wind(amr_input_file, amr_standin_data_file=None):
+    temp = read_amr_wind_input(amr_input_file)
+    print(temp["helics_port"])
     config = {
         "name": "dummy_amr_wind",
         "gridpack": {},
         "helics": {
-            "deltat": 1,  # Will be overridden by input file value
+            "deltat": 1,
             "subscription_topics": ["control"],
             "publication_topics": ["status"],
             "endpoints": [],
+            "helicsport": temp["helics_port"],
         },
         "publication_interval": 1,
         "endpoint_interval": 1,

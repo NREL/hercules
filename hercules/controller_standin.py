@@ -40,3 +40,19 @@ class ControllerStandin():
         # Might make understanding the log easier?
         return main_dict
 
+
+# Can uncomment the below and work on once the ROSCO/FAST connection is 
+# in place and we are no longer using actuator disks.
+
+# class Controller():
+
+#     def __init__(self, input_dict):
+#         pass
+
+#     def step(self, main_dict):
+
+#         pass
+
+#     def get_controller_dict(self):
+
+#         return {}

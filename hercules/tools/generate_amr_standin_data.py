@@ -241,5 +241,3 @@ if __name__ == "__main__":
 
     SD.generate_standin_data(my_inputs)
     SD.save()
-
-    

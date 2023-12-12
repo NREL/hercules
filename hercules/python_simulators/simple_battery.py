@@ -18,7 +18,7 @@ class SimpleBattery:
     def __init__(self, input_dict, dt):
         self.dt = dt
 
-        size = input_dict["size"]
+        # size = input_dict["size"]
         self.energy_capacity = input_dict["energy_capacity"] * 1e3  # [kWh]
 
         inititial_conditions = input_dict["initial_conditions"]
@@ -57,7 +57,7 @@ class SimpleBattery:
         return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC}
 
     def step(self, inputs):
-        P_signal = inputs["controller"][
+        P_signal = inputs["setpoints"]["battery"][
             "signal"
         ]  # power available for the battery to use for charging (should be >=0)
         P_avail = inputs["py_sims"]["inputs"][

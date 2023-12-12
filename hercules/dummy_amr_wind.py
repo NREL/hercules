@@ -224,10 +224,6 @@ class DummyAMRWind(FederateAgent):
 
             # Advance simulation time and time step counter
             sim_time_s += self.dt
-            time_step += 1
-            # Advance simulation time and time step counter
-            sim_time_s += self.dt
-            time_step += 1
             self.sync_time_helics(self.absolute_helics_time + self.deltat)
 
     # TODO cleanup code to move publish and subscribe here.
@@ -330,7 +326,7 @@ def launch_dummy_amr_wind(amr_input_file, amr_standin_data_file=None):
         "Agent": "dummy_amr_wind",
     }
 
-    if amr_standin_data_file != None:
+    if amr_standin_data_file is not None:
         obj = DummyAMRWind(config, amr_input_file, amr_standin_data_file)
     else:
         obj = DummyAMRWind(config, amr_input_file)

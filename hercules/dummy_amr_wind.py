@@ -238,7 +238,7 @@ def launch_dummy_amr_wind(amr_input_file):
         "publication_interval": 1,
         "endpoint_interval": 1,
         "starttime": 0,
-        "stoptime": 100,
+        "stoptime": 1000,
         "Agent": "dummy_amr_wind"
 
     }

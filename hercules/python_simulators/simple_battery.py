@@ -16,7 +16,7 @@ class SimpleBattery:
     def __init__(self, input_dict, dt):
         self.dt = dt
 
-        size = input_dict["size"]
+        # size = input_dict["size"]
         self.energy_capacity = input_dict["energy_capacity"] * 1e3  # [kWh]
 
         inititial_conditions = input_dict["initial_conditions"]

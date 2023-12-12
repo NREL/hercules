@@ -56,6 +56,18 @@ class Emulator(FederateAgent):
 
         # TODO: Store other things
         self.use_dash_frontend = self.helics_config_dict["use_dash_frontend"]
+        # self.KAFKA = self.helics_config_dict["KAFKA"]
+
+        # # TODO Copied direct from control_center.py but not actually ready yet
+        # if self.KAFKA:
+        #     from dav_kafka_python.configuration import Configuration
+        #     from dav_kafka_python.producer import PythonProducer
+        #     # Kafka topic :
+        #     self.topic = self.helics_config_dict["KAFKA_TOPIC"]
+        #     print("KAFKA topic", self.topic)
+        #     config = Configuration(env_path='./.env')
+        #     self.python_producer = PythonProducer(config)
+        #     self.python_producer.connect()
 
         # AMR wind files
         # Grab py sim details

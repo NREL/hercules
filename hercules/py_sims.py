@@ -69,7 +69,7 @@ class PySims():
             print(py_sim_name)
 
             # print('self.__dict__.keys() = ', self.__dict__.keys())
-            print('main_dict = ',main_dict)
+            # print('main_dict = ',main_dict)
 
             self.py_sim_dict[py_sim_name]['outputs'] = self.py_sim_dict[py_sim_name]['object'].step(main_dict)
 

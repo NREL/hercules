@@ -59,26 +59,28 @@ class SolarPySAM():
     def return_outputs(self):
 
         return {'power': self.power_mw,
-                'dc power': self.dc_power_mw,
+                'dc_power': self.dc_power_mw,
                 'irradiance': self.irradiance,
                 'aoi': self.aoi
         }
-
-    def step(self, inputs, absolute_helics_time):
+    
+    def step(self, inputs):
         #print('inputs',inputs)
         # print('dir(self) = ', dir(self))
         # predict power
         system_model = pvwatts.new()
         system_model.assign(self.model_params)
 
-        print('model params = ',self.model_params)
+        # print('model params = ',self.model_params)
 
-        sim_timestep = int(absolute_helics_time/self.dt)
+        print('sim_time_s = ',inputs['py_sims']['inputs']['sim_time_s'])
+        sim_timestep = int(inputs['py_sims']['inputs']['sim_time_s']/self.dt)
+        # sim_timestep = 0 # for debugging
         print('sim_timestep = ',sim_timestep)
 
-        if sim_timestep == 0:
-            with open('model-params-example.json', 'w') as f:
-                json.dump(self.model_params, f)
+        # if sim_timestep == 0:
+        #     with open('model-params-example.json', 'w') as f:
+        #         json.dump(self.model_params, f)
 
         data = self.data.iloc[[sim_timestep]] # a single timestep
         # TODO - replace sim_timestep with seconds in sim_time_s
@@ -116,11 +118,11 @@ class SolarPySAM():
         system_model.SolarResource.assign({'solar_resource_data': solar_resource_data})
         system_model.AdjustmentFactors.assign({'constant': 0})
         print('----------------------------------------------')
-        print('solar_resource_data = ',solar_resource_data)
+        # print('solar_resource_data = ',solar_resource_data)
 
         system_model.execute()
         out = system_model.Outputs.export()
-        print('out = ',out)
+        #print('out = ',out)
         if sim_timestep == 0:
             with open('out-example.json', 'w') as f:
                 json.dump(out, f)

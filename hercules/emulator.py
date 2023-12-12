@@ -39,6 +39,10 @@ class Emulator(FederateAgent):
         self.main_dict['controller'] = self.controller.get_controller_dict()
         self.main_dict['py_sims'] = self.py_sims.get_py_sim_dict()
 
+        # Initialize time # TODO - does this belong in 'inital conditions' instead?
+        if self.main_dict['py_sims']:
+            self.main_dict['py_sims']['inputs']['sim_time_s'] = 0.0
+
         # HELICS dicts
         self.hercules_comms_dict = input_dict['hercules_comms']
         self.hercules_helics_dict = self.hercules_comms_dict['helics']
@@ -137,6 +141,7 @@ class Emulator(FederateAgent):
             if (self.absolute_helics_time < self.starttime):
                 continue
 
+
             # Update controller and py sims
             self.controller.step(self.main_dict)
             self.main_dict['controller'] = self.controller.get_controller_dict()
@@ -168,6 +173,9 @@ class Emulator(FederateAgent):
             # Assign Py_sim outputs
             if self.main_dict['py_sims']:
                 self.main_dict['py_sims']['inputs']['available_power'] = sum(turbine_power_array)
+                print('sim_time_s_amr_wind = ',sim_time_s_amr_wind)
+                self.main_dict['py_sims']['inputs']['sim_time_s'] = sim_time_s_amr_wind
+                # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ',self.main_dict['py_sims']['inputs']['sim_time_s'])
 
 
             ## TODO add other parameters that need to be logged to csv here. 

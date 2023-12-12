@@ -9,25 +9,9 @@ from hercules.python_simulators.solar_pysam import SolarPySAM
 
 # Initialize solar dict
 # -------- using 1-minute data
-solar_dict = {
-    "py_sim_type": SolarPySAM,
-    "weather_file_name": '/Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/NonAnnualSimulation-sample_data.csv',
-
-    "initial_conditions": {
-        "power": 25, 
-        "irradiance": 1000
-    },
-}
-
-dt = 60 # s - input file has a dt of 1 min
-
-time_start = 0
-time_end = 4 * 60 # 800 * 60 #[s] NonAnnualSimulation-sample-data contains 24 hrs
-
-# -------- using interpolated data
 # solar_dict = {
 #     "py_sim_type": SolarPySAM,
-#     "weather_file_name": '/Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/NonAnnualSimulation-sample_data-interpolated-daytime.csv',
+#     "weather_file_name": '/Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/NonAnnualSimulation-sample_data.csv',
 
 #     "initial_conditions": {
 #         "power": 25, 
@@ -35,10 +19,26 @@ time_end = 4 * 60 # 800 * 60 #[s] NonAnnualSimulation-sample-data contains 24 hr
 #     },
 # }
 
-# dt = 0.5 # s - input file has a dt of 1 min
+# dt = 60 # s - input file has a dt of 1 min
 
 # time_start = 0
-# time_end = 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
+# time_end = 4 * 60 # 800 * 60 #[s] NonAnnualSimulation-sample-data contains 24 hrs
+
+# -------- using interpolated data
+solar_dict = {
+    "py_sim_type": SolarPySAM,
+    "weather_file_name": '/Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/NonAnnualSimulation-sample_data-interpolated-daytime.csv',
+
+    "initial_conditions": {
+        "power": 25, 
+        "irradiance": 1000
+    },
+}
+
+dt = 0.5 # s - input file has a dt of 1 min
+
+time_start = 0
+time_end = 10 # 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
 
 # -------- start simulation
 SPS = SolarPySAM(solar_dict, dt)
@@ -50,7 +50,8 @@ print('time = ', time)
 def simulate(SPS, time):
     inputs = {
         "controller": {"signal": 0},
-        "py_sims": {"inputs": {"available_power": 100}},
+        "py_sims": {"inputs": {"available_power": 100,
+                               "sim_time_s": 0}},
     }
 
     power = np.zeros(len(time))
@@ -59,10 +60,10 @@ def simulate(SPS, time):
     irradiance = np.zeros(len(time))
 
     for i in range(len(time)):
-        # inputs["py_sims"]["inputs"]["available_power"] = available_power[i]
-        outputs = SPS.step(inputs,time[i])
+        inputs["py_sims"]["inputs"]["sim_time_s"] = time[i]
+        outputs = SPS.step(inputs)
         power[i] = outputs["power"]
-        dc_power[i] = outputs["dc power"]
+        dc_power[i] = outputs["dc_power"]
         aoi[i] = outputs["aoi"]
         irradiance[i] = outputs["irradiance"]
 

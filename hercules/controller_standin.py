@@ -7,6 +7,10 @@ class ControllerStandin():
     (https://github.com/NREL/wind-hybrid-open-controller). However, this
     has been left in to allow users to run Hercules without plant-level
     control, if desired.
+
+    This assumes Hercules is running with actuator disk turbine models, and
+    will be updated (to be simply a pass-through) when the ROSCO/FAST turbine
+    models are incorporated.
     """
 
     def __init__(self, input_dict):

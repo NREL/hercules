@@ -311,6 +311,9 @@ class Emulator(FederateAgent):
         # if "turbine_yaw_angles" in self.main_dict["hercules_comms"]\
         #                                          ["amr_wind"]\
         #                                          [self.amr_wind_names[0]]:
+
+        # Stop-gap to implement controls on actuator disk models, until we 
+        # have ROSCO/FAST connected and can implement controls via ROSCO.
         yaw_angles = self.main_dict["hercules_comms"]\
                                    ["amr_wind"]\
                                    [self.amr_wind_names[0]]\

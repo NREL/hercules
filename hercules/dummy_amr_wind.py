@@ -168,6 +168,7 @@ class DummyAMRWind(FederateAgent):
                 turbine_powers,
                 turbine_wind_directions,
             ) = self.get_step(sim_time_s)
+
             # ================================================================
             # Communicate with control center
             # Send the turbine powers for this time step and get wind speed and wind direction for the
@@ -246,7 +247,7 @@ class DummyAMRWind(FederateAgent):
                 for turb in range(self.num_turbines)
             ]
 
-            turbine_wind_directions = np.zeros(self.num_turbines)
+            turbine_wind_directions = [0] * self.num_turbines
 
         else:
             amr_wind_speed = 8.0

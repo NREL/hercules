@@ -55,7 +55,7 @@ class SimpleBattery:
         return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC}
 
     def step(self, inputs):
-        P_signal = inputs["controller"][
+        P_signal = inputs["setpoints"]["battery"][
             "signal"
         ]  # power available for the battery to use for charging (should be >=0)
         P_avail = inputs["py_sims"]["inputs"][

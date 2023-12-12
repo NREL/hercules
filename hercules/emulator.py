@@ -101,6 +101,9 @@ class Emulator(FederateAgent):
         self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
             "wind_direction"
         ] = 0
+        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+            "sim_time_s_amr_wind"
+        ] = 0
 
         self.wind_speed = 0
         self.wind_direction = 0
@@ -139,8 +142,10 @@ class Emulator(FederateAgent):
                 continue
 
             # Update controller and py sims
-            self.controller.step(self.main_dict)
-            self.main_dict["controller"] = self.controller.get_controller_dict()
+            # TODO: Should 'time' in the main dict be AMR-wind time or
+            # helics time? Why aren't they the same?
+            self.main_dict["time"] = self.absolute_helics_time
+            self.main_dict = self.controller.step(self.main_dict)
             self.py_sims.step(self.main_dict)
             self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 
@@ -337,14 +342,15 @@ class Emulator(FederateAgent):
         # Periodically publish data to the surrogate
 
         # Hard coded to single wind farm for the moment
-        # if "turbine_yaw_angles" in self.main_dict["hercules_comms"]\
-        #                                          ["amr_wind"]\
-        #                                          [self.amr_wind_names[0]]:
-        yaw_angles = self.main_dict["hercules_comms"]["amr_wind"][
-            self.amr_wind_names[0]
-        ]["turbine_yaw_angles"]
-        # else: # set yaw_angles based on self.wind_direction
-        #     yaw_angles = [self.wind_direction]*self.num_turbines
+        if (
+            "turbine_yaw_angles"
+            in self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]
+        ):
+            yaw_angles = self.main_dict["hercules_comms"]["amr_wind"][
+                self.amr_wind_names[0]
+            ]["turbine_yaw_angles"]
+        else:  # set yaw_angles based on self.wind_direction
+            yaw_angles = [self.wind_direction] * self.num_turbines
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control

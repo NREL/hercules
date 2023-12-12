@@ -167,6 +167,14 @@ env_hercules()
 
 Go back to herc_root
 
+#### Install SEAS from public repo
+
+```
+pip install https://github.com/NREL/SEAS/blob/main/SEAS.tar.gz?raw=true
+```
+
+If this fails can also try but note need special permissions:
+
 ```
 git clone https://github.nrel.gov/SEAS/SEAS
 

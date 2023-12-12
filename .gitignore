@@ -8,6 +8,13 @@ data.db
 *.conda
 slices
 
+# macOS files
+.DS_Store
+
+# ide settings and files
+.idea
+.vscode
+
 # Some c++ stuff
 a.out
 *.plist

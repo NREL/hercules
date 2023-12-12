@@ -33,7 +33,7 @@ hercules_comms:
         publication_interval: 1
         endpoint_interval: 1
         starttime: 0
-        stoptime: 100
+        stoptime: 10
         Agent: ControlCenter
 
 py_sims:
@@ -41,8 +41,8 @@ py_sims:
   solar_farm_0: # The name of py_sim object 1
 
     py_sim_type: SolarPySAM
-    weather_file_name: NonAnnualSimulation-sample_data.csv
-    capacity: 100 # MW
+    weather_file_name: /Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/NonAnnualSimulation-sample_data-interpolated-daytime.csv
+    # capacity: 100 # MW
 
     initial_conditions:
 

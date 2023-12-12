@@ -1,4 +1,4 @@
-from hercules.python_simulators.simple_solar import SimpleSolar
+from hercules.python_simulators.solar_pysam import SolarPySAM
 from hercules.python_simulators.simple_battery import SimpleBattery
 from hercules.python_simulators.electrolyzer_plant import ElectrolyzerPlant
 
@@ -45,6 +45,10 @@ class PySims():
         if py_sim_obj_dict['py_sim_type'] == 'SimpleSolar':
             
             return SimpleSolar(py_sim_obj_dict, self.dt)
+        
+        if py_sim_obj_dict['py_sim_type'] == 'SolarPySAM':
+            
+            return SolarPySAM(py_sim_obj_dict, self.dt)
 
         if py_sim_obj_dict['py_sim_type'] == 'SimpleBattery':
             

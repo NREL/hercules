@@ -81,12 +81,18 @@ def read_amr_wind_input(amr_wind_input):
                                         for f in line.split()[-3:-1]])
                     turbine_locations.append(locations)
 
+        # Get the helics port
+        for line in Lines:
+            if 'helics.broker_port' in line:
+                broker_port = int(line.split()[2])
+
         return_dict = {
             'dt':dt,
             'num_turbines': num_turbines,
             'turbine_labels': turbine_labels,
             'rotor_diameter': D,
-            'turbine_locations': turbine_locations
+            'turbine_locations': turbine_locations,
+            'helics_port': broker_port,
         }
 
 
@@ -238,6 +244,9 @@ class DummyAMRWind(FederateAgent):
 
 def launch_dummy_amr_wind(amr_input_file):
 
+    temp = read_amr_wind_input(amr_input_file)
+    print(temp["helics_port"])
+
     config = {
         "name": "dummy_amr_wind",
         "gridpack": {
@@ -253,7 +262,8 @@ def launch_dummy_amr_wind(amr_input_file):
 
             ],
             "endpoints": [
-            ]
+            ],
+            "helicsport":temp["helics_port"],
         },
 
         "publication_interval": 1,

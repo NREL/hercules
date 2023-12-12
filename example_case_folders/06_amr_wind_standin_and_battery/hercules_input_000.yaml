@@ -14,6 +14,7 @@ hercules_comms:
     wind_farm_0:
       type: amr_wind_local #options are amr_wind or amr_wind_local
       amr_wind_input_file: amr_input.inp
+      yaw_simulator_name: yaw_system_0
 
   helics:
 
@@ -51,3 +52,9 @@ py_sims:
       SOC: 0.102   # initial state of charge of the battery in percentage of total size
 
 controller:
+  controller_type: SimpleYawController # This may not be needed
+  num_turbines: 2 # Should match AMR-Wind! Ideally, would come from AMR-wind
+  initial_conditions:
+      yaw: 270. # degrees (same for all turbines) (will this work?)
+
+

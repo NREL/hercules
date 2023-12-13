@@ -177,7 +177,8 @@ class DummyAMRWind(FederateAgent):
 
         self.message_from_server = None
 
-        while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+        #while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+        while sim_time_s <= (self.endtime - self.starttime):
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
             logger.info("Calculating simulation time: %.1f" % sim_time_s)
 

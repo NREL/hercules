@@ -5,6 +5,7 @@
 data.db
 *.python-version
 *.DS_Store
+*.conda
 slices
 
 # macOS files
@@ -39,3 +40,5 @@ t_00*
 logdummy
 loghercules
 *echo
+
+.vscode/*

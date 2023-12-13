@@ -212,38 +212,37 @@ class Emulator(FederateAgent):
                 turbine_power_array
             )
 
-        ## TODO add other parameters that need to be logged to csv here.
-        # Write turbine power and turbine wind direction to csv logfile.
-        # TODO: should this be in this method, or its own method?
-        aa = [str(xx) for xx in turbine_power_array]
-        xyz = ",".join(aa)
-        bb = [str(xx) for xx in turbine_wd_array]
-        zyx = ",".join(bb)
-        with open(f"{LOGFILE}.csv", "a") as filex:
-            filex.write(
-                str(self.absolute_helics_time)
-                + ","
-                + str(sim_time_s_amr_wind)
-                + ","
-                + str(wind_speed_amr_wind)
-                + ","
-                + str(wind_direction_amr_wind)
-                + ","
-                + xyz
-                + ","
-                + zyx
-                + os.linesep
-            )
+            ## TODO add other parameters that need to be logged to csv here.
+            # Write turbine power and turbine wind direction to csv logfile.
+            aa = [str(xx) for xx in turbine_power_array]
+            xyz = ",".join(aa)
+            bb = [str(xx) for xx in turbine_wd_array]
+            zyx = ",".join(bb)
+            with open(f"{LOGFILE}.csv", "a") as filex:
+                filex.write(
+                    str(self.absolute_helics_time)
+                    + ","
+                    + str(sim_time_s_amr_wind)
+                    + ","
+                    + str(wind_speed_amr_wind)
+                    + ","
+                    + str(wind_direction_amr_wind)
+                    + ","
+                    + xyz
+                    + ","
+                    + zyx
+                    + os.linesep
+                )
 
-        # Printouts related to message received from AMRWind
-        print("=======================================")
-        print("AMRWindTime:", sim_time_s_amr_wind)
-        print("AMRWindSpeed:", wind_speed_amr_wind)
-        print("AMRWindDirection:", wind_direction_amr_wind)
-        print("AMRWindTurbinePowers:", turbine_power_array)
-        print("AMRWIND number of turbines here: ", self.num_turbines)
-        print("AMRWindTurbineWD:", turbine_wd_array)
-        print("=======================================")
+            # TODO F-Strings
+            print("=======================================")
+            print("AMRWindTime:", sim_time_s_amr_wind)
+            print("AMRWindSpeed:", wind_speed_amr_wind)
+            print("AMRWindDirection:", wind_direction_amr_wind)
+            print("AMRWindTurbinePowers:", turbine_power_array)
+            print(" AMRWIND number of turbines here: ", self.num_turbines)
+            print("AMRWindTurbineWD:", turbine_wd_array)
+            print("=======================================")
 
         # Store turbine powers back to the dict
         # TODO hard-coded for now assuming only one AMR-WIND
@@ -354,17 +353,15 @@ class Emulator(FederateAgent):
         # Periodically publish data to the surrogate
 
         # Hard coded to single wind farm for the moment
-        # if "turbine_yaw_angles" in self.main_dict["hercules_comms"]\
-        #                                          ["amr_wind"]\
-        #                                          [self.amr_wind_names[0]]:
-
-        # Stop-gap to implement controls on actuator disk models, until we
-        # have ROSCO/FAST connected and can implement controls via ROSCO.
-        yaw_angles = self.main_dict["hercules_comms"]["amr_wind"][
-            self.amr_wind_names[0]
-        ]["turbine_yaw_angles"]
-        # else: # set yaw_angles based on self.wind_direction
-        #     yaw_angles = [self.wind_direction]*self.num_turbines
+        if (
+            "turbine_yaw_angles"
+            in self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]
+        ):
+            yaw_angles = self.main_dict["hercules_comms"]["amr_wind"][
+                self.amr_wind_names[0]
+            ]["turbine_yaw_angles"]
+        else:  # set yaw_angles based on self.wind_direction
+            yaw_angles = [self.wind_direction] * self.num_turbines
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control

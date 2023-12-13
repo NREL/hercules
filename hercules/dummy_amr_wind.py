@@ -27,29 +27,31 @@ import logging
 import sys
 
 import numpy as np
+import pandas as pd
 
 from SEAS.federate_agent import FederateAgent
 
 # Set up the logger
 # Useful for when running on eagle
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                    datefmt='%Y-%m-%d %H:%M',
-                    filename='log_test_client.log',
-                    filemode='w')
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+    datefmt="%Y-%m-%d %H:%M",
+    filename="log_test_client.log",
+    filemode="w",
+)
 logger = logging.getLogger("dummy_amr_wind")
 
 # Perhaps a small hack to also send log to the terminal outout
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 #  Make an announcement
-logger.info(
-    "Emulator dummy_amr_wind (standing in for AMR-Wind) connecting to server")
+logger.info("Emulator dummy_amr_wind (standing in for AMR-Wind) connecting to server")
+
 
 # Define a function to read the amrwind input file
 # Note simply copied from emulator
 def read_amr_wind_input(amr_wind_input):
-
     # Probably want a file not found error instead
     return_dict = {}
 
@@ -58,57 +60,61 @@ def read_amr_wind_input(amr_wind_input):
 
         # Get the simulation time step
         for line in Lines:
-            if 'time.fixed_dt' in line:
+            if "time.fixed_dt" in line:
+                dt = float(line.split()[2])
+
+        # Get the simulation time step
+        for line in Lines:
+            if "time.fixed_dt" in line:
                 dt = float(line.split()[2])
 
         # Find the actuators
         for line in Lines:
-            if 'Actuator.labels' in line:
+            if "Actuator.labels" in line:
                 turbine_labels = line.split()[2:]
                 num_turbines = len(turbine_labels)
 
         # Find the diameter
         for line in Lines:
-            if 'rotor_diameter' in line:
+            if "rotor_diameter" in line:
                 D = float(line.split()[-1])
 
         # Get the turbine locations
         turbine_locations = []
         for label in turbine_labels:
             for line in Lines:
-                if 'Actuator.%s.base_position' % label in line:
-                    locations = tuple([float(f)
-                                        for f in line.split()[-3:-1]])
+                if "Actuator.%s.base_position" % label in line:
+                    locations = tuple([float(f) for f in line.split()[-3:-1]])
                     turbine_locations.append(locations)
 
         # Get the helics port
         for line in Lines:
-            if 'helics.broker_port' in line:
+            if "helics.broker_port" in line:
                 broker_port = int(line.split()[2])
 
         return_dict = {
-            'dt':dt,
-            'num_turbines': num_turbines,
-            'turbine_labels': turbine_labels,
-            'rotor_diameter': D,
-            'turbine_locations': turbine_locations,
-            'helics_port': broker_port,
+            "dt": dt,
+            "num_turbines": num_turbines,
+            "turbine_labels": turbine_labels,
+            "rotor_diameter": D,
+            "turbine_locations": turbine_locations,
+            "helics_port": broker_port,
         }
-
 
     return return_dict
 
 
 class DummyAMRWind(FederateAgent):
-    def __init__(self, config_dict ,amr_wind_input):
+    def __init__(self, config_dict, amr_wind_input, amr_standin_data_file=None):
         super(DummyAMRWind, self).__init__(
-            name=config_dict['name'], 
-            feeder_num=0, 
-            starttime=config_dict['starttime'], 
-            endtime=config_dict['stoptime'], 
-            agent_num=0, 
-            config_dict=config_dict)
-        
+            name=config_dict["name"],
+            feeder_num=0,
+            starttime=config_dict["starttime"],
+            endtime=config_dict["stoptime"],
+            agent_num=0,
+            config_dict=config_dict,
+        )
+
         self.config_dict = config_dict
 
         # Read the amrwind input file
@@ -116,24 +122,24 @@ class DummyAMRWind(FederateAgent):
         self.amr_wind_input_dict = read_amr_wind_input(self.amr_wind_input)
 
         # Get the simulation time step
-        self.dt = self.amr_wind_input_dict['dt']
-        self.config_dict['helics']['deltat'] = self.dt
+        self.dt = self.amr_wind_input_dict["dt"]
+        self.config_dict["helics"]["deltat"] = self.dt
 
         # Get the number of turbines
-        self.num_turbines = self.amr_wind_input_dict['num_turbines']
+        self.num_turbines = self.amr_wind_input_dict["num_turbines"]
 
         # Print the number of turbines
         logger.info("Number of turbines: {}".format(self.num_turbines))
 
-    def run(self):
+        if amr_standin_data_file != None:
+            self.standin_data = pd.read_csv(amr_standin_data_file)
 
+    def run(self):
         # Initialize the values
         turbine_powers = np.zeros(self.num_turbines)
-        sim_time_s = 0.  # initialize time to 0
-        time_step = 0 # Initialize time step counter to 0
+        sim_time_s = 0.0  # initialize time to 0
         amr_wind_speed = 8.0
         amr_wind_direction = 240.0
-
 
         # Before starting the main time loop need to do an initial connection to the
         # Control center to get the starting wind speed and wind direction
@@ -143,15 +149,14 @@ class DummyAMRWind(FederateAgent):
         # Send initial message via helics
         # publish on topic: status
         self.send_via_helics("status", str(message_from_client_array))
-        logger.info(
-            "** Initial Message Sent: {}".format(message_from_client_array))
+        logger.info("** Initial Message Sent: {}".format(message_from_client_array))
 
         # Subscribe to helics messages:
         incoming_messages = self.helics_connector.get_all_waiting_messages()
         if incoming_messages != {}:
             try:
                 message_from_server = list(ast.literal_eval(incoming_messages))
-            except Exception as e: 
+            except Exception as e:
                 message_from_server = None
         else:
             message_from_server = None
@@ -164,69 +169,128 @@ class DummyAMRWind(FederateAgent):
         logger.info("** Intial Wind Direction: {}".format(amr_wind_direction))
         logger.info("...STARTING TIME LOOP...")
 
-        
         self.message_from_server = None
 
         while self.absolute_helics_time < (self.endtime - self.starttime + 1):
-
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
             logger.info("Calculating simulation time: %.1f" % sim_time_s)
 
             # Compute the turbine power using a simple formula
-            turbine_powers = np.ones(
-                self.num_turbines) * amr_wind_speed**3 + np.random.rand(self.num_turbines) * 50
-
-            # Scale down later turbines as if waked
-            turbine_powers[int(self.num_turbines/2):] = 0.75 * \
-                turbine_powers[int(self.num_turbines/2):]
-
-            # Convert to a list
-            turbine_powers = turbine_powers.tolist()
-
-            # Set dummy wind directions to be passed out
-            turbine_wind_directions = list(
-                amr_wind_direction + 5.*np.random.randn(self.num_turbines)
-            )
-            turbine_wind_directions = [sim_time_s+0.01, sim_time_s+0.02]
-
-            amr_wind_direction = sim_time_s
+            (
+                amr_wind_speed,
+                amr_wind_direction,
+                turbine_powers,
+                turbine_wind_directions,
+            ) = self.get_step(sim_time_s)
 
             # ================================================================
             # Communicate with control center
             # Send the turbine powers for this time step and get wind speed and wind direction for the
             # nex time step
-            logger.info('Time step: %d' % time_step)
+            logger.info("Time step: %d" % sim_time_s)
             logger.info("** Communicating with control center")
-            message_from_client_array = [
-                sim_time_s, amr_wind_speed, amr_wind_direction
-            ] + turbine_powers + turbine_wind_directions
+            message_from_client_array = (
+                [
+                    sim_time_s,
+                    amr_wind_speed,
+                    amr_wind_direction,
+                ]
+                + turbine_powers
+                + turbine_wind_directions
+            )
 
             # Send helics message to Control Center
             # publish on topic: status
             self.send_via_helics("status", str(message_from_client_array))
-            logger.info(
-                "** Message Sent: {}".format(message_from_client_array))
+            logger.info("** Message Sent: {}".format(message_from_client_array))
 
             # Subscribe to helics messages from control center:
             incoming_messages = self.helics_connector.get_all_waiting_messages()
             if incoming_messages != {}:
-                self.message_from_server = list(ast.literal_eval(
-                    incoming_messages["control"]["message"]))
+                self.message_from_server = list(
+                    ast.literal_eval(incoming_messages["control"]["message"])
+                )
             else:
                 self.message_from_server = None
             #  Now get the wind speed and wind direction back
             if self.message_from_server != None:
                 logger.info(
-                    "** Received reply {}: {}".format(sim_time_s, self.message_from_server))
+                    "** Received reply {}: {}".format(
+                        sim_time_s, self.message_from_server
+                    )
+                )
 
                 # Note dummy doesn't currently use received info for anything
 
             # Advance simulation time and time step counter
             sim_time_s += self.dt
-            time_step += 1
             self.sync_time_helics(self.absolute_helics_time + self.deltat)
 
     # TODO cleanup code to move publish and subscribe here.
+
+    def get_step(self, sim_time_s):
+        """Retreive or calculate wind speed, direction, and turbine powers
+
+        Input:
+        sim_time_s: simulation time step
+
+        Output:
+        amr_wind_speed: wind speed at current time step
+        amr_wind_direction: wind direction at current time step
+        turbine_powers: turbine powers at current time step
+        """
+
+        if hasattr(self, "standin_data"):
+            amr_wind_speed = np.interp(
+                sim_time_s,
+                self.standin_data["time"],
+                self.standin_data["amr_wind_speed"],
+            )
+            amr_wind_direction = np.interp(
+                sim_time_s,
+                self.standin_data["time"],
+                self.standin_data["amr_wind_direction"],
+            )
+            turbine_powers = [
+                np.interp(
+                    sim_time_s,
+                    self.standin_data["time"],
+                    self.standin_data[f"turbine_power_{turb}"],
+                )
+                for turb in range(self.num_turbines)
+            ]
+
+            turbine_wind_directions = [0] * self.num_turbines
+
+        else:
+            amr_wind_speed = 8.0
+            amr_wind_direction = 240.0
+
+            # Compute the turbine power using a simple formula
+            turbine_powers = (
+                np.ones(self.num_turbines) * amr_wind_speed**3
+                + np.random.rand(self.num_turbines) * 50
+            )
+
+            # Scale down later turbines as if waked
+            turbine_powers[int(self.num_turbines / 2) :] = (
+                0.75 * turbine_powers[int(self.num_turbines / 2) :]
+            )
+
+            # Convert to a list
+            turbine_powers = turbine_powers.tolist()
+
+            turbine_wind_directions = list(
+                amr_wind_direction + 5.0 * np.random.randn(self.num_turbines)
+            )
+            turbine_wind_directions = [sim_time_s + 0.01, sim_time_s + 0.02]
+
+        return (
+            amr_wind_speed,
+            amr_wind_direction,
+            turbine_powers,
+            turbine_wind_directions,
+        )
 
     def process_endpoint_event(self, msg):
         pass
@@ -242,39 +306,30 @@ class DummyAMRWind(FederateAgent):
         pass
 
 
-def launch_dummy_amr_wind(amr_input_file):
-
+def launch_dummy_amr_wind(amr_input_file, amr_standin_data_file=None):
     temp = read_amr_wind_input(amr_input_file)
     print(temp["helics_port"])
-
     config = {
         "name": "dummy_amr_wind",
-        "gridpack": {
-        },
+        "gridpack": {},
         "helics": {
-            "deltat": 1, # Will be overridden by input file value
-            "subscription_topics": [
-                "control"
-
-            ],
-            "publication_topics": [
-                "status"
-
-            ],
-            "endpoints": [
-            ],
-            "helicsport":temp["helics_port"],
+            "deltat": 1,
+            "subscription_topics": ["control"],
+            "publication_topics": ["status"],
+            "endpoints": [],
+            "helicsport": temp["helics_port"],
         },
-
         "publication_interval": 1,
         "endpoint_interval": 1,
         "starttime": 0,
-        "stoptime": 100,
-        "Agent": "dummy_amr_wind"
-
+        "stoptime": 900,
+        "Agent": "dummy_amr_wind",
     }
-    obj = DummyAMRWind(config, amr_input_file)
-    obj.run_helics_setup()
-    obj.enter_execution(function_targets=[],
-                        function_arguments=[[]])
 
+    if amr_standin_data_file is not None:
+        obj = DummyAMRWind(config, amr_input_file, amr_standin_data_file)
+    else:
+        obj = DummyAMRWind(config, amr_input_file)
+
+    obj.run_helics_setup()
+    obj.enter_execution(function_targets=[], function_arguments=[[]])

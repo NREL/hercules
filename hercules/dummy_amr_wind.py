@@ -92,6 +92,11 @@ def read_amr_wind_input(amr_wind_input):
             if "helics.broker_port" in line:
                 broker_port = int(line.split()[2])
 
+        # Get the stop time
+        for line in Lines:
+            if "time.stop_time" in line:
+                stop_time = float(line.split()[2])
+
         return_dict = {
             "dt": dt,
             "num_turbines": num_turbines,
@@ -99,6 +104,7 @@ def read_amr_wind_input(amr_wind_input):
             "rotor_diameter": D,
             "turbine_locations": turbine_locations,
             "helics_port": broker_port,
+            "stop_time":stop_time,
         }
 
     return return_dict
@@ -308,7 +314,7 @@ class DummyAMRWind(FederateAgent):
 
 def launch_dummy_amr_wind(amr_input_file, amr_standin_data_file=None):
     temp = read_amr_wind_input(amr_input_file)
-    print(temp["helics_port"])
+
     config = {
         "name": "dummy_amr_wind",
         "gridpack": {},
@@ -322,7 +328,7 @@ def launch_dummy_amr_wind(amr_input_file, amr_standin_data_file=None):
         "publication_interval": 1,
         "endpoint_interval": 1,
         "starttime": 0,
-        "stoptime": 900,
+        "stoptime": temp["stop_time"],
         "Agent": "dummy_amr_wind",
     }
 

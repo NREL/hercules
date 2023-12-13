@@ -1,5 +1,4 @@
 from hercules.emulator import Emulator
-from hercules.controller import Controller
 from hercules.py_sims import PySims
 from hercules.utilities import load_yaml
 import time

@@ -11,8 +11,8 @@
             // "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "cwd": "${workspaceFolder}\\example_case_folders\\07_amr_wind_dummy_and_solar_pysam",
-            // "cwd": "${fileDirname}",
+            // "cwd": "${workspaceFolder}\\example_case_folders\\07_amr_wind_dummy_and_solar_pysam",
+            "cwd": "${fileDirname}",
             "program": "standalone-solar-pysam-example.py",
         }
     ]

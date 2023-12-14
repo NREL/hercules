@@ -7,10 +7,6 @@ import sys
 
 input_dict = load_yaml(sys.argv[1])
 
-print('---------------')
-print('input_dict',input_dict)
-print('---------------')
-
 controller = ControllerStandin(input_dict)
 py_sims = PySims(input_dict)
 

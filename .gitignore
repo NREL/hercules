@@ -39,6 +39,7 @@ hercules/local_amr_wind_demo/sample_copy.nc
 t_00*
 logdummy
 loghercules
+logstandin
 *echo
 
 .vscode/*

@@ -3,7 +3,7 @@ from hercules.amr_wind_standin import launch_amr_wind_standin
 
 # Check that one command line argument was given
 if len(sys.argv) != 2:
-    raise Exception("Usage: python hercules_runscript_dummy_amr.py <amr_input_file>")
+    raise Exception("Usage: python hercules_runscript_amr_standin.py <amr_input_file>")
                     
 # # Get the first command line argument
 # This is the name of the file to read

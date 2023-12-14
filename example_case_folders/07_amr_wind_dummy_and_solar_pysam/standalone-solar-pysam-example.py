@@ -39,7 +39,7 @@ solar_dict = {
 dt = 0.5 # s - input file has a dt of 1 min
 
 time_start = 0
-time_end = 1000 # 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
+time_end = 100 # 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
 
 # -------- start simulation
 SPS = SolarPySAM(solar_dict, dt)

@@ -36,8 +36,8 @@ class Emulator(FederateAgent):
         self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 
         # Initialize time # TODO - does this belong in 'inital conditions' instead?
-        if self.main_dict['py_sims']:
-            self.main_dict['py_sims']['inputs']['sim_time_s'] = 0.0
+        if self.main_dict["py_sims"]:
+            self.main_dict["py_sims"]["inputs"]["sim_time_s"] = 0.0
 
         # HELICS dicts
         self.hercules_comms_dict = input_dict["hercules_comms"]

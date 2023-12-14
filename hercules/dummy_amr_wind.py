@@ -20,7 +20,7 @@
 # - - Send the measurement values of 4 turbines
 # - - Receive the wind speed and wind direction measurements
 # - - Update the turbine measurements
-# - - Sleep for 1 s
+# - - Sleep for 1 s 
 
 import ast
 import logging

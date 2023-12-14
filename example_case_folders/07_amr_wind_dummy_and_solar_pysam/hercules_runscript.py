@@ -1,5 +1,5 @@
 from hercules.emulator import Emulator
-from hercules.controller import Controller
+from hercules.controller_standin import ControllerStandin
 from hercules.py_sims import PySims
 from hercules.utilities import load_yaml
 

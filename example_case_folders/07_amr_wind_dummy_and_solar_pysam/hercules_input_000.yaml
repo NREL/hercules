@@ -42,6 +42,8 @@ py_sims:
 
     py_sim_type: SolarPySAM
     weather_file_name: /Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/NonAnnualSimulation-sample_data-interpolated-daytime.csv
+    system_info_file_name: /Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/100MW_1axis_pvsamv1.json
+
     # capacity: 100 # MW
 
     initial_conditions:

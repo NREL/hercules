@@ -4,7 +4,7 @@
 import numpy as np
 import pandas as pd
 import json
-import PySAM.Pvwattsv7 as pvwatts
+import PySAM.Pvsamv1 as pvsam
 
 class SolarPySAM():
 
@@ -16,22 +16,10 @@ class SolarPySAM():
         data = data.set_index("Timestamp")
 
         # set PV system model parameters
+        with open(input_dict["system_info_file_name"], 'r') as f:
+            model_params = json.load(f)
         sys_design = {
-            "ModelParams": {
-                "SystemDesign": {
-                    "array_type": 2.0,
-                    "azimuth": 180.0,
-                    "dc_ac_ratio": 1.08,
-                    "gcr": 0.592,
-                    "inv_eff": 97.5,
-                    "losses": 15.53,
-                    "module_type": 2.0,
-                    "system_capacity": 720,
-                    "tilt": 0.0
-                },
-                "SolarResource": {
-                }
-            },
+            "ModelParams": model_params,
             "Other": {
                 "lat": 39.7442,
                 "lon": -105.1778,
@@ -68,8 +56,15 @@ class SolarPySAM():
         #print('inputs',inputs)
         # print('dir(self) = ', dir(self))
         # predict power
-        system_model = pvwatts.new()
-        system_model.assign(self.model_params)
+        system_model = pvsam.new()
+        system_model.AdjustmentFactors.constant = 0
+        system_model.AdjustmentFactors.dc_constant = 0
+
+        for k, v in self.model_params.items():
+            try:
+                system_model.value(k, v)
+            except:
+                print(k)
 
         # print('model params = ',self.model_params)
 
@@ -128,8 +123,8 @@ class SolarPySAM():
                 json.dump(out, f)
 
         # ac = np.array(out['ac']) / 1000
-        ac = np.array(out['ac']) / 1000 # quick fix for issue being fixed by darice
-        dc = np.array(out['dc']) / 1000
+        ac = np.array(out['gen']) / 1000 # quick fix for issue being fixed by darice
+        dc = np.array(out['dc_net']) / 1000
 
         # predictions = pd.DataFrame({"ac": ac, "dc": dc}, columns = ['ac','dc'])
         # predictions = predictions.set_index(data.index.copy())     
@@ -144,7 +139,7 @@ class SolarPySAM():
 
         self.irradiance = out['dn'][0] # TODO change this to irradiance = dn + df + gh?
 
-        self.aoi = out['aoi'][0] # anle of incidence
+        self.aoi = out['subarray1_aoi'][0] # anle of incidence
 
         return self.return_outputs()
 

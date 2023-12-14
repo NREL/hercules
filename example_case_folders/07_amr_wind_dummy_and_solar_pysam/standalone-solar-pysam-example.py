@@ -28,6 +28,7 @@ from hercules.python_simulators.solar_pysam import SolarPySAM
 solar_dict = {
     "py_sim_type": SolarPySAM,
     "weather_file_name": '/Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/NonAnnualSimulation-sample_data-interpolated-daytime.csv',
+    "system_info_file_name": '/Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/100MW_1axis_pvsamv1.json',
 
     "initial_conditions": {
         "power": 25, 
@@ -38,7 +39,7 @@ solar_dict = {
 dt = 0.5 # s - input file has a dt of 1 min
 
 time_start = 0
-time_end = 10 # 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
+time_end = 1000 # 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
 
 # -------- start simulation
 SPS = SolarPySAM(solar_dict, dt)

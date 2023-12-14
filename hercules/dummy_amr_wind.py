@@ -90,6 +90,8 @@ def read_amr_wind_input(amr_wind_input):
         # Get the helics port
         for line in Lines:
             if "helics.broker_port" in line:
+                if len(line.split()) < 3:
+                    raise ValueError("Broker port couldn't be read. Check the spacing after the =")
                 broker_port = int(line.split()[2])
 
         # Get the stop time

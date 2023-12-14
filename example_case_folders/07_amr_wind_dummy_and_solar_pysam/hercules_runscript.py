@@ -11,7 +11,7 @@ print('---------------')
 print('input_dict',input_dict)
 print('---------------')
 
-controller = Controller(input_dict)
+controller = ControllerStandin(input_dict)
 py_sims = PySims(input_dict)
 
 

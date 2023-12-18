@@ -14,7 +14,6 @@ export HELICS_PORT=32000
 # Set up the helics broker
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
 
-cd example_case_folders/07_amr_wind_dummy_and_solar_pysam 
 
 python3 hercules_runscript.py hercules_input_000.yaml >> loghercules 2>&1 & # Start the controller center and pass in input file
 

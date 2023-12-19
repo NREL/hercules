@@ -6,7 +6,7 @@
 # Installation
 Create a new conda environment for hercules:
 ```
-conda create --name hercules python
+conda create --name hercules python=3.11
 conda activate hercules
 ```
 
@@ -65,6 +65,16 @@ cd ..
 pip install -e electrolyzer
 ```
 
+NREL's PySAM software is also required for hercules. To install, use 
+```
+pip install nrel-pysam=4.2.0
+```
+
+If you run hercules and get an error that `pyyaml` is missing, you may also need to install it using
+```
+conda install -c conda-forge pyyaml
+```
+
 <!--
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account
@@ -86,7 +96,7 @@ activate hercules`).
 
 In the first terminal, run
 ```
-helics_broker -t zmq  -f 2 --loglevel="debug"
+helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT &
 ```
 from any directory.
 

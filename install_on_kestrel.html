@@ -406,6 +406,11 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#install-pysam">
+   Install PySAM
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#try-an-example">
    Try an example!
   </a>
@@ -474,6 +479,11 @@ title="Print to PDF"
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#install-electrolyzer-module">
    Install electrolyzer module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#install-pysam">
+   Install PySAM
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -615,7 +625,7 @@ computer.</p>
 <h2>Set up a hercules conda environment<a class="headerlink" href="#set-up-a-hercules-conda-environment" title="Permalink to this headline">#</a></h2>
 <p>This will be needed for the remaining installations</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">module</span> <span class="n">load</span> <span class="n">anaconda3</span>
-<span class="n">conda</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">hercules</span> <span class="n">python</span>
+<span class="n">conda</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">hercules</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11</span>
 <span class="n">conda</span> <span class="n">activate</span> <span class="n">hercules</span>
 </pre></div>
 </div>
@@ -673,6 +683,18 @@ computer.</p>
 <span class="n">git</span> <span class="n">fetch</span> <span class="o">--</span><span class="nb">all</span>
 <span class="n">git</span> <span class="n">switch</span> <span class="n">develop</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="install-pysam">
+<h2>Install PySAM<a class="headerlink" href="#install-pysam" title="Permalink to this headline">#</a></h2>
+<p>Note: This section is untested.
+Go back to herc_root</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">nrel</span><span class="o">-</span><span class="n">pysam</span><span class="o">=</span><span class="mf">4.2.0</span>
+</pre></div>
+</div>
+<p>If you run hercules and get an error that <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code> is missing, you may also need to install it using</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">pyyaml</span>
 </pre></div>
 </div>
 </section>

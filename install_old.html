@@ -458,7 +458,7 @@ title="Print to PDF"
 <section class="tex2jax_ignore mathjax_ignore" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
 <p>Create a new conda environment for hercules:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">hercules</span> <span class="n">python</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">hercules</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11</span>
 <span class="n">conda</span> <span class="n">activate</span> <span class="n">hercules</span>
 </pre></div>
 </div>
@@ -508,6 +508,14 @@ the electrolyzer, use</p>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">electrolyzer</span>
 </pre></div>
 </div>
+<p>NREL's PySAM software is also required for hercules. To install, use</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">nrel</span><span class="o">-</span><span class="n">pysam</span><span class="o">=</span><span class="mf">4.2.0</span>
+</pre></div>
+</div>
+<p>If you run hercules and get an error that <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code> is missing, you may also need to install it using</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">pyyaml</span>
+</pre></div>
+</div>
 <!--
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account
@@ -526,7 +534,7 @@ Col
 <p>To run locally using a dummy placeholder for AMR-Wind, launch 3 separate
 terminals. In each, <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span></code> your hercules environment (<code class="docutils literal notranslate"><span class="pre">conda</span>&#160; <span class="pre">activate</span> <span class="pre">hercules</span></code>).</p>
 <p>In the first terminal, run</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helics_broker</span> <span class="o">-</span><span class="n">t</span> <span class="n">zmq</span>  <span class="o">-</span><span class="n">f</span> <span class="mi">2</span> <span class="o">--</span><span class="n">loglevel</span><span class="o">=</span><span class="s2">&quot;debug&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT &amp;
 </pre></div>
 </div>
 <p>from any directory.</p>

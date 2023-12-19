@@ -41,5 +41,6 @@ logdummy
 loghercules
 logstandin
 *echo
+*out-example.json
 
 .vscode/*

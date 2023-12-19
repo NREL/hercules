@@ -20,7 +20,7 @@
 # - - Send the measurement values of 4 turbines
 # - - Receive the wind speed and wind direction measurements
 # - - Update the turbine measurements
-# - - Sleep for 1 s
+# - - Sleep for 1 s 
 
 import ast
 import logging
@@ -90,7 +90,14 @@ def read_amr_wind_input(amr_wind_input):
         # Get the helics port
         for line in Lines:
             if "helics.broker_port" in line:
+                if len(line.split()) < 3:
+                    raise ValueError("Broker port couldn't be read. Check the spacing after the =")
                 broker_port = int(line.split()[2])
+
+        # Get the stop time
+        for line in Lines:
+            if "time.stop_time" in line:
+                stop_time = float(line.split()[2])
 
         return_dict = {
             "dt": dt,
@@ -99,6 +106,7 @@ def read_amr_wind_input(amr_wind_input):
             "rotor_diameter": D,
             "turbine_locations": turbine_locations,
             "helics_port": broker_port,
+            "stop_time":stop_time,
         }
 
     return return_dict
@@ -171,7 +179,8 @@ class AMRWindStandin(FederateAgent):
 
         self.message_from_server = None
 
-        while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+        #while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+        while sim_time_s <= (self.endtime - self.starttime):
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
             logger.info("Calculating simulation time: %.1f" % sim_time_s)
 
@@ -308,7 +317,7 @@ class AMRWindStandin(FederateAgent):
 
 def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None):
     temp = read_amr_wind_input(amr_input_file)
-    print(temp["helics_port"])
+
     config = {
         "name": "amr_wind_standin",
         "gridpack": {},
@@ -322,8 +331,8 @@ def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None):
         "publication_interval": 1,
         "endpoint_interval": 1,
         "starttime": 0,
-        "stoptime": 900,
-        "Agent": "amr_wind_standin",
+        "stoptime": temp["stop_time"],
+        "Agent": "dummy_amr_wind",
     }
 
     if amr_standin_data_file is not None:

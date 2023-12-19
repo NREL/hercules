@@ -32,13 +32,14 @@ DESCRIPTION = "Python front-end to the emulator."
 URL = "https://github.com/NREL/hercules"
 EMAIL = "paul.fleming@nrel.gov"
 AUTHOR = "NREL National Wind Technology Center"
-REQUIRES_PYTHON = ">=3.6.0"
+REQUIRES_PYTHON = ">=3.6.0,<3.12.0"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
     "numpy~=1.20",
     "matplotlib~=3.0",
     "pandas~=2.0",
+    "nrel-pysam~=4.2",
     # "dash>=2.0.0",
 
     #GUI Stuff

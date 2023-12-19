@@ -20,7 +20,7 @@
 # - - Send the measurement values of 4 turbines
 # - - Receive the wind speed and wind direction measurements
 # - - Update the turbine measurements
-# - - Sleep for 1 s
+# - - Sleep for 1 s 
 
 import ast
 import logging
@@ -90,6 +90,8 @@ def read_amr_wind_input(amr_wind_input):
         # Get the helics port
         for line in Lines:
             if "helics.broker_port" in line:
+                if len(line.split()) < 3:
+                    raise ValueError("Broker port couldn't be read. Check the spacing after the =")
                 broker_port = int(line.split()[2])
 
         # Get the stop time

@@ -35,6 +35,10 @@ class Emulator(FederateAgent):
         # Update the input dict components
         self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 
+        # Initialize time # TODO - does this belong in 'inital conditions' instead?
+        if self.main_dict["py_sims"]:
+            self.main_dict["py_sims"]["inputs"]["sim_time_s"] = 0.0
+
         # HELICS dicts
         self.hercules_comms_dict = input_dict["hercules_comms"]
         self.hercules_helics_dict = self.hercules_comms_dict["helics"]
@@ -153,6 +157,7 @@ class Emulator(FederateAgent):
             if self.absolute_helics_time < self.starttime:
                 continue
 
+
             # Update controller and py sims
             # TODO: Should 'time' in the main dict be AMR-wind time or
             # helics time? Why aren't they the same?
@@ -208,41 +213,43 @@ class Emulator(FederateAgent):
 
         # Assign Py_sim outputs
         if self.main_dict["py_sims"]:
-            self.main_dict["py_sims"]["inputs"]["available_power"] = sum(
-                turbine_power_array
+            self.main_dict["py_sims"]["inputs"]["available_power"] = sum(turbine_power_array)
+            print("sim_time_s_amr_wind = ",sim_time_s_amr_wind)
+            self.main_dict["py_sims"]["inputs"]["sim_time_s"] = sim_time_s_amr_wind
+            # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ',self.main_dict['py_sims']['inputs']['sim_time_s'])
+
+
+        ## TODO add other parameters that need to be logged to csv here.
+        # Write turbine power and turbine wind direction to csv logfile.
+        aa = [str(xx) for xx in turbine_power_array]
+        xyz = ",".join(aa)
+        bb = [str(xx) for xx in turbine_wd_array]
+        zyx = ",".join(bb)
+        with open(f"{LOGFILE}.csv", "a") as filex:
+            filex.write(
+                str(self.absolute_helics_time)
+                + ","
+                + str(sim_time_s_amr_wind)
+                + ","
+                + str(wind_speed_amr_wind)
+                + ","
+                + str(wind_direction_amr_wind)
+                + ","
+                + xyz
+                + ","
+                + zyx
+                + os.linesep
             )
 
-            ## TODO add other parameters that need to be logged to csv here.
-            # Write turbine power and turbine wind direction to csv logfile.
-            aa = [str(xx) for xx in turbine_power_array]
-            xyz = ",".join(aa)
-            bb = [str(xx) for xx in turbine_wd_array]
-            zyx = ",".join(bb)
-            with open(f"{LOGFILE}.csv", "a") as filex:
-                filex.write(
-                    str(self.absolute_helics_time)
-                    + ","
-                    + str(sim_time_s_amr_wind)
-                    + ","
-                    + str(wind_speed_amr_wind)
-                    + ","
-                    + str(wind_direction_amr_wind)
-                    + ","
-                    + xyz
-                    + ","
-                    + zyx
-                    + os.linesep
-                )
-
-            # TODO F-Strings
-            print("=======================================")
-            print("AMRWindTime:", sim_time_s_amr_wind)
-            print("AMRWindSpeed:", wind_speed_amr_wind)
-            print("AMRWindDirection:", wind_direction_amr_wind)
-            print("AMRWindTurbinePowers:", turbine_power_array)
-            print(" AMRWIND number of turbines here: ", self.num_turbines)
-            print("AMRWindTurbineWD:", turbine_wd_array)
-            print("=======================================")
+        # TODO F-Strings
+        print("=======================================")
+        print("AMRWindTime:", sim_time_s_amr_wind)
+        print("AMRWindSpeed:", wind_speed_amr_wind)
+        print("AMRWindDirection:", wind_direction_amr_wind)
+        print("AMRWindTurbinePowers:", turbine_power_array)
+        print(" AMRWIND number of turbines here: ", self.num_turbines)
+        print("AMRWindTurbineWD:", turbine_wd_array)
+        print("=======================================")
 
         # Store turbine powers back to the dict
         # TODO hard-coded for now assuming only one AMR-WIND

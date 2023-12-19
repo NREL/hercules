@@ -5,7 +5,7 @@ name: example_000
 
 ###
 # Describe this emulator setup
-description: Just a solar plant
+description: Wind standin plant plus electrolyzer plant
 
 dt: 0.5
 

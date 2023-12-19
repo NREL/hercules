@@ -13,7 +13,7 @@ import os
 import netCDF4 as ncdf
 
 from hercules.utilities import load_yaml
-from hercules.dummy_amr_wind import read_amr_wind_input
+from hercules.amr_wind_standin import read_amr_wind_input
 
 
 class StandinData:

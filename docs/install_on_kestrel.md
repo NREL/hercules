@@ -223,7 +223,7 @@ conda install -c conda-forge pyyaml
 ## Try an example!
 
 Look at 
-herc_root/hercules/example_case_folders/02_amr_wind_dummy_only
+herc_root/hercules/example_case_folders/02_amr_wind_standin_only
 
 (May need to edit the port from 32000 to 32001 in bash_script.sh)
 

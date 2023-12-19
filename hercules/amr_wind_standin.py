@@ -40,13 +40,13 @@ logging.basicConfig(
     filename="log_test_client.log",
     filemode="w",
 )
-logger = logging.getLogger("dummy_amr_wind")
+logger = logging.getLogger("amr_wind_standin")
 
 # Perhaps a small hack to also send log to the terminal outout
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 #  Make an announcement
-logger.info("Emulator dummy_amr_wind (standing in for AMR-Wind) connecting to server")
+logger.info("Emulator amr_wind_standin (standing in for AMR-Wind) connecting to server")
 
 
 # Define a function to read the amrwind input file
@@ -112,9 +112,9 @@ def read_amr_wind_input(amr_wind_input):
     return return_dict
 
 
-class DummyAMRWind(FederateAgent):
+class AMRWindStandin(FederateAgent):
     def __init__(self, config_dict, amr_wind_input, amr_standin_data_file=None):
-        super(DummyAMRWind, self).__init__(
+        super(AMRWindStandin, self).__init__(
             name=config_dict["name"],
             feeder_num=0,
             starttime=config_dict["starttime"],
@@ -229,7 +229,7 @@ class DummyAMRWind(FederateAgent):
                     )
                 )
 
-                # Note dummy doesn't currently use received info for anything
+                # Note standin doesn't currently use received info for anything
 
             # Advance simulation time and time step counter
             sim_time_s += self.dt
@@ -315,11 +315,11 @@ class DummyAMRWind(FederateAgent):
         pass
 
 
-def launch_dummy_amr_wind(amr_input_file, amr_standin_data_file=None):
+def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None):
     temp = read_amr_wind_input(amr_input_file)
 
     config = {
-        "name": "dummy_amr_wind",
+        "name": "amr_wind_standin",
         "gridpack": {},
         "helics": {
             "deltat": 1,
@@ -336,9 +336,9 @@ def launch_dummy_amr_wind(amr_input_file, amr_standin_data_file=None):
     }
 
     if amr_standin_data_file is not None:
-        obj = DummyAMRWind(config, amr_input_file, amr_standin_data_file)
+        obj = AMRWindStandin(config, amr_input_file, amr_standin_data_file)
     else:
-        obj = DummyAMRWind(config, amr_input_file)
+        obj = AMRWindStandin(config, amr_input_file)
 
     obj.run_helics_setup()
     obj.enter_execution(function_targets=[], function_arguments=[[]])

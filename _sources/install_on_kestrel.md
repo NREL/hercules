@@ -211,7 +211,7 @@ pip install -e .
 Note: This section is untested.
 Go back to herc_root
 ```
-pip install nrel-pysam=4.2.0
+pip install nrel-pysam==4.2.0
 ```
 
 If you run hercules and get an error that `pyyaml` is missing, you may also need to install it using

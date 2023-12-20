@@ -2,7 +2,6 @@ from hercules import py_sims
 
 
 def test_init_pysim():
-
     # Test that a pysim can be initated
 
     input_dict = dict()

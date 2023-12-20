@@ -82,7 +82,7 @@ Go back to herc_root
 
 ```
 git clone git@github.com:NREL/wind-hybrid-open-controller.git
-cd electrolyzer
+cd wind-hybrid-open-controller
 git fetch --all
 pip install -e .
 ```

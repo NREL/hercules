@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: standalone-solar-pysam-example.py",
+            "type": "python",
+            "request": "launch",
+            // "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            // "cwd": "${workspaceFolder}\\example_case_folders\\07_amr_wind_dummy_and_solar_pysam",
+            "cwd": "${fileDirname}",
+            "program": "standalone-solar-pysam-example.py",
+        }
+    ]
+}

@@ -1,1 +1,0 @@
-This example runs the dummy AMR Wind without any additional generation

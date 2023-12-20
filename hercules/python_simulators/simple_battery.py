@@ -86,7 +86,10 @@ class SimpleBattery:
 
         This method calculates
         - P_charge: [kW] (positive of negative) the charging/discharging power
-        - P_reject: [kW] (positive or negative) either the extra power that the battery cannot absorb (positive) or the power required but not provided for the battery to charge/discharge without violating constraints (negative)
+        - P_reject: [kW] (positive or negative) either the extra power that the 
+                    battery cannot absorb (positive) or the power required but 
+                    not provided for the battery to charge/discharge without violating 
+                    constraints (negative)
         """
 
         # Upper constraints [kW]
@@ -115,6 +118,3 @@ class SimpleBattery:
         elif P_signal > c_hi:
             self.P_charge = c_hi
             self.P_reject = P_signal - self.P_charge
-
-
-

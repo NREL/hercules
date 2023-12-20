@@ -1,14 +1,9 @@
 import ast
 import datetime as dt
-import json
 import os
 import sys
-import random
-import time
 
 import numpy as np
-import pandas as pd
-
 from SEAS.federate_agent import FederateAgent
 
 LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace(".", "_")
@@ -80,43 +75,31 @@ class Emulator(FederateAgent):
         # Save information about amr_wind simulations
         for amr_wind_name in self.amr_wind_names:
             self.amr_wind_dict[amr_wind_name].update(
-                self.read_amr_wind_input(
-                    self.amr_wind_dict[amr_wind_name]["amr_wind_input_file"]
-                )
+                self.read_amr_wind_input(self.amr_wind_dict[amr_wind_name]["amr_wind_input_file"])
             )
 
         # TODO For now, need to assume for simplicity there is one and only
         # one AMR_Wind simualtion
         self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]]["num_turbines"]
-        self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]][
-            "rotor_diameter"
-        ]
-        self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]][
-            "turbine_locations"
-        ]
-        self.turbine_labels = self.amr_wind_dict[self.amr_wind_names[0]][
-            "turbine_labels"
-        ]
+        self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]]["rotor_diameter"]
+        self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_locations"]
+        self.turbine_labels = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_labels"]
 
         # TODO In fugure could cover multiple farms
         # Initialize the turbine power array
         self.turbine_power_array = np.zeros(self.num_turbines)
-        self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = np.zeros(
-            self.num_turbines
-        )
+        self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = np.zeros(self.num_turbines)
         self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = [
             0.0
         ] * self.num_turbines
         # Write to hercules_comms so that controller can access
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "turbine_powers"
-        ] = [0.0] * self.num_turbines
+        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]["turbine_powers"] = [
+            0.0
+        ] * self.num_turbines
         self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
             "turbine_wind_directions"
         ] = [0.0] * self.num_turbines
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "wind_direction"
-        ] = 0
+        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]["wind_direction"] = 0
         self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
             "sim_time_s_amr_wind"
         ] = 0
@@ -157,7 +140,6 @@ class Emulator(FederateAgent):
             if self.absolute_helics_time < self.starttime:
                 continue
 
-
             # Update controller and py sims
             # TODO: Should 'time' in the main dict be AMR-wind time or
             # helics time? Why aren't they the same?
@@ -191,9 +173,7 @@ class Emulator(FederateAgent):
         if incoming_messages != {}:
             subscription_value = self.process_subscription_messages(incoming_messages)
         else:
-            print(
-                "Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0."
-            )
+            print("Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
             subscription_value = (
                 [0, 0, 0]
                 + [0 for t in range(self.num_turbines)]
@@ -214,10 +194,10 @@ class Emulator(FederateAgent):
         # Assign Py_sim outputs
         if self.main_dict["py_sims"]:
             self.main_dict["py_sims"]["inputs"]["available_power"] = sum(turbine_power_array)
-            print("sim_time_s_amr_wind = ",sim_time_s_amr_wind)
+            print("sim_time_s_amr_wind = ", sim_time_s_amr_wind)
             self.main_dict["py_sims"]["inputs"]["sim_time_s"] = sim_time_s_amr_wind
-            # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ',self.main_dict['py_sims']['inputs']['sim_time_s'])
-
+            # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ', 
+            #           self.main_dict['py_sims']['inputs']['sim_time_s'])
 
         ## TODO add other parameters that need to be logged to csv here.
         # Write turbine power and turbine wind direction to csv logfile.
@@ -253,16 +233,10 @@ class Emulator(FederateAgent):
 
         # Store turbine powers back to the dict
         # TODO hard-coded for now assuming only one AMR-WIND
-        self.amr_wind_dict[self.amr_wind_names[0]][
-            "turbine_powers"
-        ] = turbine_power_array
-        self.amr_wind_dict[self.amr_wind_names[0]][
-            "turbine_wind_directions"
-        ] = turbine_wd_array
+        self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = turbine_power_array
+        self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = turbine_wd_array
         self.turbine_power_array = turbine_power_array
-        self.amr_wind_dict[self.amr_wind_names[0]][
-            "sim_time_s_amr_wind"
-        ] = sim_time_s_amr_wind
+        self.amr_wind_dict[self.amr_wind_names[0]]["sim_time_s_amr_wind"] = sim_time_s_amr_wind
         # TODO: write these to the hercules_comms object, too?
         self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
             "turbine_powers"
@@ -330,9 +304,7 @@ class Emulator(FederateAgent):
         with open("main_dict.echo", "w") as f_i:
             sys.stdout = f_i  # Change the standard output to the file we created.
             print(self.main_dict)
-            sys.stdout = (
-                original_stdout  # Reset the standard output to its original value
-            )
+            sys.stdout = original_stdout  # Reset the standard output to its original value
 
     def parse_input_yaml(self, filename):
         pass
@@ -364,17 +336,16 @@ class Emulator(FederateAgent):
             "turbine_yaw_angles"
             in self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]
         ):
-            yaw_angles = self.main_dict["hercules_comms"]["amr_wind"][
-                self.amr_wind_names[0]
-            ]["turbine_yaw_angles"]
+            yaw_angles = self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+                "turbine_yaw_angles"
+            ]
         else:  # set yaw_angles based on self.wind_direction
             yaw_angles = [self.wind_direction] * self.num_turbines
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control
         tmp = np.array(
-            [self.absolute_helics_time, self.wind_speed, self.wind_direction]
-            + yaw_angles
+            [self.absolute_helics_time, self.wind_speed, self.wind_direction] + yaw_angles
         ).tolist()
 
         self.send_via_helics("control", str(tmp))

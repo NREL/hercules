@@ -20,7 +20,7 @@
 # - - Send the measurement values of 4 turbines
 # - - Receive the wind speed and wind direction measurements
 # - - Update the turbine measurements
-# - - Sleep for 1 s 
+# - - Sleep for 1 s
 
 import ast
 import logging
@@ -28,7 +28,6 @@ import sys
 
 import numpy as np
 import pandas as pd
-
 from SEAS.federate_agent import FederateAgent
 
 # Set up the logger
@@ -106,7 +105,7 @@ def read_amr_wind_input(amr_wind_input):
             "rotor_diameter": D,
             "turbine_locations": turbine_locations,
             "helics_port": broker_port,
-            "stop_time":stop_time,
+            "stop_time": stop_time,
         }
 
     return return_dict
@@ -139,7 +138,7 @@ class AMRWindStandin(FederateAgent):
         # Print the number of turbines
         logger.info("Number of turbines: {}".format(self.num_turbines))
 
-        if amr_standin_data_file != None:
+        if amr_standin_data_file is not None:
             self.standin_data = pd.read_csv(amr_standin_data_file)
 
     def run(self):
@@ -164,7 +163,7 @@ class AMRWindStandin(FederateAgent):
         if incoming_messages != {}:
             try:
                 message_from_server = list(ast.literal_eval(incoming_messages))
-            except Exception as e:
+            except Exception:
                 message_from_server = None
         else:
             message_from_server = None
@@ -179,7 +178,7 @@ class AMRWindStandin(FederateAgent):
 
         self.message_from_server = None
 
-        #while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+        # while self.absolute_helics_time < (self.endtime - self.starttime + 1):
         while sim_time_s <= (self.endtime - self.starttime):
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
             logger.info("Calculating simulation time: %.1f" % sim_time_s)
@@ -194,8 +193,8 @@ class AMRWindStandin(FederateAgent):
 
             # ================================================================
             # Communicate with control center
-            # Send the turbine powers for this time step and get wind speed and wind direction for the
-            # nex time step
+            # Send the turbine powers for this time step and get wind speed and wind direction for
+            # the next time step
             logger.info("Time step: %d" % sim_time_s)
             logger.info("** Communicating with control center")
             message_from_client_array = (
@@ -222,12 +221,8 @@ class AMRWindStandin(FederateAgent):
             else:
                 self.message_from_server = None
             #  Now get the wind speed and wind direction back
-            if self.message_from_server != None:
-                logger.info(
-                    "** Received reply {}: {}".format(
-                        sim_time_s, self.message_from_server
-                    )
-                )
+            if self.message_from_server is not None:
+                logger.info("** Received reply {}: {}".format(sim_time_s, self.message_from_server))
 
                 # Note standin doesn't currently use received info for anything
 

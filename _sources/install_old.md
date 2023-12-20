@@ -75,6 +75,18 @@ If you run hercules and get an error that `pyyaml` is missing, you may also need
 conda install -c conda-forge pyyaml
 ```
 
+NREL's Wind Hybrid Open Controller (WHOC) software is used to implement controllers in the Hercules platform. This package is not essential to run Hercules by itself, but is needed to implement any controls in the platform. Example 06 has an example of how this is used to control a battery based on wind farm power output.
+
+To install:
+Go back to herc_root
+
+```
+git clone git@github.com:NREL/wind-hybrid-open-controller.git
+cd wind-hybrid-open-controller
+git fetch --all
+pip install -e .
+```
+Note: if you want the newest updates to the WHOC repository, you can checkout the develop branch instead of the main branch.
 <!--
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account

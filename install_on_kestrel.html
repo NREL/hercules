@@ -411,6 +411,11 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#install-the-nrel-wind-hybrid-open-controller-whoc">
+   Install the NREL Wind Hybrid Open Controller (WHOC)
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#try-an-example">
    Try an example!
   </a>
@@ -484,6 +489,11 @@ title="Print to PDF"
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#install-pysam">
    Install PySAM
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#install-the-nrel-wind-hybrid-open-controller-whoc">
+   Install the NREL Wind Hybrid Open Controller (WHOC)
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -695,6 +705,19 @@ Go back to herc_root</p>
 </div>
 <p>If you run hercules and get an error that <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code> is missing, you may also need to install it using</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">pyyaml</span>
+</pre></div>
+</div>
+</section>
+<section id="install-the-nrel-wind-hybrid-open-controller-whoc">
+<h2>Install the NREL Wind Hybrid Open Controller (WHOC)<a class="headerlink" href="#install-the-nrel-wind-hybrid-open-controller-whoc" title="Permalink to this headline">#</a></h2>
+<p>This module is used to implement controllers in the Hercules platform. Example 06 has an example of how this is used to control a battery based on wind farm power output.</p>
+<p>Note: if you want the newest updates to the WHOC repository, you can checkout the develop branch instead of the main branch.</p>
+<p>Installation instructions:
+Go back to herc_root</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">NREL</span><span class="o">/</span><span class="n">wind</span><span class="o">-</span><span class="n">hybrid</span><span class="o">-</span><span class="nb">open</span><span class="o">-</span><span class="n">controller</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">wind</span><span class="o">-</span><span class="n">hybrid</span><span class="o">-</span><span class="nb">open</span><span class="o">-</span><span class="n">controller</span>
+<span class="n">git</span> <span class="n">fetch</span> <span class="o">--</span><span class="nb">all</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
 </pre></div>
 </div>
 </section>

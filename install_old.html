@@ -516,6 +516,16 @@ the electrolyzer, use</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">pyyaml</span>
 </pre></div>
 </div>
+<p>NREL's Wind Hybrid Open Controller (WHOC) software is used to implement controllers in the Hercules platform. This package is not essential to run Hercules by itself, but is needed to implement any controls in the platform. Example 06 has an example of how this is used to control a battery based on wind farm power output.</p>
+<p>To install:
+Go back to herc_root</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">NREL</span><span class="o">/</span><span class="n">wind</span><span class="o">-</span><span class="n">hybrid</span><span class="o">-</span><span class="nb">open</span><span class="o">-</span><span class="n">controller</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">wind</span><span class="o">-</span><span class="n">hybrid</span><span class="o">-</span><span class="nb">open</span><span class="o">-</span><span class="n">controller</span>
+<span class="n">git</span> <span class="n">fetch</span> <span class="o">--</span><span class="nb">all</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>Note: if you want the newest updates to the WHOC repository, you can checkout the develop branch instead of the main branch.</p>
 <!--
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account

@@ -86,6 +86,7 @@ cd electrolyzer
 git fetch --all
 pip install -e .
 ```
+Note: if you want the newest updates to the WHOC repository, you can checkout the develop branch instead of the main branch.
 <!--
 # Other steps for era 5
 Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account

@@ -222,6 +222,8 @@ conda install -c conda-forge pyyaml
 
 This module is used to implement controllers in the Hercules platform. Example 06 has an example of how this is used to control a battery based on wind farm power output.
 
+Note: if you want the newest updates to the WHOC repository, you can checkout the develop branch instead of the main branch.
+
 Installation instructions: 
 Go back to herc_root
 

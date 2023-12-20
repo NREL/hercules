@@ -90,7 +90,9 @@ class StandinData:
         # TODO: make this more general. It might not be "actuator14400"
         actuator_dir = os.path.join(case_folder, "post_processing/actuator14400")
 
-        # TODO: if there are a different number of actuators in the amr data files and the amr input file, raise an error. They probably do not belong to the same run
+        # TODO: if there are a different number of actuators in the amr data files 
+        #       and the amr input file, raise an error. They probably do not belong 
+        #       to the same run
         actuators = os.listdir(os.path.join(case_folder, actuator_dir))
 
         actuator_data = []
@@ -104,7 +106,7 @@ class StandinData:
             rootgrp_name = list(rootgrp.groups.keys())[0]
 
             # What is the difference between vref and vdisk?
-            vref = rootgrp["/".join([rootgrp_name, "vref"])][:]
+            # vref = rootgrp["/".join([rootgrp_name, "vref"])][:]
             vdisk = rootgrp["/".join([rootgrp_name, "vdisk"])][:]
 
             v_abs = np.linalg.norm(vdisk, axis=1)
@@ -182,10 +184,14 @@ class StandinData:
 if __name__ == "__main__":
     # # generate standin data file from amr-wind outputs
     # fpaths = {
-    #     "amr_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
-    #     "amr_out_path": "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
-    #     "herc_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
-    #     "save_path": "example_case_folders/06_amr_wind_standin_and_battery",
+    #   "amr_inp_path": 
+    #        "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
+    #   "amr_out_path":
+    #        "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
+    #   "herc_inp_path": 
+    #        "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
+    #   "save_path": 
+    #        "example_case_folders/06_amr_wind_standin_and_battery",
     # }
 
     # SD = StandinData(method="amr_actuator", **fpaths)
@@ -195,10 +201,14 @@ if __name__ == "__main__":
 
     # generate standin data file from user-defined timeseries
     fpaths = {
-        "amr_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
-        # "amr_out_path": "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
-        "herc_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
-        "save_path": "example_case_folders/06_amr_wind_standin_and_battery",
+        "amr_inp_path": 
+            "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
+        # "amr_out_path": 
+        #       "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
+        "herc_inp_path": 
+            "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
+        "save_path": 
+            "example_case_folders/06_amr_wind_standin_and_battery",
     }
     SD = StandinData(method="user", **fpaths)
 

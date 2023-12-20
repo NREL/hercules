@@ -2,8 +2,8 @@ import numpy as np
 
 from hercules.python_simulators.electrolyzer_plant import ElectrolyzerPlant
 from hercules.python_simulators.simple_battery import SimpleBattery
-from hercules.python_simulators.solar_pysam import SolarPySAM
 from hercules.python_simulators.simple_solar import SimpleSolar
+from hercules.python_simulators.solar_pysam import SolarPySAM
 
 
 class PySims:

@@ -35,7 +35,8 @@ class SimpleSolar:
         # right now, just static
         # https://www.sciencedirect.com/science/article/pii/S1364032106001134
 
-        # Note: irradiance is measured in W/m^2, so the power is calculated in Watts, and then scaled to MW
+        # Note: irradiance is measured in W/m^2, so the power is calculated in Watts, 
+        #           and then scaled to MW
         # self.power_mw = 0.0
 
         # Assume model generates its own irradiance

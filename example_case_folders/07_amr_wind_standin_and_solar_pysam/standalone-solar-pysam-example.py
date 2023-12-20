@@ -10,8 +10,7 @@ from hercules.python_simulators.solar_pysam import SolarPySAM
 # -------- using 1-minute data
 # solar_dict = {
 #     "py_sim_type": SolarPySAM,
-#     "weather_file_name": '/Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/NonAnnualSimulation-sample_data.csv',
-
+#     "weather_file_name": "NonAnnualSimulation-sample_data-interpolated-daytime.csv"
 #     "initial_conditions": {
 #         "power": 25,
 #         "irradiance": 1000

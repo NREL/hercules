@@ -138,7 +138,7 @@ class AMRWindStandin(FederateAgent):
         # Print the number of turbines
         logger.info("Number of turbines: {}".format(self.num_turbines))
 
-        if amr_standin_data_file != None:
+        if amr_standin_data_file is not None:
             self.standin_data = pd.read_csv(amr_standin_data_file)
 
     def run(self):
@@ -193,8 +193,8 @@ class AMRWindStandin(FederateAgent):
 
             # ================================================================
             # Communicate with control center
-            # Send the turbine powers for this time step and get wind speed and wind direction for the
-            # nex time step
+            # Send the turbine powers for this time step and get wind speed and wind direction for
+            # the next time step
             logger.info("Time step: %d" % sim_time_s)
             logger.info("** Communicating with control center")
             message_from_client_array = (
@@ -221,7 +221,7 @@ class AMRWindStandin(FederateAgent):
             else:
                 self.message_from_server = None
             #  Now get the wind speed and wind direction back
-            if self.message_from_server != None:
+            if self.message_from_server is not None:
                 logger.info("** Received reply {}: {}".format(sim_time_s, self.message_from_server))
 
                 # Note standin doesn't currently use received info for anything

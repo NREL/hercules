@@ -61,9 +61,9 @@ class SolarPySAM:
         for k, v in self.model_params.items():
             try:
                 system_model.value(k, v)
-            except:
+            except KeyError:
                 print(k)
-
+        #### TODO: Check with Brooke about this "except KeyError" line ####
         # print('model params = ',self.model_params)
 
         print("sim_time_s = ", inputs["py_sims"]["inputs"]["sim_time_s"])
@@ -71,7 +71,8 @@ class SolarPySAM:
         print("sim_timestep = ", sim_timestep)
 
         data = self.data.iloc[[sim_timestep]]  # a single timestep
-        # TODO - replace sim_timestep with seconds in sim_time_s and find corresponding timestep in weather file
+        # TODO - replace sim_timestep with seconds in sim_time_s and find corresponding 
+        #           timestep in weather file
 
         weather_data = np.array(
             [

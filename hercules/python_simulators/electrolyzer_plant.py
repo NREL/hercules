@@ -1,26 +1,24 @@
-# Electrolyzer plant module  
+# Electrolyzer plant module
 from electrolyzer import Supervisor
 
 
-class ElectrolyzerPlant():
-
+class ElectrolyzerPlant:
     def __init__(self, input_dict, dt):
-
         electrolyzer_dict = {}
-        electrolyzer_dict['general'] = input_dict['general']
-        electrolyzer_dict['electrolyzer'] = input_dict['electrolyzer']
-        electrolyzer_dict['electrolyzer']['dt'] = dt
+        electrolyzer_dict["general"] = input_dict["general"]
+        electrolyzer_dict["electrolyzer"] = input_dict["electrolyzer"]
+        electrolyzer_dict["electrolyzer"]["dt"] = dt
 
         # Initialize electrolyzer plant
-        self.elec_sys = Supervisor.from_dict(electrolyzer_dict['electrolyzer'])
+        self.elec_sys = Supervisor.from_dict(electrolyzer_dict["electrolyzer"])
 
         self.n_stacks = self.elec_sys.n_stacks
 
         # Right now, the plant initialization power and the initial condition power are the same
         # power_in is always in MW
-        power_in = input_dict['electrolyzer']['initial_power_kW'] / 1e3
-        self.needed_inputs = {'available_power': power_in}
-        
+        power_in = input_dict["electrolyzer"]["initial_power_kW"] / 1e3
+        self.needed_inputs = {"available_power": power_in}
+
         # Run Electrolyzer two steps to get outputs
         for i in range(2):
             H2_produced, H2_mfr, power_left, power_curtailed = self.elec_sys.run_control(
@@ -34,23 +32,21 @@ class ElectrolyzerPlant():
         self.curtailed_power = power_curtailed / 1e6
         self.H2_output = H2_produced
 
-
     def return_outputs(self):
-
         # return {'power_curtailed': self.curtailed_power, 'stacks_on': self.stacks_on, \
         #     'stacks_waiting': self.stacks_waiting, 'H2_output': self.H2_output}
 
-        return {'H2_output': self.H2_output, 'stacks_on': self.stacks_on}
+        return {"H2_output": self.H2_output, "stacks_on": self.stacks_on}
+
     def step(self, inputs):
-
         # Gather inputs
-        power_in = inputs['py_sims']['inputs']['available_power']  #TODO check what units this is in
+        power_in = inputs["py_sims"]["inputs"][
+            "available_power"
+        ]  # TODO check what units this is in
 
-        # Run electrolyzer forward one step 
+        # Run electrolyzer forward one step
         ######## Electrolyzer needs input in Watts ########
-        H2_produced, H2_mfr, power_left, power_curtailed = self.elec_sys.run_control(
-            power_in * 1e3
-        )
+        H2_produced, H2_mfr, power_left, power_curtailed = self.elec_sys.run_control(power_in * 1e3)
 
         # Collect outputs from electrolyzer step
         self.curtailed_power = power_curtailed / 1e6
@@ -59,6 +55,3 @@ class ElectrolyzerPlant():
         self.H2_output = H2_produced
 
         return self.return_outputs()
-
-
-

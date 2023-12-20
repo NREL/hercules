@@ -115,6 +115,3 @@ class SimpleBattery:
         elif P_signal > c_hi:
             self.P_charge = c_hi
             self.P_reject = P_signal - self.P_charge
-
-
-

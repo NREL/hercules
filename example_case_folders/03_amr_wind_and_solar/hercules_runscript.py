@@ -13,6 +13,4 @@ py_sims = PySims(input_dict)
 
 emulator = Emulator(controller, py_sims, input_dict)
 emulator.run_helics_setup()
-emulator.enter_execution(function_targets=[],
-                    function_arguments=[[]])
-
+emulator.enter_execution(function_targets=[], function_arguments=[[]])

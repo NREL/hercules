@@ -13,7 +13,7 @@ from hercules.python_simulators.solar_pysam import SolarPySAM
 #     "weather_file_name": '/Users/bstanisl/hercules-pysam/hercules/example_case_folders/07_amr_wind_dummy_and_solar_pysam/NonAnnualSimulation-sample_data.csv',
 
 #     "initial_conditions": {
-#         "power": 25, 
+#         "power": 25,
 #         "irradiance": 1000
 #     },
 # }
@@ -26,32 +26,28 @@ from hercules.python_simulators.solar_pysam import SolarPySAM
 # -------- using interpolated data
 solar_dict = {
     "py_sim_type": SolarPySAM,
-    "weather_file_name": 'NonAnnualSimulation-sample_data-interpolated-daytime.csv',
-    "system_info_file_name": '100MW_1axis_pvsamv1.json',
-
-    "initial_conditions": {
-        "power": 25, 
-        "irradiance": 1000
-    },
+    "weather_file_name": "NonAnnualSimulation-sample_data-interpolated-daytime.csv",
+    "system_info_file_name": "100MW_1axis_pvsamv1.json",
+    "initial_conditions": {"power": 25, "irradiance": 1000},
 }
 
-dt = 0.5 # s - input file has a dt of 1 min
+dt = 0.5  # s - input file has a dt of 1 min
 
 time_start = 0
-time_end = 100 # 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
+time_end = 100  # 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
 
 # -------- start simulation
 SPS = SolarPySAM(solar_dict, dt)
 
 time_delta = dt
 time = np.arange(time_start, time_end, time_delta)
-print('time = ', time)
+print("time = ", time)
+
 
 def simulate(SPS, time):
     inputs = {
         "controller": {"signal": 0},
-        "py_sims": {"inputs": {"available_power": 100,
-                               "sim_time_s": 0}},
+        "py_sims": {"inputs": {"available_power": 100, "sim_time_s": 0}},
     }
 
     power = np.zeros(len(time))
@@ -67,23 +63,24 @@ def simulate(SPS, time):
         aoi[i] = outputs["aoi"]
         irradiance[i] = outputs["irradiance"]
 
-    fig, ax = plt.subplots(4, 1, sharex="col") #, figsize=[6,5], dpi=250)
+    fig, ax = plt.subplots(4, 1, sharex="col")  # , figsize=[6,5], dpi=250)
 
-    ax[0].plot(time/3600, power, '.-', label="power")
-    ax[0].set_ylabel('ac power')
+    ax[0].plot(time / 3600, power, ".-", label="power")
+    ax[0].set_ylabel("ac power")
     # ax[0].legend()
 
-    ax[1].plot(time/3600, dc_power, '.-', label="dc power")
-    ax[1].set_ylabel('dc power')
+    ax[1].plot(time / 3600, dc_power, ".-", label="dc power")
+    ax[1].set_ylabel("dc power")
 
-    ax[2].plot(time/3600, irradiance, '.-', label="irradiance")
-    ax[2].set_ylabel('irradiance')
+    ax[2].plot(time / 3600, irradiance, ".-", label="irradiance")
+    ax[2].set_ylabel("irradiance")
     # ax[1].legend()
 
-    ax[3].plot(time/3600, aoi, '.-', label="aoi")
-    ax[3].set_ylabel('aoi')
-    ax[-1].set_xlabel('time [hr]')
+    ax[3].plot(time / 3600, aoi, ".-", label="aoi")
+    ax[3].set_ylabel("aoi")
+    ax[-1].set_xlabel("time [hr]")
 
     plt.show()
+
 
 simulate(SPS, time)

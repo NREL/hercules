@@ -128,9 +128,7 @@ class StandinData:
             time = actuator_data[0]["time"]
 
         amr_wind_speed = np.mean([ad["v_abs"] for ad in actuator_data], axis=0)
-        amr_wind_direction = np.mean(
-            [ad["v_direction"] for ad in actuator_data], axis=0
-        )
+        amr_wind_direction = np.mean([ad["v_direction"] for ad in actuator_data], axis=0)
 
         powers = np.stack([ad["power"] for ad in actuator_data], axis=1)
 
@@ -175,12 +173,8 @@ class StandinData:
 
     def parse_hercules_input(self, fname):
         hercules_input = load_yaml(fname)
-        self.time_start = hercules_input["hercules_comms"]["helics"]["config"][
-            "starttime"
-        ]
-        self.time_stop = hercules_input["hercules_comms"]["helics"]["config"][
-            "stoptime"
-        ]
+        self.time_start = hercules_input["hercules_comms"]["helics"]["config"]["starttime"]
+        self.time_stop = hercules_input["hercules_comms"]["helics"]["config"]["stoptime"]
         self.time_delta = hercules_input["dt"]
 
 
@@ -223,12 +217,9 @@ if __name__ == "__main__":
     turbine_powers = np.zeros([len(time), num_turbines])
     for i in range(len(time)):
         turb_powers = (
-            np.ones(num_turbines) * amr_wind_speed[i] ** 3
-            + np.random.rand(num_turbines) * 50
+            np.ones(num_turbines) * amr_wind_speed[i] ** 3 + np.random.rand(num_turbines) * 50
         )
-        turb_powers[int(num_turbines / 2) :] = (
-            0.75 * turb_powers[int(num_turbines / 2) :]
-        )
+        turb_powers[int(num_turbines / 2) :] = 0.75 * turb_powers[int(num_turbines / 2) :]
         turb_powers = [np.min([turb_rating, tp]) for tp in turb_powers]
         turbine_powers[i, :] = turb_powers
 

@@ -20,7 +20,7 @@
 # - - Send the measurement values of 4 turbines
 # - - Receive the wind speed and wind direction measurements
 # - - Update the turbine measurements
-# - - Sleep for 1 s 
+# - - Sleep for 1 s
 
 import ast
 import logging
@@ -105,7 +105,7 @@ def read_amr_wind_input(amr_wind_input):
             "rotor_diameter": D,
             "turbine_locations": turbine_locations,
             "helics_port": broker_port,
-            "stop_time":stop_time,
+            "stop_time": stop_time,
         }
 
     return return_dict
@@ -178,7 +178,7 @@ class AMRWindStandin(FederateAgent):
 
         self.message_from_server = None
 
-        #while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+        # while self.absolute_helics_time < (self.endtime - self.starttime + 1):
         while sim_time_s <= (self.endtime - self.starttime):
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
             logger.info("Calculating simulation time: %.1f" % sim_time_s)
@@ -222,11 +222,7 @@ class AMRWindStandin(FederateAgent):
                 self.message_from_server = None
             #  Now get the wind speed and wind direction back
             if self.message_from_server != None:
-                logger.info(
-                    "** Received reply {}: {}".format(
-                        sim_time_s, self.message_from_server
-                    )
-                )
+                logger.info("** Received reply {}: {}".format(sim_time_s, self.message_from_server))
 
                 # Note standin doesn't currently use received info for anything
 

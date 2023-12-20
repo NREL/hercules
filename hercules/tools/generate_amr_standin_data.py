@@ -90,8 +90,8 @@ class StandinData:
         # TODO: make this more general. It might not be "actuator14400"
         actuator_dir = os.path.join(case_folder, "post_processing/actuator14400")
 
-        # TODO: if there are a different number of actuators in the amr data files 
-        #       and the amr input file, raise an error. They probably do not belong 
+        # TODO: if there are a different number of actuators in the amr data files
+        #       and the amr input file, raise an error. They probably do not belong
         #       to the same run
         actuators = os.listdir(os.path.join(case_folder, actuator_dir))
 
@@ -184,13 +184,13 @@ class StandinData:
 if __name__ == "__main__":
     # # generate standin data file from amr-wind outputs
     # fpaths = {
-    #   "amr_inp_path": 
+    #   "amr_inp_path":
     #        "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
     #   "amr_out_path":
     #        "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
-    #   "herc_inp_path": 
+    #   "herc_inp_path":
     #        "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
-    #   "save_path": 
+    #   "save_path":
     #        "example_case_folders/06_amr_wind_standin_and_battery",
     # }
 
@@ -203,9 +203,9 @@ if __name__ == "__main__":
     fpaths = {
         "amr_inp_path": 
             "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
-        # "amr_out_path": 
+        # "amr_out_path":
         #       "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
-        "herc_inp_path": 
+        "herc_inp_path":
             "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
         "save_path": 
             "example_case_folders/06_amr_wind_standin_and_battery",

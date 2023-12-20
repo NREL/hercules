@@ -196,7 +196,7 @@ class Emulator(FederateAgent):
             self.main_dict["py_sims"]["inputs"]["available_power"] = sum(turbine_power_array)
             print("sim_time_s_amr_wind = ", sim_time_s_amr_wind)
             self.main_dict["py_sims"]["inputs"]["sim_time_s"] = sim_time_s_amr_wind
-            # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ', 
+            # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ',
             #           self.main_dict['py_sims']['inputs']['sim_time_s'])
 
         ## TODO add other parameters that need to be logged to csv here.

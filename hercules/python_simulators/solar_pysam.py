@@ -71,7 +71,7 @@ class SolarPySAM:
         print("sim_timestep = ", sim_timestep)
 
         data = self.data.iloc[[sim_timestep]]  # a single timestep
-        # TODO - replace sim_timestep with seconds in sim_time_s and find corresponding 
+        # TODO - replace sim_timestep with seconds in sim_time_s and find corresponding
         #           timestep in weather file
 
         weather_data = np.array(

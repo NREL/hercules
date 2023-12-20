@@ -86,9 +86,9 @@ class SimpleBattery:
 
         This method calculates
         - P_charge: [kW] (positive of negative) the charging/discharging power
-        - P_reject: [kW] (positive or negative) either the extra power that the 
-                    battery cannot absorb (positive) or the power required but 
-                    not provided for the battery to charge/discharge without violating 
+        - P_reject: [kW] (positive or negative) either the extra power that the
+                    battery cannot absorb (positive) or the power required but
+                    not provided for the battery to charge/discharge without violating
                     constraints (negative)
         """
 

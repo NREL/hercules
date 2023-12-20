@@ -1,5 +1,4 @@
 # Very simple solar farm model  
-import numpy as np
 
 class SimpleSolar():
 

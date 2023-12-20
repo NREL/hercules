@@ -1,4 +1,5 @@
 import sys
+
 from hercules.amr_wind_standin import launch_amr_wind_standin
 
 # Check that one command line argument was given

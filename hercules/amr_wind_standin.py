@@ -28,7 +28,6 @@ import sys
 
 import numpy as np
 import pandas as pd
-
 from SEAS.federate_agent import FederateAgent
 
 # Set up the logger
@@ -164,7 +163,7 @@ class AMRWindStandin(FederateAgent):
         if incoming_messages != {}:
             try:
                 message_from_server = list(ast.literal_eval(incoming_messages))
-            except Exception as e:
+            except Exception:
                 message_from_server = None
         else:
             message_from_server = None

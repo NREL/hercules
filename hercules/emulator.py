@@ -1,14 +1,9 @@
 import ast
 import datetime as dt
-import json
 import os
 import sys
-import random
-import time
 
 import numpy as np
-import pandas as pd
-
 from SEAS.federate_agent import FederateAgent
 
 LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace(".", "_")

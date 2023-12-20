@@ -1,6 +1,7 @@
 # Electrolyzer plant module  
 from electrolyzer import Supervisor
 
+
 class ElectrolyzerPlant():
 
     def __init__(self, input_dict, dt):

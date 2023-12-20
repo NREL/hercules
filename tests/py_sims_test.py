@@ -1,4 +1,3 @@
-import pytest
 
 from hercules import py_sims
 

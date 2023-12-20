@@ -2,9 +2,8 @@
 Standalone Solar PySAM example - to test functionality without Helics
 for debugging PySAM integration
 """
-import numpy as np
 import matplotlib.pyplot as plt
-
+import numpy as np
 from hercules.python_simulators.solar_pysam import SolarPySAM
 
 # Initialize solar dict

@@ -1,12 +1,9 @@
-from hercules.emulator import Emulator
+import sys
+
 from hercules.controller_standin import ControllerStandin
+from hercules.emulator import Emulator
 from hercules.py_sims import PySims
 from hercules.utilities import load_yaml
-
-import sys
-import numpy as np
-
-
 
 input_dict = load_yaml(sys.argv[1])
 

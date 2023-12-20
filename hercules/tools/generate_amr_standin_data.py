@@ -6,14 +6,14 @@ TODO:
 
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 import os
-import netCDF4 as ncdf
 
-from hercules.utilities import load_yaml
+import matplotlib.pyplot as plt
+import netCDF4 as ncdf
+import numpy as np
+import pandas as pd
 from hercules.amr_wind_standin import read_amr_wind_input
+from hercules.utilities import load_yaml
 
 
 class StandinData:

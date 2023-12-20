@@ -1,6 +1,6 @@
-import pytest
 
 from SEAS.federate_agent import FederateAgent
+
 
 def test_seas_import():
 

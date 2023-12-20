@@ -1,5 +1,7 @@
-import yaml
 import os
+
+import yaml
+
 
 class Loader(yaml.SafeLoader):
 

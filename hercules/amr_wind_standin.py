@@ -327,7 +327,7 @@ def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None):
         "endpoint_interval": 1,
         "starttime": 0,
         "stoptime": temp["stop_time"],
-        "Agent": "dummy_amr_wind",
+        "Agent": "amr_wind_standin",
     }
 
     if amr_standin_data_file is not None:

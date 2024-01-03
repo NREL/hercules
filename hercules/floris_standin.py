@@ -149,97 +149,6 @@ class FlorisStandin(AMRWindStandin):
             raise NotImplementedError("external data not yet supported.")
             self.standin_data = pd.read_csv(amr_standin_data_file)
 
-    def run(self):
-        # Initialize the values
-        turbine_powers = np.zeros(self.num_turbines)
-        sim_time_s = 0.0  # initialize time to 0
-        amr_wind_speed = 8.0
-        amr_wind_direction = 240.0
-
-        # Before starting the main time loop need to do an initial connection to the
-        # Control center to get the starting wind speed and wind direction
-        # Code the time step as -1 and -1 (to ensure it is an array)
-        logger.info("** First communication with control center")
-        message_from_client_array = [0, -1, -1]
-        # Send initial message via helics
-        # publish on topic: status
-        self.send_via_helics("status", str(message_from_client_array))
-        logger.info("** Initial Message Sent: {}".format(message_from_client_array))
-
-        # Subscribe to helics messages:
-        incoming_messages = self.helics_connector.get_all_waiting_messages()
-        if incoming_messages != {}:
-            try:
-                message_from_server = list(ast.literal_eval(incoming_messages))
-            except Exception:
-                message_from_server = None
-        else:
-            message_from_server = None
-
-        # Synchronize time bewteen control center and AMRWind
-        self.sync_time_helics(self.absolute_helics_time + self.deltat)
-        logger.info("** Initial Received reply: {}".format(message_from_server))
-
-        logger.info("** Intial Wind Speed: {}".format(amr_wind_speed))
-        logger.info("** Intial Wind Direction: {}".format(amr_wind_direction))
-        logger.info("...STARTING TIME LOOP...")
-
-        self.message_from_server = None
-
-        # while self.absolute_helics_time < (self.endtime - self.starttime + 1):
-        while sim_time_s <= (self.endtime - self.starttime):
-            # SIMULATE A CALCULATION STEP IN AMR WIND=========================
-            logger.info("Calculating simulation time: %.1f" % sim_time_s)
-
-            # Compute the turbine power using a simple formula
-            (
-                amr_wind_speed,
-                amr_wind_direction,
-                turbine_powers,
-                turbine_wind_directions,
-            ) = self.get_step(sim_time_s)
-
-            # ================================================================
-            # Communicate with control center
-            # Send the turbine powers for this time step and get wind speed and wind direction for
-            # the next time step
-            logger.info("Time step: %d" % sim_time_s)
-            logger.info("** Communicating with control center")
-            message_from_client_array = (
-                [
-                    sim_time_s,
-                    amr_wind_speed,
-                    amr_wind_direction,
-                ]
-                + turbine_powers
-                + turbine_wind_directions
-            )
-
-            # Send helics message to Control Center
-            # publish on topic: status
-            self.send_via_helics("status", str(message_from_client_array))
-            logger.info("** Message Sent: {}".format(message_from_client_array))
-
-            # Subscribe to helics messages from control center:
-            incoming_messages = self.helics_connector.get_all_waiting_messages()
-            if incoming_messages != {}:
-                self.message_from_server = list(
-                    ast.literal_eval(incoming_messages["control"]["message"])
-                )
-            else:
-                self.message_from_server = None
-            #  Now get the wind speed and wind direction back
-            if self.message_from_server is not None:
-                logger.info("** Received reply {}: {}".format(sim_time_s, self.message_from_server))
-
-                # Note standin doesn't currently use received info for anything
-
-            # Advance simulation time and time step counter
-            sim_time_s += self.dt
-            self.sync_time_helics(self.absolute_helics_time + self.deltat)
-
-    # TODO cleanup code to move publish and subscribe here.
-
     def get_step(self, sim_time_s):
         """Retreive or calculate wind speed, direction, and turbine powers
 
@@ -263,39 +172,20 @@ class FlorisStandin(AMRWindStandin):
                 self.standin_data["time"],
                 self.standin_data["amr_wind_direction"],
             )
-            turbine_powers = [
-                np.interp(
-                    sim_time_s,
-                    self.standin_data["time"],
-                    self.standin_data[f"turbine_power_{turb}"],
-                )
-                for turb in range(self.num_turbines)
-            ]
-
-            turbine_wind_directions = [0] * self.num_turbines
 
         else:
             amr_wind_speed = 8.0
             amr_wind_direction = 240.0
 
-            # Compute the turbine power using a simple formula
-            turbine_powers = (
-                np.ones(self.num_turbines) * amr_wind_speed**3
-                + np.random.rand(self.num_turbines) * 50
-            )
-
-            # Scale down later turbines as if waked
-            turbine_powers[int(self.num_turbines / 2) :] = (
-                0.75 * turbine_powers[int(self.num_turbines / 2) :]
-            )
-
-            # Convert to a list
-            turbine_powers = turbine_powers.tolist()
-
-            turbine_wind_directions = list(
-                amr_wind_direction + 5.0 * np.random.randn(self.num_turbines)
-            )
-            turbine_wind_directions = [sim_time_s + 0.01, sim_time_s + 0.02]
+        turbine_wind_directions = [amr_wind_direction]*self.num_turbines
+        
+        # Compute the turbine power using FLORIS
+        self.fi.reinitialize(
+            wind_speeds=[amr_wind_speed],
+            wind_directions=[amr_wind_direction]
+        ) 
+        self.fi.calculate_wake() # TODO: get controls in here
+        turbine_powers = self.fi.get_turbine_powers().flatten().tolist()
 
         return (
             amr_wind_speed,

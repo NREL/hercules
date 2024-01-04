@@ -1,15 +1,14 @@
 from pathlib import Path
+
 import numpy as np
-
-from SEAS.federate_agent import FederateAgent
 from floris.tools import FlorisInterface
-
+from hercules.amr_wind_standin import AMRWindStandin
 from hercules.floris_standin import (
-    FlorisStandin,
     construct_floris_from_amr_input,
     default_floris_dict,
+    FlorisStandin,
 )
-from hercules.amr_wind_standin import AMRWindStandin
+from SEAS.federate_agent import FederateAgent
 
 AMR_INPUT = Path(__file__).resolve().parent / "test_inputs" / "amr_input_florisstandin.inp"
 

@@ -26,7 +26,6 @@ import logging
 import sys
 
 import numpy as np
-import pandas as pd
 from floris.simulation.turbine import build_cosine_loss_turbine_dict
 from floris.tools import FlorisInterface
 

@@ -1,6 +1,4 @@
 from pathlib import Path
-from re import A
-from tkinter import Y
 
 import numpy as np
 from floris.tools import FlorisInterface

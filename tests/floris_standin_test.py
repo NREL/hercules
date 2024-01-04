@@ -1,4 +1,6 @@
 from pathlib import Path
+from re import A
+from tkinter import Y
 
 import numpy as np
 from floris.tools import FlorisInterface
@@ -11,6 +13,7 @@ from hercules.floris_standin import (
 from SEAS.federate_agent import FederateAgent
 
 AMR_INPUT = Path(__file__).resolve().parent / "test_inputs" / "amr_input_florisstandin.inp"
+AMR_EXTERNAL_DATA = Path(__file__).resolve().parent / "test_inputs" / "amr_standin_data.csv"
 
 CONFIG = {
     "name": "floris_standin",
@@ -103,5 +106,53 @@ def test_FlorisStandin_get_step():
 
 
 def test_FlorisStandin_with_standin_data():
-    # TODO: write this test once standin_data capability built out
-    pass
+    floris_standin = FlorisStandin(CONFIG, AMR_INPUT, AMR_EXTERNAL_DATA)
+
+    yaw_angles_all = [
+        [240.0, 240.0],
+        [240.0, 240.0],  # Step up from 8 to 10 m/s
+        [240.0, 240.0],
+        [240.0, 240.0],  # Step back down to 8 m/s
+        [240.0, 240.0],  # wd changes to 270.0 here
+        [270.0, 270.0],  # change to match wd
+        [270.0, 270.0],
+        [250.0, 270.0],  # Apply simple make steering
+        [250.0, 270.0],
+        [250.0, 270.0],
+    ]
+
+    # Initialize storage
+    fs_ws_all = []
+    fs_wd_all = []
+    fs_tp_all = []
+    fs_twd_all = []
+    for i, s in enumerate(np.arange(0, 10.0, 1.0)):
+        fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(s, yaw_angles=yaw_angles_all[i])
+        fs_ws_all.append(fs_ws)
+        fs_wd_all.append(fs_wd)
+        fs_tp_all.append(fs_tp)
+        fs_twd_all.append(fs_twd)
+
+    # Check standin data mapped over correctly
+    assert fs_ws_all == floris_standin.standin_data.amr_wind_speed.to_list()
+    assert fs_wd_all == floris_standin.standin_data.amr_wind_direction.to_list()
+    assert np.allclose(
+        np.array(fs_twd_all)[:, 0], floris_standin.standin_data.amr_wind_direction.values
+    )
+
+    # Check power behaves as expected
+    # Same condition for each
+    fs_tp_all = np.array(fs_tp_all)
+    assert np.allclose(fs_tp_all[0, :], fs_tp_all[3, :])
+    # Higher power at 10 than 8 m/s
+    assert (np.array(fs_tp_all[0, :]) < np.array(fs_tp_all[1, :])).all()
+    # Same power at upstream turbine, lower power at downstream turbine when aligned
+    assert fs_tp_all[5, 0] == fs_tp_all[0, 0]
+    assert fs_tp_all[5, 1] < fs_tp_all[0, 1]
+    # Lower power at upstream turbine, higher power at downstream turbine when steering,
+    # total power uplift
+    assert fs_tp_all[7, 0] < fs_tp_all[6, 0]
+    assert fs_tp_all[7, 1] > fs_tp_all[6, 1]
+    assert fs_tp_all[7, :].sum() > fs_tp_all[6, :].sum()
+    # More power steering at 10m/s than 8m/s
+    assert fs_tp_all[9, :].sum() > fs_tp_all[7, :].sum()

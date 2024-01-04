@@ -201,11 +201,14 @@ if __name__ == "__main__":
 
     # generate standin data file from user-defined timeseries
     fpaths = {
-        "amr_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
+        "amr_inp_path": 
+            "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
         # "amr_out_path":
         #       "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
-        "herc_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
-        "save_path": "example_case_folders/06_amr_wind_standin_and_battery",
+        "herc_inp_path":
+            "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
+        "save_path": 
+            "example_case_folders/06_amr_wind_standin_and_battery",
     }
     SD = StandinData(method="user", **fpaths)
 

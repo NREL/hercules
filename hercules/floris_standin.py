@@ -100,6 +100,10 @@ def construct_floris_from_amr_input(amr_wind_input):
             if acuator_type+".wind_speed" in line:
                 wind_speed = [float(l) for l in line.split()[2:]]
         # The power curve needs to be constructed from available data
+        thrust_coefficient = np.array(thrust_coefficient)
+        if (thrust_coefficient < 0).any() or (thrust_coefficient > 1).any():
+            print("Clipping thrust_coefficient to (0, 1) interval.")
+            thrust_coefficient = np.clip(thrust_coefficient, 0.0, 1.0)
         ai = (1 - np.sqrt(1-np.array(thrust_coefficient)))/2
         power_coefficient = 4*ai*(1-ai)**2
         turbine_data_dict={
@@ -149,7 +153,10 @@ class FlorisStandin(AMRWindStandin):
             raise NotImplementedError("external data not yet supported.")
             self.standin_data = pd.read_csv(amr_standin_data_file)
 
-    def get_step(self, sim_time_s):
+        # Initialize storage
+        self.yaw_angles_stored = [0.]*self.num_turbines
+
+    def get_step(self, sim_time_s, yaw_angles=None):
         """Retreive or calculate wind speed, direction, and turbine powers
 
         Input:
@@ -183,8 +190,25 @@ class FlorisStandin(AMRWindStandin):
         self.fi.reinitialize(
             wind_speeds=[amr_wind_speed],
             wind_directions=[amr_wind_direction]
-        ) 
-        self.fi.calculate_wake() # TODO: get controls in here
+        )
+        
+        
+        if yaw_angles is not None:
+            yaw_misalignments = (amr_wind_direction - np.array(yaw_angles))[None,:] # TODO: remove 2
+            
+            if (np.abs(yaw_misalignments) > 45).any(): # Bad yaw angles
+                print((
+                    "Large yaw misalignment detected. " +
+                    "Wind direction: {0:.2f} deg, ".format(amr_wind_direction) +
+                    "Yaw angles: "
+                ), yaw_angles, "Using previous yaw angles."
+                )
+                yaw_misalignments = (amr_wind_direction - np.array(self.yaw_angles_stored))[None,:]
+            else: # Reasonable yaw angles, save in case bad angles received later
+                self.yaw_angles_stored = yaw_angles
+        else:
+            yaw_misalignments = yaw_angles
+        self.fi.calculate_wake(yaw_angles=yaw_misalignments)
         turbine_powers = self.fi.get_turbine_powers().flatten().tolist()
 
         return (

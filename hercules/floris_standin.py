@@ -142,10 +142,6 @@ class FlorisStandin(AMRWindStandin):
         # Print the number of turbines
         logger.info("Number of turbines: {}".format(self.num_turbines))
 
-        if amr_standin_data_file is not None:
-            raise NotImplementedError("external data not yet supported.")
-            self.standin_data = pd.read_csv(amr_standin_data_file)
-
         # Initialize storage
         self.yaw_angles_stored = [0.0] * self.num_turbines
 

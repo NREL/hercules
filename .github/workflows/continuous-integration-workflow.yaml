@@ -24,7 +24,6 @@ jobs:
         pip install -e ".[develop]"
         pip install git+https://github.com/NREL/electrolyzer.git
         pip install https://github.com/NREL/SEAS/blob/main/SEAS.tar.gz?raw=true
-# Temporary, hoping to replace this with normal setup install
         pip install git+https://github.com/misi9170/floris/tree/v4-ms/turbine-library
 #    - uses: pre-commit/action@v3.0.0
     - name: Run ruff

@@ -22,17 +22,15 @@
 # - - Update the turbine measurements
 # - - Sleep for 1 s
 
-import ast
 import logging
 import sys
 
 import numpy as np
 import pandas as pd
-from SEAS.federate_agent import FederateAgent
-from floris.tools import FlorisInterface
 from floris.simulation.turbine import build_cosine_loss_turbine_dict
+from floris.tools import FlorisInterface
 
-from hercules.amr_wind_standin import read_amr_wind_input, AMRWindStandin
+from hercules.amr_wind_standin import AMRWindStandin, read_amr_wind_input
 
 # Set up the logger
 # Useful for when running on eagle
@@ -56,7 +54,6 @@ logger.info("Emulator amr_wind_standin (standing in for AMR-Wind) connecting to 
 # Note simply copied from emulator
 def construct_floris_from_amr_input(amr_wind_input):
     # Probably want a file not found error instead
-    return_dict = {}
 
     with open(amr_wind_input) as fp:
         Lines = fp.readlines()
@@ -66,7 +63,7 @@ def construct_floris_from_amr_input(amr_wind_input):
         layout_y = []
         for line in Lines:
             if ".base_position" in line:
-                loc = [float(l) for l in line.split()[2:]]
+                loc = [float(d) for d in line.split()[2:]]
                 layout_x.append(loc[0])
                 layout_y.append(loc[1])
 
@@ -95,10 +92,10 @@ def construct_floris_from_amr_input(amr_wind_input):
         # construct turbine thrust and power curves
         for line in Lines:
             if acuator_type+".thrust_coeff" in line:
-                thrust_coefficient = [float(l) for l in line.split()[2:]]
+                thrust_coefficient = [float(d) for d in line.split()[2:]]
         for line in Lines:
             if acuator_type+".wind_speed" in line:
-                wind_speed = [float(l) for l in line.split()[2:]]
+                wind_speed = [float(d) for d in line.split()[2:]]
         # The power curve needs to be constructed from available data
         thrust_coefficient = np.array(thrust_coefficient)
         if (thrust_coefficient < 0).any() or (thrust_coefficient > 1).any():

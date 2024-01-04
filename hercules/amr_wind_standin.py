@@ -185,7 +185,7 @@ class AMRWindStandin(FederateAgent):
 
             # Compute the turbine power using a simple formula
             if self.message_from_server is not None:
-                yaw_angles = self.message_from_server[-self.num_turbines:]
+                yaw_angles = self.message_from_server[-self.num_turbines :]
             else:
                 yaw_angles = None
             (

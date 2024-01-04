@@ -74,39 +74,37 @@ def construct_floris_from_amr_input(amr_wind_input):
                 if acuator_type == "UniformCtDisk":
                     pass
                 else:
-                    raise NotImplementedError(
-                        "FLORIS standin requires UniformCtDisk actuators."
-                    )
+                    raise NotImplementedError("FLORIS standin requires UniformCtDisk actuators.")
 
         # Get the turine parameters
         for line in Lines:
-            if acuator_type+".rotor_diameter" in line:
+            if acuator_type + ".rotor_diameter" in line:
                 rotor_diameter = float(line.split()[2])
         for line in Lines:
-            if acuator_type+".hub_height" in line:
+            if acuator_type + ".hub_height" in line:
                 hub_height = float(line.split()[2])
         for line in Lines:
-            if acuator_type+".density" in line:
+            if acuator_type + ".density" in line:
                 ref_air_density = float(line.split()[2])
 
         # construct turbine thrust and power curves
         for line in Lines:
-            if acuator_type+".thrust_coeff" in line:
+            if acuator_type + ".thrust_coeff" in line:
                 thrust_coefficient = [float(d) for d in line.split()[2:]]
         for line in Lines:
-            if acuator_type+".wind_speed" in line:
+            if acuator_type + ".wind_speed" in line:
                 wind_speed = [float(d) for d in line.split()[2:]]
         # The power curve needs to be constructed from available data
         thrust_coefficient = np.array(thrust_coefficient)
         if (thrust_coefficient < 0).any() or (thrust_coefficient > 1).any():
             print("Clipping thrust_coefficient to (0, 1) interval.")
             thrust_coefficient = np.clip(thrust_coefficient, 0.0, 1.0)
-        ai = (1 - np.sqrt(1-np.array(thrust_coefficient)))/2
-        power_coefficient = 4*ai*(1-ai)**2
-        turbine_data_dict={
-            "wind_speed":wind_speed,
-            "thrust_coefficient":thrust_coefficient,
-            "power_coefficient":list(power_coefficient)
+        ai = (1 - np.sqrt(1 - np.array(thrust_coefficient))) / 2
+        power_coefficient = 4 * ai * (1 - ai) ** 2
+        turbine_data_dict = {
+            "wind_speed": wind_speed,
+            "thrust_coefficient": thrust_coefficient,
+            "power_coefficient": list(power_coefficient),
         }
 
         # Build the turbine dictionary as expected by FLORIS
@@ -115,15 +113,13 @@ def construct_floris_from_amr_input(amr_wind_input):
             turbine_name="FLORIS-standin-turbine",
             hub_height=hub_height,
             rotor_diameter=rotor_diameter,
-            ref_air_density=ref_air_density
+            ref_air_density=ref_air_density,
         )
 
         # load a default model
-        fi = FlorisInterface("gch.yaml")
+        fi = FlorisInterface(default_floris_dict)
         fi.reinitialize(
-            layout_x=layout_x,
-            layout_y=layout_y,
-            turbine_type=[turb_dict]*len(layout_x)
+            layout_x=layout_x, layout_y=layout_y, turbine_type=[turb_dict] * len(layout_x)
         )
 
     return fi
@@ -134,7 +130,7 @@ class FlorisStandin(AMRWindStandin):
         super(FlorisStandin, self).__init__(
             config_dict=config_dict,
             amr_wind_input=amr_input_file,
-            amr_standin_data_file=amr_standin_data_file
+            amr_standin_data_file=amr_standin_data_file,
         )
 
         # Construct the floris object
@@ -151,7 +147,7 @@ class FlorisStandin(AMRWindStandin):
             self.standin_data = pd.read_csv(amr_standin_data_file)
 
         # Initialize storage
-        self.yaw_angles_stored = [0.]*self.num_turbines
+        self.yaw_angles_stored = [0.0] * self.num_turbines
 
     def get_step(self, sim_time_s, yaw_angles=None):
         """Retreive or calculate wind speed, direction, and turbine powers
@@ -181,27 +177,28 @@ class FlorisStandin(AMRWindStandin):
             amr_wind_speed = 8.0
             amr_wind_direction = 240.0
 
-        turbine_wind_directions = [amr_wind_direction]*self.num_turbines
-        
+        turbine_wind_directions = [amr_wind_direction] * self.num_turbines
+
         # Compute the turbine power using FLORIS
-        self.fi.reinitialize(
-            wind_speeds=[amr_wind_speed],
-            wind_directions=[amr_wind_direction]
-        )
-        
-        
+        self.fi.reinitialize(wind_speeds=[amr_wind_speed], wind_directions=[amr_wind_direction])
+
         if yaw_angles is not None:
-            yaw_misalignments = (amr_wind_direction - np.array(yaw_angles))[None,:] # TODO: remove 2
-            
-            if (np.abs(yaw_misalignments) > 45).any(): # Bad yaw angles
-                print((
-                    "Large yaw misalignment detected. " +
-                    "Wind direction: {0:.2f} deg, ".format(amr_wind_direction) +
-                    "Yaw angles: "
-                ), yaw_angles, "Using previous yaw angles."
+            yaw_misalignments = (amr_wind_direction - np.array(yaw_angles))[
+                None, :
+            ]  # TODO: remove 2
+
+            if (np.abs(yaw_misalignments) > 45).any():  # Bad yaw angles
+                print(
+                    (
+                        "Large yaw misalignment detected. "
+                        + "Wind direction: {0:.2f} deg, ".format(amr_wind_direction)
+                        + "Yaw angles: "
+                    ),
+                    yaw_angles,
+                    "Using previous yaw angles.",
                 )
-                yaw_misalignments = (amr_wind_direction - np.array(self.yaw_angles_stored))[None,:]
-            else: # Reasonable yaw angles, save in case bad angles received later
+                yaw_misalignments = (amr_wind_direction - np.array(self.yaw_angles_stored))[None, :]
+            else:  # Reasonable yaw angles, save in case bad angles received later
                 self.yaw_angles_stored = yaw_angles
         else:
             yaw_misalignments = yaw_angles
@@ -230,7 +227,6 @@ class FlorisStandin(AMRWindStandin):
 
 
 def launch_floris(amr_input_file, amr_standin_data_file=None):
-    
     temp = read_amr_wind_input(amr_input_file)
 
     config = {
@@ -251,10 +247,66 @@ def launch_floris(amr_input_file, amr_standin_data_file=None):
     }
 
     if amr_standin_data_file is not None:
-        #obj = AMRWindStandin(config, amr_input_file, amr_standin_data_file)
+        # obj = AMRWindStandin(config, amr_input_file, amr_standin_data_file)
         raise NotImplementedError("FLORIS standin is not yet configured for standin data.")
     else:
         obj = FlorisStandin(config, amr_input_file)
 
     obj.run_helics_setup()
     obj.enter_execution(function_targets=[], function_arguments=[[]])
+
+
+default_floris_dict = {
+    "logging": {
+        "console": {"enable": True, "level": "WARNING"},
+        "file": {"enable": False, "level": "WARNING"},
+    },
+    "solver": {"type": "turbine_grid", "turbine_grid_points": 3},
+    "wake": {
+        "model_strings": {
+            "combination_model": "sosfs",
+            "deflection_model": "gauss",
+            "turbulence_model": "crespo_hernandez",
+            "velocity_model": "gauss",
+        },
+        "enable_secondary_steering": True,
+        "enable_yaw_added_recovery": True,
+        "enable_transverse_velocities": True,
+        "wake_deflection_parameters": {
+            "gauss": {
+                "ad": 0.0,
+                "alpha": 0.58,
+                "bd": 0.0,
+                "beta": 0.077,
+                "dm": 1.0,
+                "ka": 0.38,
+                "kb": 0.004,
+            },
+            "jimenez": {"ad": 0.0, "bd": 0.0, "kd": 0.05},
+        },
+        "wake_turbulence_parameters": {
+            "crespo_hernandez": {"initial": 0.1, "constant": 0.5, "ai": 0.8, "downstream": -0.32}
+        },
+        "wake_velocity_parameters": {
+            "gauss": {"alpha": 0.58, "beta": 0.077, "ka": 0.38, "kb": 0.004},
+            "jensen": {"we": 0.05},
+        },
+    },
+    "farm": {
+        "layout_x": [0.0],
+        "layout_y": [0.0],
+        "turbine_type": ["nrel_5MW"],
+    },
+    "flow_field": {
+        "wind_speeds": [8.0],
+        "wind_directions": [270.0],
+        "wind_veer": 0.0,
+        "wind_shear": 0.12,
+        "air_density": 1.225,
+        "turbulence_intensity": 0.06,
+        "reference_wind_height": 90.0,
+    },
+    "name": "GCH_for_FlorisStandin",
+    "description": "FLORIS Gauss Curl Hybrid model standing in for AMR-Wind",
+    "floris_version": "v4.x",
+}

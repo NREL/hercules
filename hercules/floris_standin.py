@@ -241,11 +241,7 @@ def launch_floris(amr_input_file, amr_standin_data_file=None):
         "Agent": "floris_standin",
     }
 
-    if amr_standin_data_file is not None:
-        # obj = AMRWindStandin(config, amr_input_file, amr_standin_data_file)
-        raise NotImplementedError("FLORIS standin is not yet configured for standin data.")
-    else:
-        obj = FlorisStandin(config, amr_input_file)
+    obj = FlorisStandin(config, amr_input_file, amr_standin_data_file)
 
     obj.run_helics_setup()
     obj.enter_execution(function_targets=[], function_arguments=[[]])

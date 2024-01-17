@@ -26,8 +26,8 @@ import logging
 import sys
 
 import numpy as np
-from floris.turbine_library import build_cosine_loss_turbine_dict
 from floris.tools import FlorisInterface
+from floris.turbine_library import build_cosine_loss_turbine_dict
 
 from hercules.amr_wind_standin import AMRWindStandin, read_amr_wind_input
 

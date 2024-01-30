@@ -198,7 +198,7 @@ class FlorisStandin(AMRWindStandin):
         else:
             yaw_misalignments = yaw_angles
         self.fi.calculate_wake(yaw_angles=yaw_misalignments)
-        # This converts the output power from Floris, which is in watts, to kW to interact with the rest of Hercules
+        # This converts the output power from Floris, which is in watts, to kW for the rest of Hercules
         turbine_powers = (self.fi.get_turbine_powers() / 1000).flatten().tolist()  # in kW
 
         return (

@@ -198,7 +198,7 @@ class FlorisStandin(AMRWindStandin):
         else:
             yaw_misalignments = yaw_angles
         self.fi.calculate_wake(yaw_angles=yaw_misalignments)
-        turbine_powers = self.fi.get_turbine_powers().flatten().tolist()
+        turbine_powers = (self.fi.get_turbine_powers() / 1000).flatten().tolist()
 
         return (
             amr_wind_speed,

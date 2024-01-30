@@ -73,7 +73,7 @@ def test_FlorisStandin_get_step():
     fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(5.0)
     fi_true.reinitialize(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
     fi_true.calculate_wake()
-    fi_true_tp = fi_true.get_turbine_powers()
+    fi_true_tp = fi_true.get_turbine_powers() / 1000 # kW expected
 
     assert fs_ws == default_wind_speed
     assert fs_wd == default_wind_direction
@@ -85,7 +85,7 @@ def test_FlorisStandin_get_step():
     fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(5.0, yaw_angles)
     fi_true.reinitialize(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
     fi_true.calculate_wake()  # Aligned in any case
-    fi_true_tp = fi_true.get_turbine_powers()
+    fi_true_tp = fi_true.get_turbine_powers() / 1000 # kW expected
 
     assert np.allclose(fs_tp, fi_true_tp.flatten().tolist())
 
@@ -99,7 +99,7 @@ def test_FlorisStandin_get_step():
 
     # Correct yaw angles
     fi_true.calculate_wake(yaw_angles=default_wind_direction - np.array([yaw_angles]))
-    fi_true_tp = fi_true.get_turbine_powers()
+    fi_true_tp = fi_true.get_turbine_powers() / 1000 # kW expected
     assert np.allclose(fs_tp, fi_true_tp.flatten().tolist())
 
 

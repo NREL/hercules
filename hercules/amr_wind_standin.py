@@ -184,12 +184,16 @@ class AMRWindStandin(FederateAgent):
             logger.info("Calculating simulation time: %.1f" % sim_time_s)
 
             # Compute the turbine power using a simple formula
+            if self.message_from_server is not None:
+                yaw_angles = self.message_from_server[-self.num_turbines :]
+            else:
+                yaw_angles = None
             (
                 amr_wind_speed,
                 amr_wind_direction,
                 turbine_powers,
                 turbine_wind_directions,
-            ) = self.get_step(sim_time_s)
+            ) = self.get_step(sim_time_s, yaw_angles)
 
             # ================================================================
             # Communicate with control center
@@ -232,7 +236,7 @@ class AMRWindStandin(FederateAgent):
 
     # TODO cleanup code to move publish and subscribe here.
 
-    def get_step(self, sim_time_s):
+    def get_step(self, sim_time_s, yaw_angles=None):
         """Retreive or calculate wind speed, direction, and turbine powers
 
         Input:
@@ -327,7 +331,7 @@ def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None):
         "endpoint_interval": 1,
         "starttime": 0,
         "stoptime": temp["stop_time"],
-        "Agent": "dummy_amr_wind",
+        "Agent": "amr_wind_standin",
     }
 
     if amr_standin_data_file is not None:

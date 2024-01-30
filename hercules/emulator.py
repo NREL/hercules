@@ -371,6 +371,9 @@ class Emulator(FederateAgent):
                 if "Actuator.labels" in line:
                     turbine_labels = line.split()[2:]
                     num_turbines = len(turbine_labels)
+            for line in Lines:
+                if "Actuator.type" in line:
+                    actuator_type = line.split()[-1]
 
             self.num_turbines = num_turbines
             print("Number of turbines in amrwind: ", num_turbines)
@@ -397,7 +400,7 @@ class Emulator(FederateAgent):
 
             # Find the diameter
             for line in Lines:
-                if "rotor_diameter" in line:
+                if "Actuator.%s.rotor_diameter" % actuator_type in line:
                     D = float(line.split()[-1])
 
             # Get the turbine locations

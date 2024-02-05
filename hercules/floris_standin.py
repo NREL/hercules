@@ -295,7 +295,7 @@ default_floris_dict = {
         "wind_veer": 0.0,
         "wind_shear": 0.12,
         "air_density": 1.225,
-        "turbulence_intensity": 0.06,
+        "turbulence_intensities": [0.06],
         "reference_wind_height": 90.0,
     },
     "name": "GCH_for_FlorisStandin",

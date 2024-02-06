@@ -145,6 +145,7 @@ class AMRWindStandin(FederateAgent):
         # Initialize the values
         turbine_powers = np.zeros(self.num_turbines)
         sim_time_s = 0.0  # initialize time to 0
+        sim_time_s = self.absolute_helics_time  # initialize time to 0
         amr_wind_speed = 8.0
         amr_wind_direction = 240.0
 
@@ -152,11 +153,11 @@ class AMRWindStandin(FederateAgent):
         # Control center to get the starting wind speed and wind direction
         # Code the time step as -1 and -1 (to ensure it is an array)
         logger.info("** First communication with control center")
-        message_from_client_array = [0, -1, -1]
+        # message_from_client_array = [0, -1, -1]
         # Send initial message via helics
         # publish on topic: status
-        self.send_via_helics("status", str(message_from_client_array))
-        logger.info("** Initial Message Sent: {}".format(message_from_client_array))
+        # self.send_via_helics("status", str(message_from_client_array))
+        # logger.info("** Initial Message Sent: {}".format(message_from_client_array))
 
         # Subscribe to helics messages:
         incoming_messages = self.helics_connector.get_all_waiting_messages()
@@ -170,6 +171,8 @@ class AMRWindStandin(FederateAgent):
 
         # Synchronize time bewteen control center and AMRWind
         self.sync_time_helics(self.absolute_helics_time + self.deltat)
+        sim_time_s = float(self.absolute_helics_time)
+        
         logger.info("** Initial Received reply: {}".format(message_from_server))
 
         logger.info("** Intial Wind Speed: {}".format(amr_wind_speed))
@@ -178,10 +181,11 @@ class AMRWindStandin(FederateAgent):
 
         self.message_from_server = None
 
-        # while self.absolute_helics_time < (self.endtime - self.starttime + 1):
-        while sim_time_s <= (self.endtime - self.starttime):
+        while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+        #while sim_time_s <= (self.endtime - self.starttime):
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
-            logger.info("Calculating simulation time: %.1f" % sim_time_s)
+            sim_time_s = float(self.absolute_helics_time)
+            logger.info("Calculating simulation time: %.3f" % sim_time_s)
 
             # Compute the turbine power using a simple formula
             (
@@ -195,7 +199,7 @@ class AMRWindStandin(FederateAgent):
             # Communicate with control center
             # Send the turbine powers for this time step and get wind speed and wind direction for
             # the next time step
-            logger.info("Time step: %d" % sim_time_s)
+            logger.info("Time step: %0.3f" % sim_time_s)
             logger.info("** Communicating with control center")
             message_from_client_array = (
                 [
@@ -209,6 +213,7 @@ class AMRWindStandin(FederateAgent):
 
             # Send helics message to Control Center
             # publish on topic: status
+            
             self.send_via_helics("status", str(message_from_client_array))
             logger.info("** Message Sent: {}".format(message_from_client_array))
 
@@ -227,8 +232,10 @@ class AMRWindStandin(FederateAgent):
                 # Note standin doesn't currently use received info for anything
 
             # Advance simulation time and time step counter
-            sim_time_s += self.dt
+            #sim_time_s += self.dt
             self.sync_time_helics(self.absolute_helics_time + self.deltat)
+            print("ABSOLUTE TIME : ",self.absolute_helics_time, self.deltat, self.dt)
+            sim_time_s = self.absolute_helics_time
 
     # TODO cleanup code to move publish and subscribe here.
 
@@ -317,7 +324,7 @@ def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None):
         "name": "amr_wind_standin",
         "gridpack": {},
         "helics": {
-            "deltat": 1,
+            "deltat": 0.5,
             "subscription_topics": ["control"],
             "publication_topics": ["status"],
             "endpoints": [],

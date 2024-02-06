@@ -173,7 +173,7 @@ class Emulator(FederateAgent):
         incoming_messages = self.helics_connector.get_all_waiting_messages()
         if incoming_messages != {}:
             subscription_value = self.process_subscription_messages(incoming_messages)
-            print("What did we receive ", subscription_value)
+            # print("What did we receive ", subscription_value)
         else:
             print("Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
             subscription_value = (
@@ -360,7 +360,7 @@ class Emulator(FederateAgent):
 
     def read_amr_wind_input(self, amr_wind_input):
         # TODO this function is ugly and uncommented
-        print("How many times does this get called ", amr_wind_input)
+        # print("How many times does this get called ", amr_wind_input)
 
         # TODO Initialize to empty in case doesn't run
         # Probably want a file not found error instead

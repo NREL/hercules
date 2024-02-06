@@ -294,7 +294,7 @@ class AMRWindStandin(FederateAgent):
             turbine_wind_directions = list(
                 amr_wind_direction + 5.0 * np.random.randn(self.num_turbines)
             )
-            turbine_wind_directions = [sim_time_s + 0.01, sim_time_s + 0.02]
+            # turbine_wind_directions = [sim_time_s + 0.01, sim_time_s + 0.02]
 
         return (
             amr_wind_speed,

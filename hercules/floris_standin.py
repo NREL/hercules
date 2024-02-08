@@ -154,9 +154,9 @@ class FlorisStandin(AMRWindStandin):
         power_setpoints: power setpoints for each turbine (W). Defaults to None.
 
         Output:
-        amr_wind_speed: wind speed at current time step
-        amr_wind_direction: wind direction at current time step
-        turbine_powers: turbine powers at current time step
+        amr_wind_speed: wind speed at current time step [m/s]
+        amr_wind_direction: wind direction at current time step [deg]
+        turbine_powers: turbine powers at current time step [kW]
         """
 
         if hasattr(self, "standin_data"):
@@ -203,10 +203,11 @@ class FlorisStandin(AMRWindStandin):
         if power_setpoints is not None:
             power_setpoints = np.array(power_setpoints)[None,:]
             # Set invalid power setpoints to a large value
-            power_setpoints[power_setpoints == np.full(power_setpoints.shape, None)] = 1e12
-            power_setpoints[power_setpoints < 0] = 1e12
+            power_setpoints[power_setpoints == np.full(power_setpoints.shape, None)] = 1e9
+            power_setpoints[power_setpoints < 0] = 1e9
+            # Note conversion from Watts (used in Floris) and back to kW (used in Hercules)
+            power_setpoints = power_setpoints * 1000 # in W
         self.fi.calculate_wake(yaw_angles=yaw_misalignments, power_setpoints=power_setpoints)
-        # This converts the output power from Floris (in Watts) to kW (standard for Hercules)
         turbine_powers = (self.fi.get_turbine_powers() / 1000).flatten().tolist()  # in kW
 
         return (

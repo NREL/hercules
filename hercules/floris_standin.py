@@ -114,6 +114,7 @@ def construct_floris_from_amr_input(amr_wind_input):
             rotor_diameter=rotor_diameter,
             ref_air_density=ref_air_density,
         )
+        turb_dict["power_thrust_model"] = "mixed"
 
         # load a default model
         fi = FlorisInterface(default_floris_dict)
@@ -144,11 +145,13 @@ class FlorisStandin(AMRWindStandin):
         # Initialize storage
         self.yaw_angles_stored = [0.0] * self.num_turbines
 
-    def get_step(self, sim_time_s, yaw_angles=None):
+    def get_step(self, sim_time_s, yaw_angles=None, power_setpoints=None):
         """Retreive or calculate wind speed, direction, and turbine powers
 
         Input:
         sim_time_s: simulation time step
+        yaw_angles: absolute yaw positions for each turbine (deg). Defaults to None.
+        power_setpoints: power setpoints for each turbine (W). Defaults to None.
 
         Output:
         amr_wind_speed: wind speed at current time step
@@ -197,7 +200,14 @@ class FlorisStandin(AMRWindStandin):
                 self.yaw_angles_stored = yaw_angles
         else:
             yaw_misalignments = yaw_angles
-        self.fi.calculate_wake(yaw_angles=yaw_misalignments)
+        if power_setpoints is not None:
+            print(power_setpoints)
+            power_setpoints = np.array(power_setpoints)[None,:]
+            print(power_setpoints)
+            # Set invalid power setpoints to a large value
+            power_setpoints[power_setpoints == None] = 1e12
+            power_setpoints[power_setpoints < 0] = 1e12
+        self.fi.calculate_wake(yaw_angles=yaw_misalignments, power_setpoints=power_setpoints)
         # This converts the output power from Floris (in Watts) to kW (standard for Hercules)
         turbine_powers = (self.fi.get_turbine_powers() / 1000).flatten().tolist()  # in kW
 

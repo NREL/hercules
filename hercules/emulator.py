@@ -344,10 +344,22 @@ class Emulator(FederateAgent):
         else:  # set yaw_angles based on self.wind_direction
             yaw_angles = [self.wind_direction] * self.num_turbines
 
+        if (
+            "turbine_power_setpoints"
+            in self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]
+        ):
+            power_setpoints = self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+                "turbine_power_setpoints"
+            ]
+        else:  # set yaw_angles based on self.wind_direction
+            power_setpoints = [None] * self.num_turbines
+
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control
         tmp = np.array(
-            [self.absolute_helics_time, self.wind_speed, self.wind_direction] + yaw_angles
+            [self.absolute_helics_time, self.wind_speed, self.wind_direction]
+            + yaw_angles
+            + power_setpoints
         ).tolist()
 
         self.send_via_helics("control", str(tmp))

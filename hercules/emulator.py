@@ -356,6 +356,7 @@ class Emulator(FederateAgent):
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control
+        # TODO: power_setpoints part will not work with AMRWind proper.
         tmp = np.array(
             [self.absolute_helics_time, self.wind_speed, self.wind_direction]
             + yaw_angles

@@ -201,11 +201,9 @@ class FlorisStandin(AMRWindStandin):
         else:
             yaw_misalignments = yaw_angles
         if power_setpoints is not None:
-            print(power_setpoints)
             power_setpoints = np.array(power_setpoints)[None,:]
-            print(power_setpoints)
             # Set invalid power setpoints to a large value
-            power_setpoints[power_setpoints == None] = 1e12
+            power_setpoints[power_setpoints == np.full(power_setpoints.shape, None)] = 1e12
             power_setpoints[power_setpoints < 0] = 1e12
         self.fi.calculate_wake(yaw_angles=yaw_misalignments, power_setpoints=power_setpoints)
         # This converts the output power from Floris (in Watts) to kW (standard for Hercules)

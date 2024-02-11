@@ -4,6 +4,9 @@
 # A lot of modules and conda stuff
 conda activate hercules
 
+# Delete old log files
+rm hercules_output.csv log_test_client.log loghercules logfloris
+
 # Set the helics port to use: 
 export HELICS_PORT=32000
 
@@ -16,8 +19,5 @@ helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS
 python3 hercules_runscript.py hercules_input_000.yaml >> loghercules 2>&1 & # Start the controller center and pass in input file
 
 
-python3 hercules_runscript_amr_standin.py amr_input.inp >> logstandin 2>&1
-# Now go back to scratch folder and launch the job
+python3 floris_runscript.py amr_input.inp >> logfloris 2>&1
 
-# cd /scratch/pfleming/c2c/example_sim_02
-# mpirun -n 72 /home/pfleming/amr-wind/build/amr_wind amr_input.inp >> logamr 

@@ -5,7 +5,7 @@ name: example_000
 
 ###
 # Describe this emulator setup
-description: Wind standin plant plus electrolyzer plant
+description: Wind standin plant using FLORIS plus electrolyzer plant
 
 dt: 0.5
 

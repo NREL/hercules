@@ -180,7 +180,10 @@ class FlorisStandin(AMRWindStandin):
         # Compute the turbine power using FLORIS
         self.fi.reinitialize(wind_speeds=[amr_wind_speed], wind_directions=[amr_wind_direction])
 
-        if yaw_angles is not None:
+        if yaw_angles is None or (np.array(yaw_angles) == -1000).any():
+            # Note: -1000 is the "no value" flag for yaw_angles (NaNs not handled well)
+            yaw_misalignments = None
+        else:
             yaw_misalignments = (amr_wind_direction - np.array(yaw_angles))[
                 None, :
             ]  # TODO: remove 2
@@ -198,8 +201,7 @@ class FlorisStandin(AMRWindStandin):
                 yaw_misalignments = (amr_wind_direction - np.array(self.yaw_angles_stored))[None, :]
             else:  # Reasonable yaw angles, save in case bad angles received later
                 self.yaw_angles_stored = yaw_angles
-        else:
-            yaw_misalignments = yaw_angles
+
         if power_setpoints is not None:
             power_setpoints = np.array(power_setpoints)[None,:]
             # Set invalid power setpoints to a large value
@@ -224,7 +226,7 @@ class FlorisStandin(AMRWindStandin):
         pass
 
     def process_periodic_publication(self):
-        # Periodically publish data to the surrpogate
+        # Periodically publish data to the surrogate
         pass
 
     def process_subscription_messages(self, msg):

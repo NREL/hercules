@@ -81,6 +81,14 @@ def test_FlorisStandin_get_step_yaw_angles():
     assert fs_twd == [default_wind_direction] * 2
     assert np.allclose(fs_tp, fi_true_tp.flatten().tolist())
 
+    # Test with any "no value" yaw angles (should apply no yaw angle)
+    fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(5.0, yaw_angles=[-1000, 20])
+    
+    assert fs_ws == default_wind_speed
+    assert fs_wd == default_wind_direction
+    assert fs_twd == [default_wind_direction] * 2
+    assert np.allclose(fs_tp, fi_true_tp.flatten().tolist())
+
     # Test with aligned turbines
     yaw_angles = [240.0, 240.0]
     fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(5.0, yaw_angles)

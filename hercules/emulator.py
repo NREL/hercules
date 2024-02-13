@@ -20,7 +20,7 @@ class Emulator(FederateAgent):
 
         # Initialize the output file
         if "output_file" in input_dict:
-            self.output_file = input_dict["output_file"] + ".csv"
+            self.output_file = input_dict["output_file"]
         else:
             self.output_file = "hercules_output.csv"
 

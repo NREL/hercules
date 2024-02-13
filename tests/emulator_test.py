@@ -61,11 +61,15 @@ def test_Emulator_instantiation():
     controller = ControllerStandin(test_input_dict)
     py_sims = PySims(test_input_dict)
     
-    _ = Emulator(controller, py_sims, test_input_dict)
+    emulator = Emulator(controller, py_sims, test_input_dict)
+
+    # Check default settings
+    assert emulator.output_file == "hercules_output.csv"
+    assert emulator.external_data_all == {}
 
     test_input_dict_2 = test_input_dict.copy()
     test_input_dict_2["external_data_file"] = "tests/test_inputs/external_data.csv"
-    test_input_dict_2["output_file"] = "test_output"
+    test_input_dict_2["output_file"] = "test_output.csv"
     test_input_dict_2["dt"] = 0.5
 
     emulator = Emulator(controller, py_sims, test_input_dict_2)

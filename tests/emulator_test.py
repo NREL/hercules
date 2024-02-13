@@ -1,5 +1,5 @@
-from hercules.emulator import Emulator
 from hercules.controller_standin import ControllerStandin
+from hercules.emulator import Emulator
 from hercules.py_sims import PySims
 
 # Copy data from hercules_input.yaml into input_dict

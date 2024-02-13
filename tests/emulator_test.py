@@ -74,3 +74,5 @@ def test_Emulator_instantiation():
     assert emulator.external_data_all["power_reference"][1] == 1500
     assert emulator.external_data_all["power_reference"][2] == 2000
     assert emulator.external_data_all["power_reference"][-1] == 3000
+
+    assert emulator.output_file == "test_output.csv"

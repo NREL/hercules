@@ -47,6 +47,7 @@ class Emulator(FederateAgent):
         self.external_data_all = {}
         if "external_data_file" in input_dict:
             self._read_external_data_file(input_dict["external_data_file"])
+            self.external_signals = {}
 
         # Write the time step into helics config dict
         self.helics_config_dict["helics"]["deltat"] = self.dt
@@ -168,7 +169,7 @@ class Emulator(FederateAgent):
             #     continue
             # Get any external data
             for k in self.external_data_all:
-                self.main_dict["external_data"][k] = self.external_data_all[k][idx]
+                self.main_dict["external_signals"][k] = self.external_data_all[k][idx]
 
             # Update controller and py sims
             # TODO: Should 'time' in the main dict be AMR-wind time or

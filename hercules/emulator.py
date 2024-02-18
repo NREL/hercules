@@ -48,6 +48,7 @@ class Emulator(FederateAgent):
         if "external_data_file" in input_dict:
             self._read_external_data_file(input_dict["external_data_file"])
             self.external_signals = {}
+            self.main_dict["external_signals"] = {}
 
         # Write the time step into helics config dict
         self.helics_config_dict["helics"]["deltat"] = self.dt
@@ -310,6 +311,8 @@ class Emulator(FederateAgent):
         # The keys and values as two lists
         keys = list(self.main_dict_flat.keys())
         values = list(self.main_dict_flat.values())
+
+        print('OUTPUT FILE', self.output_file)
 
         # If this is first iteration, write the keys as csv header
         if self.first_iteration:

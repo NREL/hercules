@@ -3,7 +3,7 @@ name: example_001
 
 ###
 # Describe this emulator setup
-description: AMR-wind (Dummy) with battery
+description: AMR-wind (Standin) with battery
 
 dt: 0.5
 

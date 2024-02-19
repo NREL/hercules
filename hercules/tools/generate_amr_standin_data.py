@@ -6,14 +6,14 @@ TODO:
 
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 import os
-import netCDF4 as ncdf
 
+import matplotlib.pyplot as plt
+import netCDF4 as ncdf
+import numpy as np
+import pandas as pd
+from hercules.amr_wind_standin import read_amr_wind_input
 from hercules.utilities import load_yaml
-from hercules.dummy_amr_wind import read_amr_wind_input
 
 
 class StandinData:
@@ -90,7 +90,9 @@ class StandinData:
         # TODO: make this more general. It might not be "actuator14400"
         actuator_dir = os.path.join(case_folder, "post_processing/actuator14400")
 
-        # TODO: if there are a different number of actuators in the amr data files and the amr input file, raise an error. They probably do not belong to the same run
+        # TODO: if there are a different number of actuators in the amr data files
+        #       and the amr input file, raise an error. They probably do not belong
+        #       to the same run
         actuators = os.listdir(os.path.join(case_folder, actuator_dir))
 
         actuator_data = []
@@ -104,7 +106,7 @@ class StandinData:
             rootgrp_name = list(rootgrp.groups.keys())[0]
 
             # What is the difference between vref and vdisk?
-            vref = rootgrp["/".join([rootgrp_name, "vref"])][:]
+            # vref = rootgrp["/".join([rootgrp_name, "vref"])][:]
             vdisk = rootgrp["/".join([rootgrp_name, "vdisk"])][:]
 
             v_abs = np.linalg.norm(vdisk, axis=1)
@@ -128,9 +130,7 @@ class StandinData:
             time = actuator_data[0]["time"]
 
         amr_wind_speed = np.mean([ad["v_abs"] for ad in actuator_data], axis=0)
-        amr_wind_direction = np.mean(
-            [ad["v_direction"] for ad in actuator_data], axis=0
-        )
+        amr_wind_direction = np.mean([ad["v_direction"] for ad in actuator_data], axis=0)
 
         powers = np.stack([ad["power"] for ad in actuator_data], axis=1)
 
@@ -175,12 +175,8 @@ class StandinData:
 
     def parse_hercules_input(self, fname):
         hercules_input = load_yaml(fname)
-        self.time_start = hercules_input["hercules_comms"]["helics"]["config"][
-            "starttime"
-        ]
-        self.time_stop = hercules_input["hercules_comms"]["helics"]["config"][
-            "stoptime"
-        ]
+        self.time_start = hercules_input["hercules_comms"]["helics"]["config"]["starttime"]
+        self.time_stop = hercules_input["hercules_comms"]["helics"]["config"]["stoptime"]
         self.time_delta = hercules_input["dt"]
 
 
@@ -188,10 +184,14 @@ class StandinData:
 if __name__ == "__main__":
     # # generate standin data file from amr-wind outputs
     # fpaths = {
-    #     "amr_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
-    #     "amr_out_path": "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
-    #     "herc_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
-    #     "save_path": "example_case_folders/06_amr_wind_standin_and_battery",
+    #   "amr_inp_path":
+    #        "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
+    #   "amr_out_path":
+    #        "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
+    #   "herc_inp_path":
+    #        "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
+    #   "save_path":
+    #        "example_case_folders/06_amr_wind_standin_and_battery",
     # }
 
     # SD = StandinData(method="amr_actuator", **fpaths)
@@ -201,10 +201,14 @@ if __name__ == "__main__":
 
     # generate standin data file from user-defined timeseries
     fpaths = {
-        "amr_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
-        # "amr_out_path": "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
-        "herc_inp_path": "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
-        "save_path": "example_case_folders/06_amr_wind_standin_and_battery",
+        "amr_inp_path": 
+            "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
+        # "amr_out_path":
+        #       "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
+        "herc_inp_path":
+            "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
+        "save_path": 
+            "example_case_folders/06_amr_wind_standin_and_battery",
     }
     SD = StandinData(method="user", **fpaths)
 
@@ -223,12 +227,9 @@ if __name__ == "__main__":
     turbine_powers = np.zeros([len(time), num_turbines])
     for i in range(len(time)):
         turb_powers = (
-            np.ones(num_turbines) * amr_wind_speed[i] ** 3
-            + np.random.rand(num_turbines) * 50
+            np.ones(num_turbines) * amr_wind_speed[i] ** 3 + np.random.rand(num_turbines) * 50
         )
-        turb_powers[int(num_turbines / 2) :] = (
-            0.75 * turb_powers[int(num_turbines / 2) :]
-        )
+        turb_powers[int(num_turbines / 2) :] = 0.75 * turb_powers[int(num_turbines / 2) :]
         turb_powers = [np.min([turb_rating, tp]) for tp in turb_powers]
         turbine_powers[i, :] = turb_powers
 

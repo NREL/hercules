@@ -20,6 +20,7 @@ class SenderAgent(FederateAgent):
         print("SenderAgent time before loop: ", self.absolute_helics_time)
         i = 0
         while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+            print("+++++")
             print("SenderAgent time in loop: ", self.absolute_helics_time)
             incoming_messages = self.helics_connector.get_all_waiting_messages()
             try:
@@ -32,9 +33,11 @@ class SenderAgent(FederateAgent):
             print("timestamp received from computer: ", message[0])
             print("result received from computer: ", message[1])
             to_send = [self.absolute_helics_time, i]
+            print("sending", to_send, "to computer")
             self.send_via_helics("sender", str(to_send))
             self.sync_time_helics(self.absolute_helics_time+self.deltat)
             i += 1
+            print("-----")
 
 class ComputerAgent(FederateAgent):
     def __init__(self, config_dict):
@@ -52,6 +55,7 @@ class ComputerAgent(FederateAgent):
         print("ComputerAgent time before loop: ", self.absolute_helics_time)
         #self.sync_time_helics(self.absolute_helics_time) # or comment out
         while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+            print("+++++")
             print("ComputerAgent time in loop: ", self.absolute_helics_time)
             incoming_messages = self.helics_connector.get_all_waiting_messages()
             try:
@@ -63,9 +67,11 @@ class ComputerAgent(FederateAgent):
                 message = [-1, -1]
             print("timestamp received from sender: ", message[0])
             i = message[1]
-            to_send = [self.absolute_helics_time, i*10]
+            to_send = [self.absolute_helics_time, i]#*10]
+            print("sending", to_send, "to sender")
             self.send_via_helics("computer", str(to_send))
             self.sync_time_helics(self.absolute_helics_time+self.deltat)
+            print("-----")
 
 if __name__ == "__main__":
     a = int(sys.argv[1])

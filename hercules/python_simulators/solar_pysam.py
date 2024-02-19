@@ -2,7 +2,7 @@
 # code originally copied from https://github.com/NREL/pysam/blob/main/Examples/NonAnnualSimulation.ipynb
 
 import json
-
+# import os
 import numpy as np
 import pandas as pd
 import PySAM.Pvsamv1 as pvsam
@@ -11,19 +11,36 @@ import PySAM.Pvsamv1 as pvsam
 class SolarPySAM:
     def __init__(self, input_dict, dt):
         # load weather data
-        data = pd.read_csv(input_dict["weather_file_name"])
+        if input_dict["weather_file_name"]: # using a weather file
+            data = pd.read_csv(input_dict["weather_file_name"])
+        else: # using an input dictionary
+            data = pd.DataFrame.from_dict(input_dict["weather_data_input"])
+
+        print(data)
         data["Timestamp"] = pd.DatetimeIndex(
-            pd.to_datetime(data["Timestamp"], format="ISO8601", utc=True)
+                pd.to_datetime(data["Timestamp"], format="ISO8601", utc=True)
         )
         data = data.set_index("Timestamp")
+        
+        # print('input_dict = ')
+        # print(input_dict)
 
+        # print('filename = ', input_dict["system_info_file_name"])
+        # print('cwd = ',os.getcwd())
         # set PV system model parameters
-        with open(input_dict["system_info_file_name"], "r") as f:
-            model_params = json.load(f)
-        sys_design = {
-            "ModelParams": model_params,
-            "Other": {"lat": 39.7442, "lon": -105.1778, "elev": 1829},
-        }
+        if input_dict["system_info_file_name"]: # using system info json file
+            with open(input_dict["system_info_file_name"], "r") as f:
+                model_params = json.load(f)
+            sys_design = {
+                "ModelParams": model_params,
+                "Other": {"lat": 39.7442, "lon": -105.1778, "elev": 1829},
+            }
+        else: # using system info data dictionary in input file
+            sys_design = input_dict["system_info_data_input"]
+            print("sys_design")
+            print(sys_design)
+            print("model_params")
+            print(sys_design["ModelParams"])
 
         self.model_params = sys_design["ModelParams"]
         self.elev = sys_design["Other"]["elev"]
@@ -124,11 +141,14 @@ class SolarPySAM:
         self.power_mw = ac[0]  # calculating one timestep at a time
         self.dc_power_mw = dc[0]
         print("self.power_mw = ", self.power_mw)
+        print("self.dc_power_mw = ", self.dc_power_mw)
+        
         if self.power_mw < 0.0:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
         self.irradiance = out["gh"][0]  # TODO check that gh is the accurate irradiance output
+        print("self.irradiance = ", self.irradiance)
 
         self.aoi = out["subarray1_aoi"][0]  # angle of incidence
 

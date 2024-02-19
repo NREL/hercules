@@ -155,9 +155,15 @@ class Emulator(FederateAgent):
         print("... waiting for initial connection from AMRWind")
         # Send initial connection signal to AMRWind
         # publish on topic: control
+        print("First receive")
+#        for _ in range(2):
+        self.receive_amrwind_data()
+        print(self.main_dict)
+        print("Sending -1s")
         self.send_via_helics("control", str("[-1,-1,-1]"))
         print(" #### Entering main loop #### ")
-        self.sync_time_helics(self.absolute_helics_time + self.deltat)
+        self.sync_time_helics(self.absolute_helics_time - self.deltat)
+        print(self.absolute_helics_time)
         # Initialize the first iteration flag
         self.first_iteration = True
 
@@ -165,6 +171,7 @@ class Emulator(FederateAgent):
         # while self.absolute_helics_time < self.endtime:
         idx = 0
         while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+            print(self.absolute_helics_time)
             # Loop till we reach simulation startime.
             # if self.absolute_helics_time < self.starttime:
             #     continue
@@ -176,7 +183,9 @@ class Emulator(FederateAgent):
             # TODO: Should 'time' in the main dict be AMR-wind time or
             # helics time? Why aren't they the same?
             self.main_dict["time"] = self.absolute_helics_time
+            print(self.main_dict["external_signals"])
             self.main_dict = self.controller.step(self.main_dict)
+            print(self.main_dict['hercules_comms']['amr_wind']['wind_farm_0']['turbine_power_setpoints'])
             self.py_sims.step(self.main_dict)
             self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 
@@ -199,6 +208,7 @@ class Emulator(FederateAgent):
                 self.save_main_dict_as_text()
                 self.first_iteration = False
 
+            #self.sync_time_helics(self.absolute_helics_time + self.deltat)
             idx += 1
 
     def receive_amrwind_data(self):

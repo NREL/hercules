@@ -160,18 +160,24 @@ class AMRWindStandin(FederateAgent):
         # logger.info("** Initial Message Sent: {}".format(message_from_client_array))
 
         # Subscribe to helics messages:
-        incoming_messages = self.helics_connector.get_all_waiting_messages()
-        if incoming_messages != {}:
-            try:
-                message_from_server = list(ast.literal_eval(incoming_messages))
-            except Exception:
+        for _ in range(1):
+            incoming_messages = self.helics_connector.get_all_waiting_messages()
+            if incoming_messages != {}:
+                try:
+                    message_from_server = list(ast.literal_eval(incoming_messages))
+                except Exception:
+                    print("here here")
+                    message_from_server = None
+            else:
+                print("here 2")
                 message_from_server = None
-        else:
-            message_from_server = None
+            #self.sync_time_helics(self.absolute_helics_time)
 
         # Synchronize time bewteen control center and AMRWind
-        self.sync_time_helics(self.absolute_helics_time + self.deltat)
+        self.sync_time_helics(self.absolute_helics_time - self.deltat)
+        #self.sync_time_helics(0)
         sim_time_s = float(self.absolute_helics_time)
+        print("sim_time_s before while loop", sim_time_s)
         
         logger.info("** Initial Received reply: {}".format(message_from_server))
 
@@ -185,6 +191,7 @@ class AMRWindStandin(FederateAgent):
         #while sim_time_s <= (self.endtime - self.starttime):
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
             sim_time_s = float(self.absolute_helics_time)
+            print("sim_time_s inside while loop", sim_time_s)
             logger.info("Calculating simulation time: %.3f" % sim_time_s)
 
             # Compute the turbine power using a simple formula

@@ -1,9 +1,14 @@
 """This module provides unit tests for 'SolarPySAM'."""
 import pytest
+import os
 from hercules.python_simulators.solar_pysam import SolarPySAM
 from numpy.testing import assert_almost_equal
 
 def get_solar_params():
+
+    full_path = os.path.realpath(__file__)
+    path = os.path.dirname(full_path)
+
     solar_dict = {
         "py_sim_type": SolarPySAM,
         "weather_file_name": None,
@@ -16,7 +21,7 @@ def get_solar_params():
         "SRRL BMS Dry Bulb Temperature (°C)": [11.990000406901045],
         },
 
-        "system_info_file_name": '../example_case_folders/07_amr_wind_standin_and_solar_pysam/100MW_1axis_pvsamv1.json',
+        "system_info_file_name": path+'/../../example_case_folders/07_amr_wind_standin_and_solar_pysam/100MW_1axis_pvsamv1.json',
         "initial_conditions": {
             "power": 25, 
             "irradiance": 1000

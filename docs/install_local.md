@@ -1,6 +1,4 @@
-# Old installation instructions
-
-*Note these instructions are likely out of date, saving for now* 
+# Local installation instructions
 
 
 # Installation
@@ -109,7 +107,7 @@ Col
 
 # Running [Local]
 
-To run locally using a dummy placeholder for AMR-Wind, launch 3 separate 
+To run locally using a standin for AMR-Wind, launch 3 separate 
 terminals. In each, `conda activate` your hercules environment (`conda 
 activate hercules`). 
 
@@ -136,6 +134,20 @@ launches the hercules emulator. These will connect to the helics_broker and
 run the co-simulation. You should see printout from both the dummy AMR-wind 
 process and the hercules emulator printed to your screen.
 
+
+Alternatively, the bash files in each example are set up to be run from the terminal using 
+```
+./bash_script.sh
+```
+However, if the simulation hangs, be sure to check if there are multiple processes running with 
+```
+ps
+```
+which will tell you all of the processes currently working.  You can kill processes that you do not want by using the kill command, paired with the process number (filled into the blank in the command below).
+```
+kill ___
+```
+
 <!--
 In 4 different terminals with location set to hercules/, type the following commands
 (This is more and more out of date)
@@ -146,71 +158,16 @@ In 4 different terminals with location set to hercules/, type the following comm
 - Terminal 4: `python front_end_dash.py`
 -->
 
-# Running [Eagle]
+# Running [Kestrel]
 
-Running hercules in full requires installing AMR-Wind (likely on eagle/HPC).
-The steps are detailed below, and assume that you have already installed 
+Running hercules in full requires installing AMR-Wind (likely on Kestrel/HPC).
+The steps are detailed in section **HPC Installation**.
+<!--
+
+below, and assume that you have already installed 
 the other parts of hercules as described above under **Installation**. 
+-->
 
-### Setting up AMR-WIND 
-
-First, `deactive` your conda environment using 
-```
-conda deactivate
-```
-
-Then, clone AMR-Wind and install its required submodules. This can be done 
-using
-
-EITHER
-```
-git clone https://github.com/Exawind/amr-wind
-cd amr-wind
-git submodule update --init
-cd ..
-``` 
-OR
-``` 
-git clone --recursive https://github.com/Exawind/amr-wind
-```
-
-Now, create a new directory `build` within the main AMR-Wind repository
-```
-mkdir amr-wind/build
-```
-and copy amr-wind_buildme.sh from hercules into it, naming the copied file 
-buildme.sh
-```
-cp hercules/amr-wind_buildme.sh amr-wind/build/buildme.sh
-```
-
-`cd` into the build directory, set executable permissions for buildme.sh, and
-run buildme.sh
-```
-cd amrwind/build
-chmod +x buildme.sh
-./buildme.sh
-```
-
-This will begin compiling an AMR-Wind executable. The process could take 
-several minutes, during which progress updates will print to the terminal. 
-Once complete, the build directory will contain an executable named amr_wind.
-
-### Running a job
-
-For an example of running hercules with AMR-Wind, `cd` to 
-hercules/example_case_folders/example_sim_06/. 
-
-Change the line beginning `mpirun` to point to your compiled amr-wind 
-executable. This will appear something like:
-```
-mpirun -n 72 /path/to/amr-wind/build/amr_wind amr_input.inp >> logamr 2>&1
-```
-Make any other necessary changes to batch_script.sh, and submit it to the 
-jobs queue using
-```
-sbatch batch_script.sh
-```
 
 <!--
 ```bash

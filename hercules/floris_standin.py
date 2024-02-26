@@ -113,7 +113,9 @@ def construct_floris_from_amr_input(amr_wind_input):
             hub_height=hub_height,
             rotor_diameter=rotor_diameter,
             ref_air_density=ref_air_density,
+            generator_efficiency=1.0,
         )
+        turb_dict["power_thrust_model"] = "mixed"
 
         # load a default model
         fi = FlorisInterface(default_floris_dict)
@@ -144,16 +146,18 @@ class FlorisStandin(AMRWindStandin):
         # Initialize storage
         self.yaw_angles_stored = [0.0] * self.num_turbines
 
-    def get_step(self, sim_time_s, yaw_angles=None):
+    def get_step(self, sim_time_s, yaw_angles=None, power_setpoints=None):
         """Retreive or calculate wind speed, direction, and turbine powers
 
         Input:
         sim_time_s: simulation time step
+        yaw_angles: absolute yaw positions for each turbine (deg). Defaults to None.
+        power_setpoints: power setpoints for each turbine (W). Defaults to None.
 
         Output:
-        amr_wind_speed: wind speed at current time step
-        amr_wind_direction: wind direction at current time step
-        turbine_powers: turbine powers at current time step
+        amr_wind_speed: wind speed at current time step [m/s]
+        amr_wind_direction: wind direction at current time step [deg]
+        turbine_powers: turbine powers at current time step [kW]
         """
 
         if hasattr(self, "standin_data"):
@@ -177,7 +181,10 @@ class FlorisStandin(AMRWindStandin):
         # Compute the turbine power using FLORIS
         self.fi.reinitialize(wind_speeds=[amr_wind_speed], wind_directions=[amr_wind_direction])
 
-        if yaw_angles is not None:
+        if yaw_angles is None or (np.array(yaw_angles) == -1000).any():
+            # Note: -1000 is the "no value" flag for yaw_angles (NaNs not handled well)
+            yaw_misalignments = None
+        else:
             yaw_misalignments = (amr_wind_direction - np.array(yaw_angles))[
                 None, :
             ]  # TODO: remove 2
@@ -195,10 +202,15 @@ class FlorisStandin(AMRWindStandin):
                 yaw_misalignments = (amr_wind_direction - np.array(self.yaw_angles_stored))[None, :]
             else:  # Reasonable yaw angles, save in case bad angles received later
                 self.yaw_angles_stored = yaw_angles
-        else:
-            yaw_misalignments = yaw_angles
-        self.fi.calculate_wake(yaw_angles=yaw_misalignments)
-        # This converts the output power from Floris (in Watts) to kW (standard for Hercules)
+
+        if power_setpoints is not None:
+            power_setpoints = np.array(power_setpoints)[None,:]
+            # Set invalid power setpoints to a large value
+            power_setpoints[power_setpoints == np.full(power_setpoints.shape, None)] = 1e9
+            power_setpoints[power_setpoints < 0] = 1e9
+            # Note conversion from Watts (used in Floris) and back to kW (used in Hercules)
+            power_setpoints = power_setpoints * 1000 # in W
+        self.fi.calculate_wake(yaw_angles=yaw_misalignments, power_setpoints=power_setpoints)
         turbine_powers = (self.fi.get_turbine_powers() / 1000).flatten().tolist()  # in kW
 
         return (
@@ -215,7 +227,7 @@ class FlorisStandin(AMRWindStandin):
         pass
 
     def process_periodic_publication(self):
-        # Periodically publish data to the surrpogate
+        # Periodically publish data to the surrogate
         pass
 
     def process_subscription_messages(self, msg):

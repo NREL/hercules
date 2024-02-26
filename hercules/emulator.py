@@ -4,6 +4,7 @@ import os
 import sys
 
 import numpy as np
+import pandas as pd
 from SEAS.federate_agent import FederateAgent
 
 LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace(".", "_")
@@ -18,9 +19,12 @@ class Emulator(FederateAgent):
         self.main_dict_flat = {}
 
         # Initialize the output file
-        self.output_file = "hercules_output.csv"
+        if "output_file" in input_dict:
+            self.output_file = input_dict["output_file"]
+        else:
+            self.output_file = "hercules_output.csv"
 
-        # Save timt step
+        # Save time step
         self.dt = input_dict["dt"]
 
         # Initialize components
@@ -38,6 +42,13 @@ class Emulator(FederateAgent):
         self.hercules_comms_dict = input_dict["hercules_comms"]
         self.hercules_helics_dict = self.hercules_comms_dict["helics"]
         self.helics_config_dict = self.hercules_comms_dict["helics"]["config"]
+
+        # Read in any external data
+        self.external_data_all = {}
+        if "external_data_file" in input_dict:
+            self._read_external_data_file(input_dict["external_data_file"])
+            self.external_signals = {}
+            self.main_dict["external_signals"] = {}
 
         # Write the time step into helics config dict
         self.helics_config_dict["helics"]["deltat"] = self.dt
@@ -79,7 +90,7 @@ class Emulator(FederateAgent):
             )
 
         # TODO For now, need to assume for simplicity there is one and only
-        # one AMR_Wind simualtion
+        # one AMR_Wind simulation
         self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]]["num_turbines"]
         self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]]["rotor_diameter"]
         self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_locations"]
@@ -123,11 +134,29 @@ class Emulator(FederateAgent):
         # list(self.pub.values())[0].publish(str("[-1,-1,-1]"))
         # self.logger.info(" #### Entering main loop #### ")
 
+    def _read_external_data_file(self, filename):
+        # Read in the external data file
+        df_ext = pd.read_csv(filename)
+        if "time" not in df_ext.columns:
+            raise ValueError("External data file must have a 'time' column")
+        
+        # Interpolate the external data according to time
+        times = np.arange(
+            self.helics_config_dict["starttime"],
+            self.helics_config_dict["stoptime"],
+            self.dt
+        )
+        self.external_data_all["time"] = times
+        for c in df_ext.columns:
+            if c != "time":
+                self.external_data_all[c] = np.interp(times, df_ext.time, df_ext[c])
+
     def run(self):
         # TODO In future code that doesnt insist on AMRWInd can make this optional
         print("... waiting for initial connection from AMRWind")
         # Send initial connection signal to AMRWind
         # publish on topic: control
+        self.receive_amrwind_data()
         self.send_via_helics("control", str("[-1,-1,-1]"))
         print(" #### Entering main loop #### ")
         self.sync_time_helics(self.absolute_helics_time + self.deltat)
@@ -137,9 +166,15 @@ class Emulator(FederateAgent):
         # Run simulation till  endtime
         # while self.absolute_helics_time < self.endtime:
         while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+            print(self.absolute_helics_time)
             # Loop till we reach simulation startime.
             # if self.absolute_helics_time < self.starttime:
             #     continue
+            # Get any external data
+            for k in self.external_data_all:
+                self.main_dict["external_signals"][k] = self.external_data_all[k][
+                    self.external_data_all["time"] == self.absolute_helics_time
+                ][0]
 
 
             # Update controller and py sims
@@ -280,6 +315,7 @@ class Emulator(FederateAgent):
         keys = list(self.main_dict_flat.keys())
         values = list(self.main_dict_flat.values())
 
+
         # If this is first iteration, write the keys as csv header
         if self.first_iteration:
             with open(self.output_file, "w") as filex:
@@ -345,10 +381,23 @@ class Emulator(FederateAgent):
         else:  # set yaw_angles based on self.wind_direction
             yaw_angles = [self.wind_direction] * self.num_turbines
 
+        if (
+            "turbine_power_setpoints"
+            in self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]
+        ):
+            power_setpoints = self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+                "turbine_power_setpoints"
+            ]
+        else:  # set yaw_angles based on self.wind_direction
+            power_setpoints = [None] * self.num_turbines
+
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control
+        # TODO: power_setpoints part will not work with AMRWind proper.
         tmp = np.array(
-            [self.absolute_helics_time, self.wind_speed, self.wind_direction] + yaw_angles
+            [self.absolute_helics_time, self.wind_speed, self.wind_direction]
+            + yaw_angles
+            + power_setpoints
         ).tolist()
 
         self.send_via_helics("control", str(tmp))

@@ -2,6 +2,7 @@
 # code originally copied from https://github.com/NREL/pysam/blob/main/Examples/NonAnnualSimulation.ipynb
 
 import json
+
 # import os
 import numpy as np
 import pandas as pd
@@ -36,6 +37,7 @@ class SolarPySAM:
                 "Other": {"lat": 39.7442, "lon": -105.1778, "elev": 1829},
             }
         else: # using system info data dictionary in input file
+            # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
             sys_design = input_dict["system_info_data_input"]
             print("sys_design")
             print(sys_design)
@@ -78,9 +80,10 @@ class SolarPySAM:
         for k, v in self.model_params.items():
             try:
                 system_model.value(k, v)
-            except:
+            except Exception:
                 print(k)
         #### TODO: Check with Brooke about this "except KeyError" line ####
+                # Brooke: I got errors with KeyError so changed it to Exception and it's working
         # print('model params = ',self.model_params)
 
         print("sim_time_s = ", inputs["py_sims"]["inputs"]["sim_time_s"])

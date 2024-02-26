@@ -160,17 +160,14 @@ class AMRWindStandin(FederateAgent):
         # logger.info("** Initial Message Sent: {}".format(message_from_client_array))
 
         # Subscribe to helics messages:
-        for _ in range(1):
-            incoming_messages = self.helics_connector.get_all_waiting_messages()
-            if incoming_messages != {}:
-                try:
-                    message_from_server = list(ast.literal_eval(incoming_messages))
-                except Exception:
-                    print("here here")
-                    message_from_server = None
-            else:
-                print("here 2")
+        incoming_messages = self.helics_connector.get_all_waiting_messages()
+        if incoming_messages != {}:
+            try:
+                message_from_server = list(ast.literal_eval(incoming_messages))
+            except Exception:
                 message_from_server = None
+        else:
+            message_from_server = None
 
         # Synchronize time bewteen control center and AMRWind
         self.sync_time_helics(self.absolute_helics_time + self.deltat)

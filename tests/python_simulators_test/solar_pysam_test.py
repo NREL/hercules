@@ -64,12 +64,12 @@ def test_return_outputs(SPS: SolarPySAM):
     assert outputs_init["power"] == 25
     assert outputs_init["irradiance"] == 1000
 
-    # change simple battery state as if during simulation
+    # change PV power predictions and irradiance as if during simulation
     SPS.power_mw = 800
     SPS.dc_power_mw = 1000
     SPS.irradiance = 900
 
-    # check that outputs return the changed battery state
+    # check that outputs return the changed PV outputs
     outputs_sim = SPS.return_outputs()
 
     assert outputs_sim["power"] == 800

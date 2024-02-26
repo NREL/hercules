@@ -113,6 +113,7 @@ def construct_floris_from_amr_input(amr_wind_input):
             hub_height=hub_height,
             rotor_diameter=rotor_diameter,
             ref_air_density=ref_air_density,
+            generator_efficiency=1.0,
         )
         turb_dict["power_thrust_model"] = "mixed"
 

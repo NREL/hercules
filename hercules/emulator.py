@@ -146,6 +146,7 @@ class Emulator(FederateAgent):
             self.helics_config_dict["stoptime"],
             self.dt
         )
+        self.external_data_all["time"] = times
         for c in df_ext.columns:
             if c != "time":
                 self.external_data_all[c] = np.interp(times, df_ext.time, df_ext[c])
@@ -177,7 +178,9 @@ class Emulator(FederateAgent):
             #     continue
             # Get any external data
             for k in self.external_data_all:
-                self.main_dict["external_signals"][k] = self.external_data_all[k][idx]
+                self.main_dict["external_signals"][k] = self.external_data_all[k][
+                    self.external_data_all["time"] == self.absolute_helics_time
+                ][0]
 
             # Update controller and py sims
             # TODO: Should 'time' in the main dict be AMR-wind time or

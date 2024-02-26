@@ -11,6 +11,7 @@ def get_solar_params():
     full_path = os.path.realpath(__file__)
     path = os.path.dirname(full_path)
 
+    # explicitly specifying weather inputs from the first timestep of the example file
     solar_dict = {
         "py_sim_type": SolarPySAM,
         "weather_file_name": None,
@@ -44,6 +45,7 @@ def SPS():
     return create_solar_pysam()
 
 def test_init():
+    # testing the `init` function: reading the inputs from input dictionary
     solar_dict, dt = get_solar_params()
     SPS = SolarPySAM(solar_dict, dt)
 
@@ -55,6 +57,7 @@ def test_init():
     assert SPS.aoi == 0
 
 def test_return_outputs(SPS: SolarPySAM):
+    # testing the function `return_outputs`
     # outputs after initialization - all outputs should reflect input dict
     outputs_init = SPS.return_outputs()
 
@@ -74,6 +77,7 @@ def test_return_outputs(SPS: SolarPySAM):
     assert outputs_sim["irradiance"] == 900
 
 def test_step(SPS: SolarPySAM):
+    # testing the `step` function: calculating power based on inputs at first timestep
     step_inputs = {
         "py_sims": {
             "inputs": {

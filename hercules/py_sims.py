@@ -49,10 +49,6 @@ class PySims:
     def get_py_sim(self, py_sim_obj_dict):
         if py_sim_obj_dict["py_sim_type"] == "SimpleSolar":
             return SimpleSolar(py_sim_obj_dict, self.dt)
-        
-        if py_sim_obj_dict['py_sim_type'] == 'SolarPySAM':
-            
-            return SolarPySAM(py_sim_obj_dict, self.dt)
 
         if py_sim_obj_dict["py_sim_type"] == "SolarPySAM":
             return SolarPySAM(py_sim_obj_dict, self.dt)

@@ -1,16 +1,14 @@
-# Very simple solar farm model  
-import numpy as np
+# Very simple solar farm model
 
-class SimpleSolar():
 
+class SimpleSolar:
     def __init__(self, input_dict, dt):
-
         # Need dt, plant capacity and efficiency
         # Using base value of 1000 W/m^2 irradiance for sizing
 
         # Efficiency currently denotes the kind of solar panel you have
-        self.efficiency = input_dict['efficiency']  # need a realistic efficiency for a solar panel
-        self.capacity = input_dict['capacity']
+        self.efficiency = input_dict["efficiency"]  # need a realistic efficiency for a solar panel
+        self.capacity = input_dict["capacity"]
 
         # Total area of solar panels
         base_irradiance = 1000  # W/m^2
@@ -20,8 +18,8 @@ class SimpleSolar():
         self.dt = dt
 
         # Save the initial condition
-        self.power_mw = input_dict['initial_conditions']['power']
-        self.irradiance = input_dict['initial_conditions']['irradiance']
+        self.power_mw = input_dict["initial_conditions"]["power"]
+        self.irradiance = input_dict["initial_conditions"]["irradiance"]
 
         # Define needed inputs as empty dict
         self.needed_inputs = {}
@@ -30,26 +28,22 @@ class SimpleSolar():
         # self.compute_power()
 
     def return_outputs(self):
-
-        return {'power': self.power_mw,
-                'irradiance': self.irradiance
-        }
+        return {"power": self.power_mw, "irradiance": self.irradiance}
 
     def step(self, inputs):
-
         # TODO add tilt tracking - haven't gotten to this yet
         # right now, just static
         # https://www.sciencedirect.com/science/article/pii/S1364032106001134
 
-        # Note: irradiance is measured in W/m^2, so the power is calculated in Watts, and then scaled to MW
+        # Note: irradiance is measured in W/m^2, so the power is calculated in Watts,
+        #           and then scaled to MW
         # self.power_mw = 0.0
 
         # Assume model generates its own irradiance
-        irradiance = 1000.
+        irradiance = 1000.0
 
         # Save this as an output for now
         self.irradiance = irradiance
-
 
         # Gather inputs
         # irradiance = inputs['irradiance']
@@ -61,7 +55,3 @@ class SimpleSolar():
         # Need to put outputs into input/output structure
 
         return self.return_outputs()
-
-
-
-

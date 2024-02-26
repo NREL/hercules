@@ -5,6 +5,7 @@
 data.db
 *.python-version
 *.DS_Store
+*.conda
 slices
 
 # macOS files
@@ -38,4 +39,8 @@ hercules/local_amr_wind_demo/sample_copy.nc
 t_00*
 logdummy
 loghercules
+logstandin
 *echo
+*out-example.json
+
+.vscode/*

@@ -156,21 +156,16 @@ class Emulator(FederateAgent):
         print("... waiting for initial connection from AMRWind")
         # Send initial connection signal to AMRWind
         # publish on topic: control
-        print("First receive")
-#        for _ in range(2):
         self.receive_amrwind_data()
         print(self.main_dict)
-        print("Sending -1s")
         self.send_via_helics("control", str("[-1,-1,-1]"))
         print(" #### Entering main loop #### ")
-        self.sync_time_helics(self.absolute_helics_time - self.deltat)
-        print(self.absolute_helics_time)
+        self.sync_time_helics(self.absolute_helics_time + self.deltat)
         # Initialize the first iteration flag
         self.first_iteration = True
 
         # Run simulation till  endtime
         # while self.absolute_helics_time < self.endtime:
-        idx = 0
         while self.absolute_helics_time < (self.endtime - self.starttime + 1):
             print(self.absolute_helics_time)
             # Loop till we reach simulation startime.
@@ -210,9 +205,6 @@ class Emulator(FederateAgent):
                 print(self.main_dict)
                 self.save_main_dict_as_text()
                 self.first_iteration = False
-
-            #self.sync_time_helics(self.absolute_helics_time + self.deltat)
-            idx += 1
 
     def receive_amrwind_data(self):
         # Subscribe to helics messages:
@@ -325,7 +317,6 @@ class Emulator(FederateAgent):
         keys = list(self.main_dict_flat.keys())
         values = list(self.main_dict_flat.values())
 
-        print('OUTPUT FILE', self.output_file)
 
         # If this is first iteration, write the keys as csv header
         if self.first_iteration:

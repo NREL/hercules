@@ -2,7 +2,7 @@
 
 Still a work in progress but currently there are 3 sets of installation instructions
 
-[Local installation instructions](intall_local)
+[Local installation instructions](install_local)
 
 [Installing on Kestrel](install_on_kestrel)
 

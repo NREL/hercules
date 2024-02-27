@@ -116,6 +116,10 @@ def test_FlorisStandin_get_step_yaw_angles():
     yaw_angles = [0.0, 10.0]
     _, _, fs_tp2, _ = floris_standin.get_step(5.0, yaw_angles)
     assert np.allclose(fs_tp, fs_tp2)
+    assert np.allclose(
+        default_wind_direction-floris_standin.fi.floris.farm.yaw_angles,
+        [260.0, 230.0]
+    )
 
 def test_FlorisStandin_get_step_power_setpoints():
     floris_standin = FlorisStandin(CONFIG, AMR_INPUT)

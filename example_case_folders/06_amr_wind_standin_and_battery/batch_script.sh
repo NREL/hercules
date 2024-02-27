@@ -14,8 +14,8 @@ cd ../../
 mkdir -p outputs
 python hercules/tools/generate_amr_standin_data.py
 
-# Delete the temporary outputs folder
-rm -rf outputs
+# Delete any log files in the output folder
+rm -f outputs/*.log
 
 # Go back to the 06 directory
 cd example_case_folders/06_amr_wind_standin_and_battery

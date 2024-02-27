@@ -143,9 +143,9 @@ However, if the simulation hangs, be sure to check if there are multiple process
 ```
 ps
 ```
-which will tell you all of the processes currently working.  You can kill processes that you do not want by using the kill command, paired with the process number (filled into the blank in the command below).
+which will tell you all of the processes currently working.  You can kill processes that you do not want by using the kill command, paired with the process ID (filled into the blank in the command below).
 ```
-kill ___
+kill <PID>
 ```
 
 <!--

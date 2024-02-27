@@ -6,10 +6,18 @@
 #    source batch_script.sh
 #    ./batch_script.sh
 
-# Generate the stand-in data
+# Generate the stand-in data uses a script within hercules/tools
 echo "Generating stand-in data"
 cd ../../
+
+# Make a temp folder to hold the outputs
+mkdir -p outputs
 python hercules/tools/generate_amr_standin_data.py
+
+# Delete the temporary outputs folder
+rm -rf outputs
+
+# Go back to the 06 directory
 cd example_case_folders/06_amr_wind_standin_and_battery
 echo "Finished generating stand-in data"
 

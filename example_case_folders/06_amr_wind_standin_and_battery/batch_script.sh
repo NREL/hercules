@@ -43,4 +43,5 @@ python hercules_runscript_amr_standin.py amr_input.inp amr_standin_data.csv >> o
 echo "Starting hercules"
 python hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1
 
-
+# If everything is successful
+exit 0

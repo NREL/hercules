@@ -34,7 +34,10 @@ class SolarPySAM:
                 model_params = json.load(f)
             sys_design = {
                 "ModelParams": model_params,
-                "Other": {"lat": 39.7442, "lon": -105.1778, "elev": 1829},
+                # "Other": input_dict["other"],
+                "Other": {"lat": input_dict["lat"], 
+                          "lon": input_dict["lon"], 
+                          "elev": input_dict["elev"]},
             }
         else: # using system info data dictionary in input file
             # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
@@ -58,14 +61,14 @@ class SolarPySAM:
         # Save the initial condition
         self.power_mw = input_dict["initial_conditions"]["power"]
         self.dc_power_mw = input_dict["initial_conditions"]["power"]
-        self.irradiance = input_dict["initial_conditions"]["irradiance"]
+        self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
 
     def return_outputs(self):
         return {
             "power": self.power_mw,
             "dc_power": self.dc_power_mw,
-            "irradiance": self.irradiance,
+            "dni": self.dni,
             "aoi": self.aoi,
         }
 
@@ -150,8 +153,11 @@ class SolarPySAM:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
-        self.irradiance = out["gh"][0]  # TODO check that gh is the accurate irradiance output
-        print("self.irradiance = ", self.irradiance)
+        # self.irradiance = out["gh"][0]  # TODO check that gh is the accurate irradiance output
+        self.dni = out["dn"][0] # direct normal irradiance
+        self.dhi = out["df"][0] # diffuse horizontal irradiance
+        self.ghi = out["gh"][0] # global horizontal irradiance
+        print("self.dni = ", self.dni)
 
         self.aoi = out["subarray1_aoi"][0]  # angle of incidence
 

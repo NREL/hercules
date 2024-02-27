@@ -44,4 +44,5 @@ echo "Starting hercules"
 python hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1
 
 # If everything is successful
+echo "Finished running hercules"
 exit 0

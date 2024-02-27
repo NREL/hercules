@@ -45,7 +45,7 @@ jobs:
           error_found=1
         fi
 
-        if [[ $error_found ]]; then
+        if [[ ! $error_found ]]; then
           echo "${error_results}"
         fi
 

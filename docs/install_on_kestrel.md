@@ -40,9 +40,7 @@ env_hercules()
         conda activate hercules
 }
 ``` 
-  ```
-  Module load anaconda3
-  ```
+
 
 ## Middle Steps: Creating the Hercules conda enviroment
   ### Install SEAS

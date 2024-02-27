@@ -7,7 +7,7 @@ parts:
   - caption: Installation
     chapters:
     - file: install_instructions
-    - file: install_old
+    - file: install_local
     - file: install_on_kestrel
     - file: install_spack
   - caption: Usage

@@ -2,6 +2,7 @@ import ast
 import datetime as dt
 import os
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -12,6 +13,9 @@ LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace("."
 
 class Emulator(FederateAgent):
     def __init__(self, controller, py_sims, input_dict):
+        # Make sure output folder exists
+        Path("output").mkdir(parents=True, exist_ok=True)
+
         # Save the input dict to main dict
         self.main_dict = input_dict
 
@@ -22,7 +26,7 @@ class Emulator(FederateAgent):
         if "output_file" in input_dict:
             self.output_file = input_dict["output_file"]
         else:
-            self.output_file = "hercules_output.csv"
+            self.output_file = "outputs/hercules_output.csv"
 
         # Save time step
         self.dt = input_dict["dt"]
@@ -139,12 +143,10 @@ class Emulator(FederateAgent):
         df_ext = pd.read_csv(filename)
         if "time" not in df_ext.columns:
             raise ValueError("External data file must have a 'time' column")
-        
+
         # Interpolate the external data according to time
         times = np.arange(
-            self.helics_config_dict["starttime"],
-            self.helics_config_dict["stoptime"],
-            self.dt
+            self.helics_config_dict["starttime"], self.helics_config_dict["stoptime"], self.dt
         )
         self.external_data_all["time"] = times
         for c in df_ext.columns:
@@ -314,7 +316,6 @@ class Emulator(FederateAgent):
         keys = list(self.main_dict_flat.keys())
         values = list(self.main_dict_flat.values())
 
-
         # If this is first iteration, write the keys as csv header
         if self.first_iteration:
             with open(self.output_file, "w") as filex:
@@ -339,7 +340,7 @@ class Emulator(FederateAgent):
         # to see full dictionary in interpreting log
 
         original_stdout = sys.stdout
-        with open("main_dict.echo", "w") as f_i:
+        with open("outputs/main_dict.echo", "w") as f_i:
             sys.stdout = f_i  # Change the standard output to the file we created.
             print(self.main_dict)
             sys.stdout = original_stdout  # Reset the standard output to its original value

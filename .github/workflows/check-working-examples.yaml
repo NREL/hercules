@@ -39,7 +39,7 @@ jobs:
         error_results="Error in example:"
 
         # Try running the bash script
-        if ! bash run_example.sh; then
+        if ! bash batch_script.sh; then
           error_results="${error_results}"$'\n'" - run_example.sh"
           error_found=1
         fi

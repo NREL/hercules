@@ -1,11 +1,35 @@
 #!/bin/bash
 
-export HELICS_PORT=32000 
-helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT &
+# Run this script via the command: bash batch_script.sh
 
-cd example_case_folders/06_amr_wind_standin_and_battery 
+# Activate the conda environment
+conda activate hercules
 
-python hercules_runscript_amr_standin.py amr_input.inp amr_standin_data.csv >> logstandin 2>&1 &
+# Generate the stand-in data
+echo "Generating stand-in data"
+cd ../
+python hercules/tools/generate_amr_standin_data.py
+cd 06_amr_wind_standin_and_battery
+echo "Finished generating stand-in data"
 
-python hercules_runscript.py hercules_input_000.yaml >> loghercules 2>&1
+# Set the helics port to use
+#make sure you use the same port number in the amr_input.inp and hercules_input_000.yaml files
+export HELICS_PORT=32000
 
+# Delete the existing outputs folder
+rm -rf outputs
+
+# Create the outputs folder
+mkdir -p outputs
+
+# Set up the helics broker
+helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
+# For debugging add --consoleloglevel=trace
+
+# Start the controller center and pass in input file
+echo "Starting the hercules"
+python hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
+
+# Start the amr_standin
+echo "Starting the amr stand-in"
+python hercules_runscript_amr_standin.py amr_input.inp amr_standin_data.csv >> outputs/logstandin.log 2>&1

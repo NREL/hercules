@@ -25,6 +25,7 @@
 import ast
 import logging
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -36,7 +37,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
     datefmt="%Y-%m-%d %H:%M",
-    filename="log_test_client.log",
+    filename="outputs/log_test_client.log",
     filemode="w",
 )
 logger = logging.getLogger("amr_wind_standin")
@@ -113,6 +114,9 @@ def read_amr_wind_input(amr_wind_input):
 
 class AMRWindStandin(FederateAgent):
     def __init__(self, config_dict, amr_wind_input, amr_standin_data_file=None):
+        # Ensure outputs folder exists
+        Path("outputs").mkdir(parents=True, exist_ok=True)
+
         super(AMRWindStandin, self).__init__(
             name=config_dict["name"],
             feeder_num=0,
@@ -172,7 +176,7 @@ class AMRWindStandin(FederateAgent):
         # Synchronize time bewteen control center and AMRWind
         self.sync_time_helics(self.absolute_helics_time + self.deltat)
         sim_time_s = float(self.absolute_helics_time)
-        
+
         logger.info("** Initial Received reply: {}".format(message_from_server))
 
         logger.info("** Intial Wind Speed: {}".format(amr_wind_speed))
@@ -182,15 +186,15 @@ class AMRWindStandin(FederateAgent):
         self.message_from_server = None
 
         while self.absolute_helics_time < (self.endtime - self.starttime + 1):
-        #while sim_time_s <= (self.endtime - self.starttime):
+            # while sim_time_s <= (self.endtime - self.starttime):
             # SIMULATE A CALCULATION STEP IN AMR WIND=========================
             sim_time_s = float(self.absolute_helics_time)
             logger.info("Calculating simulation time: %.3f" % sim_time_s)
 
             # Compute the turbine power using a simple formula
             if self.message_from_server is not None:
-                yaw_angles = self.message_from_server[-2*self.num_turbines:-self.num_turbines]
-                power_setpoints = self.message_from_server[-self.num_turbines:]
+                yaw_angles = self.message_from_server[-2 * self.num_turbines : -self.num_turbines]
+                power_setpoints = self.message_from_server[-self.num_turbines :]
             else:
                 yaw_angles = None
                 power_setpoints = None
@@ -219,7 +223,7 @@ class AMRWindStandin(FederateAgent):
 
             # Send helics message to Control Center
             # publish on topic: status
-            
+
             self.send_via_helics("status", str(message_from_client_array))
             logger.info("** Message Sent: {}".format(message_from_client_array))
 
@@ -238,9 +242,9 @@ class AMRWindStandin(FederateAgent):
                 # Note standin doesn't currently use received info for anything
 
             # Advance simulation time and time step counter
-            #sim_time_s += self.dt
+            # sim_time_s += self.dt
             self.sync_time_helics(self.absolute_helics_time + self.deltat)
-            print("ABSOLUTE TIME : ",self.absolute_helics_time, self.deltat, self.dt)
+            print("ABSOLUTE TIME : ", self.absolute_helics_time, self.deltat, self.dt)
             sim_time_s = self.absolute_helics_time
 
     # TODO cleanup code to move publish and subscribe here.

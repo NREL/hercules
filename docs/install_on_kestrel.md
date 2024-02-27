@@ -107,10 +107,7 @@ pip install git+https://github.com/NREL/floris.git@v4
 ```
 to get the correct branch of FLORIS installed.
 
-If you run hercules and get an error that `pyyaml` is missing, you may also need to install it using
-```
-conda install -c conda-forge pyyaml
-```
+Note that that pyyaml package is also required for FLORIS. 
 
 ### Install the NREL Wind Hybrid Open Controller (WHOC)
 

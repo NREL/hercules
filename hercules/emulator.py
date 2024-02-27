@@ -14,7 +14,7 @@ LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace("."
 class Emulator(FederateAgent):
     def __init__(self, controller, py_sims, input_dict):
         # Make sure output folder exists
-        Path("output").mkdir(parents=True, exist_ok=True)
+        Path("outputs").mkdir(parents=True, exist_ok=True)
 
         # Save the input dict to main dict
         self.main_dict = input_dict

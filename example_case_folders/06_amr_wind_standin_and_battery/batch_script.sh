@@ -35,10 +35,12 @@ mkdir -p outputs
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT --consoleloglevel=trace & 
 # For debugging add --consoleloglevel=trace
 
-# Start the controller center and pass in input file
-echo "Starting the hercules"
-python hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
-
 # Start the amr_standin
-echo "Starting the amr stand-in"
-python hercules_runscript_amr_standin.py amr_input.inp amr_standin_data.csv >> outputs/logstandin.log 2>&1
+echo "Starting amr stand-in"
+python hercules_runscript_amr_standin.py amr_input.inp amr_standin_data.csv >> outputs/logstandin.log 2>&1 &
+
+# Start the controller center and pass in input file
+echo "Starting hercules"
+python hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1
+
+

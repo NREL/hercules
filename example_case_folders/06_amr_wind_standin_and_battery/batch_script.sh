@@ -3,6 +3,7 @@
 # Run this script via the command: bash batch_script.sh
 
 # Activate the conda environment
+conda init bash
 conda activate hercules
 
 # Generate the stand-in data

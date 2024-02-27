@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Run this script via the command: bash batch_script.sh
-
-# Activate the conda environment
-conda init bash
-conda activate hercules
+# Ensure hercules conda or venv is activated before running this script
+# Run this script via the command: 
+#    bash batch_script.sh
+#    source batch_script.sh
+#    ./batch_script.sh
 
 # Generate the stand-in data
 echo "Generating stand-in data"
-cd ../
+cd ../../
 python hercules/tools/generate_amr_standin_data.py
-cd 06_amr_wind_standin_and_battery
+cd example_case_folders/06_amr_wind_standin_and_battery
 echo "Finished generating stand-in data"
 
 # Set the helics port to use

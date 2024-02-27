@@ -15,3 +15,5 @@ bash sbatch_script.sh
 ```
 
 ## Notes
+
+Make sure hercules conda or venv is activated before running the example.

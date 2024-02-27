@@ -12,5 +12,8 @@ parts:
     - file: install_spack
   - caption: Usage
     chapters:
-    - file: examples
     - file: order_of_op
+  - caption: Examples
+    chapters:
+    - file: examples_overview
+    - file: ../example_case_folders/06_amr_wind_standin_and_battery/README.md

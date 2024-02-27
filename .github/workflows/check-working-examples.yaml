@@ -33,7 +33,7 @@ jobs:
 
         mkdir -p temp1/temp2/temp3
         cp -rv example_case_folders/06_amr_wind_standin_and_battery/ temp1/temp2/temp3/.
-        cd temp1/temp2/temp3/example_case_folders/06_amr_wind_standin_and_battery/
+        cd temp1/temp2/temp3/06_amr_wind_standin_and_battery/
 
         error_found=0  # 0 is false
         error_results="Error in example:"

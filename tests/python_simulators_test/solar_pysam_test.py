@@ -26,9 +26,12 @@ def get_solar_params():
 
         "system_info_file_name": path+
             '/../../example_case_folders/07_amr_wind_standin_and_solar_pysam/100MW_1axis_pvsamv1.json',
+        "lat": 39.7442, 
+        "lon": -105.1778, 
+        "elev": 1829,
         "initial_conditions": {
             "power": 25, 
-            "irradiance": 1000
+            "dni": 1000
         },
     }
     
@@ -53,7 +56,7 @@ def test_init():
 
     assert SPS.power_mw == solar_dict["initial_conditions"]["power"]
     assert SPS.dc_power_mw == solar_dict["initial_conditions"]["power"]
-    assert SPS.irradiance == solar_dict["initial_conditions"]["irradiance"]
+    assert SPS.dni == solar_dict["initial_conditions"]["dni"]
     assert SPS.aoi == 0
 
 def test_return_outputs(SPS: SolarPySAM):
@@ -61,20 +64,20 @@ def test_return_outputs(SPS: SolarPySAM):
     # outputs after initialization - all outputs should reflect input dict
     outputs_init = SPS.return_outputs()
 
-    assert outputs_init["power"] == 25
-    assert outputs_init["irradiance"] == 1000
+    assert outputs_init["power_mw"] == 25
+    assert outputs_init["dni"] == 1000
 
     # change PV power predictions and irradiance as if during simulation
     SPS.power_mw = 800
     SPS.dc_power_mw = 1000
-    SPS.irradiance = 900
+    SPS.dni = 900
 
     # check that outputs return the changed PV outputs
     outputs_sim = SPS.return_outputs()
 
-    assert outputs_sim["power"] == 800
-    assert outputs_sim["dc_power"] == 1000
-    assert outputs_sim["irradiance"] == 900
+    assert outputs_sim["power_mw"] == 800
+    assert outputs_sim["dc_power_mw"] == 1000
+    assert outputs_sim["dni"] == 900
 
 def test_step(SPS: SolarPySAM):
     # testing the `step` function: calculating power based on inputs at first timestep
@@ -90,4 +93,4 @@ def test_step(SPS: SolarPySAM):
 
     assert_almost_equal(SPS.power_mw, 32.17650018440107, decimal=8)
     assert_almost_equal(SPS.dc_power_mw, 33.26240852125279, decimal=8)
-    assert_almost_equal(SPS.irradiance, 68.23037719726561, decimal=8)
+    assert_almost_equal(SPS.ghi, 68.23037719726561, decimal=8)

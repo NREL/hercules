@@ -14,3 +14,8 @@ parts:
     chapters:
     - file: examples
     - file: order_of_op
+  - caption: Technologies
+    chapters:
+    - file: wind
+    - file: battery
+    - file: solar_pv

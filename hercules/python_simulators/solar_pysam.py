@@ -26,8 +26,6 @@ class SolarPySAM:
         # print('input_dict = ')
         # print(input_dict)
 
-        # print('filename = ', input_dict["system_info_file_name"])
-        # print('cwd = ',os.getcwd())
         # set PV system model parameters
         if input_dict["system_info_file_name"]: # using system info json file
             with open(input_dict["system_info_file_name"], "r") as f:
@@ -66,8 +64,8 @@ class SolarPySAM:
 
     def return_outputs(self):
         return {
-            "power": self.power_mw,
-            "dc_power": self.dc_power_mw,
+            "power_mw": self.power_mw,
+            "dc_power_mw": self.dc_power_mw,
             "dni": self.dni,
             "aoi": self.aoi,
         }
@@ -137,9 +135,9 @@ class SolarPySAM:
         system_model.execute()
         out = system_model.Outputs.export()
 
-        if sim_timestep == 0:
-            with open("out-example.json", "w") as f:
-                json.dump(out, f)
+        # if sim_timestep == 0:
+        #     with open("out-example.json", "w") as f:
+        #         json.dump(out, f)
 
         ac = np.array(out["gen"]) / 1000  # quick fix for issue being fixed by darice
         dc = np.array(out["dc_net"]) / 1000

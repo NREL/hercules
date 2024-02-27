@@ -61,7 +61,7 @@ def test_return_outputs(SPS: SolarPySAM):
     # outputs after initialization - all outputs should reflect input dict
     outputs_init = SPS.return_outputs()
 
-    assert outputs_init["power"] == 25
+    assert outputs_init["power_mw"] == 25
     assert outputs_init["dni"] == 1000
 
     # change simple battery state as if during simulation
@@ -72,8 +72,8 @@ def test_return_outputs(SPS: SolarPySAM):
     # check that outputs return the changed battery state
     outputs_sim = SPS.return_outputs()
 
-    assert outputs_sim["power"] == 800
-    assert outputs_sim["dc_power"] == 1000
+    assert outputs_sim["power_mw"] == 800
+    assert outputs_sim["dc_power_mw"] == 1000
     assert outputs_sim["dni"] == 900
 
 def test_step(SPS: SolarPySAM):

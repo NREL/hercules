@@ -178,7 +178,6 @@ class Emulator(FederateAgent):
                     self.external_data_all["time"] == self.absolute_helics_time
                 ][0]
 
-
             # Update controller and py sims
             # TODO: Should 'time' in the main dict be AMR-wind time or
             # helics time? Why aren't they the same?

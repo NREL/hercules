@@ -16,4 +16,4 @@ parts:
   - caption: Examples
     chapters:
     - file: examples_overview
-    - file: ../example_case_folders/06_amr_wind_standin_and_battery/README
+    - file: examples/06_amr_wind_standin_and_battery

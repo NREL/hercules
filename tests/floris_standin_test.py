@@ -47,7 +47,7 @@ def test_FlorisStandin_instantiation():
 
     # Get FLORIS equivalent, match layout and turbines
     fi_true = FlorisInterface(default_floris_dict)
-    fi_true.reinitialize(
+    fi_true.set(
         layout_x=floris_standin.fi.layout_x,
         layout_y=floris_standin.fi.layout_y,
         turbine_type=floris_standin.fi.floris.farm.turbine_definitions,
@@ -61,7 +61,7 @@ def test_FlorisStandin_get_step_yaw_angles():
 
     # Get FLORIS equivalent, match layout and turbines
     fi_true = FlorisInterface(default_floris_dict)
-    fi_true.reinitialize(
+    fi_true.set(
         layout_x=floris_standin.fi.layout_x,
         layout_y=floris_standin.fi.layout_y,
         turbine_type=floris_standin.fi.floris.farm.turbine_definitions,
@@ -72,8 +72,8 @@ def test_FlorisStandin_get_step_yaw_angles():
 
     # Test with None yaw angles
     fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(5.0)
-    fi_true.reinitialize(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
-    fi_true.calculate_wake()
+    fi_true.set(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
+    fi_true.run()
     fi_true_tp = fi_true.get_turbine_powers() / 1000 # kW expected
 
     assert fs_ws == default_wind_speed
@@ -92,8 +92,8 @@ def test_FlorisStandin_get_step_yaw_angles():
     # Test with aligned turbines
     yaw_angles = [240.0, 240.0]
     fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(5.0, yaw_angles)
-    fi_true.reinitialize(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
-    fi_true.calculate_wake()  # Aligned in any case
+    fi_true.set(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
+    fi_true.run()
     fi_true_tp = fi_true.get_turbine_powers() / 1000 # kW expected
 
     assert np.allclose(fs_tp, fi_true_tp.flatten().tolist())
@@ -101,23 +101,32 @@ def test_FlorisStandin_get_step_yaw_angles():
     # Test with misaligned turbines
     yaw_angles = [260.0, 230.0]
     fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(5.0, yaw_angles)
-    fi_true.reinitialize(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
-    fi_true.calculate_wake()  # Don't expect to work
+    fi_true.set(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
+    fi_true.run()  # Don't expect to work
     fi_true_tp = fi_true.get_turbine_powers() / 1000
     assert not np.allclose(fs_tp, fi_true_tp.flatten().tolist())
 
     # Correct yaw angles
-    fi_true.calculate_wake(yaw_angles=default_wind_direction - np.array([yaw_angles]))
+    fi_true.set(yaw_angles=default_wind_direction - np.array([yaw_angles]))
+    fi_true.run()
     fi_true_tp = fi_true.get_turbine_powers() / 1000 # kW expected
     assert np.allclose(fs_tp, fi_true_tp.flatten().tolist())
 
+    # Test that yaw angles are maintained from the previous step if large misalignments are provided
+    yaw_angles = [0.0, 10.0]
+    _, _, fs_tp2, _ = floris_standin.get_step(5.0, yaw_angles)
+    assert np.allclose(fs_tp, fs_tp2)
+    assert np.allclose(
+        default_wind_direction-floris_standin.fi.floris.farm.yaw_angles,
+        [260.0, 230.0]
+    )
 
 def test_FlorisStandin_get_step_power_setpoints():
     floris_standin = FlorisStandin(CONFIG, AMR_INPUT)
 
     # Get FLORIS equivalent, match layout and turbines
     fi_true = FlorisInterface(default_floris_dict)
-    fi_true.reinitialize(
+    fi_true.set(
         layout_x=floris_standin.fi.layout_x,
         layout_y=floris_standin.fi.layout_y,
         turbine_type=floris_standin.fi.floris.farm.turbine_definitions,
@@ -128,19 +137,21 @@ def test_FlorisStandin_get_step_power_setpoints():
 
     # Test with power setpoints
     fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(5.0, power_setpoints=[1e3, 1e3])
-    fi_true.reinitialize(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
-    fi_true.calculate_wake() # don't expect to work
+    fi_true.set(wind_speeds=[default_wind_speed], wind_directions=[default_wind_direction])
+    fi_true.run() # don't expect to work
     fi_true_tp = fi_true.get_turbine_powers() / 1000
     assert not np.allclose(fs_tp, fi_true_tp.flatten().tolist())
 
     # Correct power setpoints
-    fi_true.calculate_wake(power_setpoints=np.array([[1e6, 1e6]]))
+    fi_true.set(power_setpoints=np.array([[1e6, 1e6]]))
+    fi_true.run()
     fi_true_tp = fi_true.get_turbine_powers() / 1000 # kW expected
     assert np.allclose(fs_tp, fi_true_tp.flatten().tolist())
 
     # Mixed power setpoints
     fs_ws, fs_wd, fs_tp, fs_twd = floris_standin.get_step(5.0, power_setpoints=[None, 1e3])
-    fi_true.calculate_wake(power_setpoints=np.array([[None, 1e6]]))
+    fi_true.set(power_setpoints=np.array([[None, 1e6]]))
+    fi_true.run()
     fi_true_tp = fi_true.get_turbine_powers() / 1000
     assert np.allclose(fs_tp, fi_true_tp.flatten().tolist())
 
@@ -158,10 +169,11 @@ def test_FlorisStandin_get_step_power_setpoints():
     )
     floris_power_setpoints = np.array([power_setpoints])
     floris_power_setpoints[0,1] *= 1e3 
-    fi_true.calculate_wake(
+    fi_true.set(
         yaw_angles=default_wind_direction - np.array([yaw_angles]),
         power_setpoints=floris_power_setpoints
     )
+    fi_true.run()
     fi_true_tp = fi_true.get_turbine_powers() / 1000
     assert np.allclose(fs_tp, fi_true_tp.flatten().tolist())
 

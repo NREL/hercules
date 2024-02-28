@@ -24,6 +24,7 @@
 
 import logging
 import sys
+from pathlib import Path
 
 import numpy as np
 from floris.tools import FlorisInterface
@@ -37,7 +38,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
     datefmt="%Y-%m-%d %H:%M",
-    filename="log_test_client.log",
+    filename="outputs/log_test_client.log",
     filemode="w",
 )
 logger = logging.getLogger("amr_wind_standin")
@@ -119,7 +120,7 @@ def construct_floris_from_amr_input(amr_wind_input):
 
         # load a default model
         fi = FlorisInterface(default_floris_dict)
-        fi.reinitialize(
+        fi.set(
             layout_x=layout_x, layout_y=layout_y, turbine_type=[turb_dict] * len(layout_x)
         )
 
@@ -128,6 +129,9 @@ def construct_floris_from_amr_input(amr_wind_input):
 
 class FlorisStandin(AMRWindStandin):
     def __init__(self, config_dict, amr_input_file, amr_standin_data_file=None):
+        # Ensure outputs folder exists
+        Path("outputs").mkdir(parents=True, exist_ok=True)
+
         super(FlorisStandin, self).__init__(
             config_dict=config_dict,
             amr_wind_input=amr_input_file,
@@ -178,12 +182,9 @@ class FlorisStandin(AMRWindStandin):
 
         turbine_wind_directions = [amr_wind_direction] * self.num_turbines
 
-        # Compute the turbine power using FLORIS
-        self.fi.reinitialize(wind_speeds=[amr_wind_speed], wind_directions=[amr_wind_direction])
-
         if yaw_angles is None or (np.array(yaw_angles) == -1000).any():
             # Note: -1000 is the "no value" flag for yaw_angles (NaNs not handled well)
-            yaw_misalignments = None
+            yaw_misalignments = None # Floris will remember the previous yaw angles
         else:
             yaw_misalignments = (amr_wind_direction - np.array(yaw_angles))[
                 None, :
@@ -199,18 +200,24 @@ class FlorisStandin(AMRWindStandin):
                     yaw_angles,
                     "Using previous yaw angles.",
                 )
-                yaw_misalignments = (amr_wind_direction - np.array(self.yaw_angles_stored))[None, :]
-            else:  # Reasonable yaw angles, save in case bad angles received later
-                self.yaw_angles_stored = yaw_angles
+                yaw_misalignments = None # Floris will remember the previous yaw angles
 
         if power_setpoints is not None:
-            power_setpoints = np.array(power_setpoints)[None,:]
+            power_setpoints = np.array(power_setpoints)[None, :]
             # Set invalid power setpoints to a large value
             power_setpoints[power_setpoints == np.full(power_setpoints.shape, None)] = 1e9
             power_setpoints[power_setpoints < 0] = 1e9
             # Note conversion from Watts (used in Floris) and back to kW (used in Hercules)
             power_setpoints = power_setpoints * 1000 # in W
-        self.fi.calculate_wake(yaw_angles=yaw_misalignments, power_setpoints=power_setpoints)
+
+        # Set up and solve FLORIS
+        self.fi.set(
+            wind_speeds=[amr_wind_speed],
+            wind_directions=[amr_wind_direction],
+            yaw_angles=yaw_misalignments,
+            power_setpoints=power_setpoints
+        )
+        self.fi.run()
         turbine_powers = (self.fi.get_turbine_powers() / 1000).flatten().tolist()  # in kW
 
         return (

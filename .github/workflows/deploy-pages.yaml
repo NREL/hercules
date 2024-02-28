@@ -23,6 +23,12 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -e ".[docs]"
+    
+    - name: Make copies of example docs
+      run: |
+        mkdir -vp docs/examples
+        cp -v example_case_folders/06_amr_wind_standin_and_battery/README.md docs/examples/06_amr_wind_standin_and_battery.md
+        ls -l docs/examples
 
     # Build the book
     - name: Build the book

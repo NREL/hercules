@@ -27,7 +27,7 @@ jobs:
     - name: Make copies of example docs
       run: |
         mkdir -vp docs/examples
-        ln -sv example_case_folders/06_amr_wind_standin_and_battery/README.md docs/examples/06_amr_wind_standin_and_battery.md
+        cp -v example_case_folders/06_amr_wind_standin_and_battery/README.md docs/examples/06_amr_wind_standin_and_battery.md
         ls -l docs/examples
 
     # Build the book

@@ -1,0 +1,10 @@
+# https://citation-file-format.github.io/about/
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: NREL
+    given-names: 
+title: "HERCULES"
+version: 1.0
+
+date-released: 2023-12-20

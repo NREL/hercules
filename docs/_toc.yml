@@ -13,16 +13,12 @@ parts:
   - caption: Usage
     chapters:
     - file: order_of_op
+  - caption: Technologies
+    chapters:
+    - file: wind
+    - file: battery
+    - file: solar_pv
   - caption: Examples
     chapters:
     - file: examples_overview
     - file: examples/06_amr_wind_standin_and_battery
-
-
-
-
-
-
-
-
-

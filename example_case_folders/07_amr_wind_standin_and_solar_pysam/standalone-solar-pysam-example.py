@@ -27,7 +27,10 @@ solar_dict = {
     "py_sim_type": SolarPySAM,
     "weather_file_name": "NonAnnualSimulation-sample_data-interpolated-daytime.csv",
     "system_info_file_name": "100MW_1axis_pvsamv1.json",
-    "initial_conditions": {"power": 25, "irradiance": 1000},
+    "lat": 39.7442, 
+    "lon": -105.1778, 
+    "elev": 1829,
+    "initial_conditions": {"power": 25, "dni": 1000},
 }
 
 dt = 0.5  # s - input file has a dt of 1 min
@@ -57,10 +60,10 @@ def simulate(SPS, time):
     for i in range(len(time)):
         inputs["py_sims"]["inputs"]["sim_time_s"] = time[i]
         outputs = SPS.step(inputs)
-        power[i] = outputs["power"]
-        dc_power[i] = outputs["dc_power"]
+        power[i] = outputs["power_mw"]
+        dc_power[i] = outputs["dc_power_mw"]
         aoi[i] = outputs["aoi"]
-        irradiance[i] = outputs["irradiance"]
+        irradiance[i] = outputs["dni"]
 
     fig, ax = plt.subplots(4, 1, sharex="col")  # , figsize=[6,5], dpi=250)
 

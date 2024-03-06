@@ -6,5 +6,6 @@ authors:
     given-names: 
 title: "HERCULES"
 version: 1.0
+url: https://github.com/NREL/hercules
 
 date-released: 2023-12-20

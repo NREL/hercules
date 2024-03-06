@@ -35,6 +35,7 @@ hercules/local_amr_wind_demo/sample_copy.nc
 #Ignore csv files
 *.csv
 !tests/test_inputs/amr_standin_data.csv
+!tests/test_inputs/external_data.csv
 
 # Some output files to ignore
 t_00*

@@ -2,8 +2,8 @@
 
 Still a work in progress but currently there are 3 sets of installation instructions
 
-[Installing on kestrel](install_on_kestrel)
+[Local installation instructions](install_local)
 
-[Old installation instructions](install_old)
+[Installing on Kestrel](install_on_kestrel)
 
 [Install via spack](install_spack)

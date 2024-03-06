@@ -189,15 +189,25 @@ class AMRWindStandin(FederateAgent):
 
             # Compute the turbine power using a simple formula
             if self.message_from_server is not None:
-                yaw_angles = self.message_from_server[-self.num_turbines :]
+                if len(self.message_from_server) >= 3 + self.num_turbines:
+                    yaw_angles = self.message_from_server[3:3 + self.num_turbines]
+                else:
+                    yaw_angles = None
+                if len(self.message_from_server) >= 3 + 2*self.num_turbines:
+                    power_setpoints = self.message_from_server[
+                        3 + self.num_turbines:3 + 2*self.num_turbines
+                    ]
+                else:
+                    power_setpoints = None
             else:
                 yaw_angles = None
+                power_setpoints = None
             (
                 amr_wind_speed,
                 amr_wind_direction,
                 turbine_powers,
                 turbine_wind_directions,
-            ) = self.get_step(sim_time_s, yaw_angles)
+            ) = self.get_step(sim_time_s, yaw_angles, power_setpoints)
 
             # ================================================================
             # Communicate with control center
@@ -243,7 +253,7 @@ class AMRWindStandin(FederateAgent):
 
     # TODO cleanup code to move publish and subscribe here.
 
-    def get_step(self, sim_time_s, yaw_angles=None):
+    def get_step(self, sim_time_s, yaw_angles=None, power_setpoints=None):
         """Retreive or calculate wind speed, direction, and turbine powers
 
         Input:

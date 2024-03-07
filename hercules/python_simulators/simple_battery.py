@@ -1,4 +1,9 @@
-# simple battery dispatch model
+"""
+Simple battery dispatch model
+Author: Zack tully - zachary.tully@nrel.gov
+
+TODO: docstrings
+"""
 
 import numpy as np
 

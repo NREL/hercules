@@ -61,7 +61,7 @@ class SolarPySAM:
         for k, v in self.model_params.items():
             try:
                 system_model.value(k, v)
-            except KeyError:
+            except Exception:
                 print(k)
         #### TODO: Check with Brooke about this "except KeyError" line ####
         # print('model params = ',self.model_params)

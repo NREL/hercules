@@ -9,7 +9,7 @@ This example demonstrates how to use the AMR Wind Standin and a solar model usin
 To run the example, execute the following command in the terminal:
 
 ```bash
-bash sbatch_script.sh
+bash batch_script.sh
 ```
 
 ## Notes

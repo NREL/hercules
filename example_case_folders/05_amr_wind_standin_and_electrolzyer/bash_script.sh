@@ -5,19 +5,15 @@
 conda activate hercules
 
 # Delete old log files
-rm hercules_output.csv log_test_client.log loghercules logfloris
+rm hercules_output_control.csv log_test_client.log loghercules_cl logfloris_cl
 
 # Set the helics port to use: 
 export HELICS_PORT=32000
 
 #make sure you use the same port number in the amr_input.inp and hercules_input_000.yaml files. 
 # Set up the helics broker
-helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT &
 
-# Need to set this to your hercules folder
-# cd /home/pfleming/hercules/hercules
-python3 hercules_runscript.py hercules_input_000.yaml >> loghercules 2>&1 & # Start the controller center and pass in input file
-
-
-python3 floris_runscript.py amr_input.inp >> logfloris 2>&1
+helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
+python3 hercules_runscript_CLcontrol.py hercules_input_000.yaml >> loghercules_cl 2>&1 &
+python3 floris_runscript.py amr_input.inp amr_standin_data-higher.csv >> logfloris_cl 2>&1
 

@@ -43,11 +43,12 @@ class ElectrolyzerPlant:
         power_in = inputs["py_sims"]["inputs"][
             "available_power"
         ]  # TODO check what units this is in
-
+        print('elec power in', power_in)
         # Run electrolyzer forward one step
         ######## Electrolyzer needs input in Watts ########
         H2_produced, H2_mfr, power_left, power_curtailed = self.elec_sys.run_control(power_in * 1e3)
-
+        # print('Stack power', self.elec_sys.stack_power)
+        print('H2 results', H2_produced, H2_mfr, power_left, power_curtailed)
         # Collect outputs from electrolyzer step
         self.curtailed_power = power_curtailed / 1e6
         self.stacks_on = sum([self.elec_sys.stacks[i].stack_on for i in range(self.n_stacks)])

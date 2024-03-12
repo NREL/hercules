@@ -37,9 +37,14 @@ class SolarPySAM:
                           "elev": input_dict["elev"]},
             }
         else: # using system info data dictionary in input file
+<<<<<<< HEAD
             sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
             # model_params = sys_design.export() # have to flatten this dictionary
             # sys_design = input_dict["system_info_data_input"]
+=======
+            # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
+            sys_design = input_dict["system_info_data_input"]
+>>>>>>> bcee3c357d19b3205f10fab05bfc95efdedd6c0b
             print("sys_design")
             print(sys_design)
             print("model_params")

@@ -77,20 +77,40 @@ def prep_control(SB: SimpleBattery):
     return SB
 
 
+def step_inputs(P_avail, P_signal):
+    return dict(
+        {
+            "setpoints": {"battery": {"signal": P_signal}},
+            "py_sims": {"inputs": {"available_power": P_avail}},
+        }
+    )
 def test_control_power_constraint(SB: SimpleBattery):
+
+    # step_inputs = dict(
+    #     {
+    #         "setpoints": {"battery": {"signal": 2e3}},
+    #         "py_sims": {"inputs": {"available_power": 0.5e3}},
+    #     }
+    # )
+
     # test upper charging limit
-    SB.control(P_avail=3e3, P_signal=2.5e3)
-    assert SB.P_charge == 2e3
-    assert SB.P_reject == 0.5e3
+    # SB.control(i_avail=3e3, i_signal=2.5e3)
+    SB.x = 0
+    # out = SB.step(step_inputs(P_avail=3e3, P_signal=2.5e3))
+    out = SB.step(step_inputs(P_avail=2e3, P_signal=1.5e3))
+    assert out["power"] == 2e3
+    assert out["reject"] == 0.5e3
 
     # Test lower charging limit
-    SB.control(P_avail=3e3, P_signal=-2.5e3)
-    assert SB.P_charge == -2e3
-    assert SB.P_reject == -0.5e3
+    SB.x = 0
+    (power, reject, soc) = SB.step(step_inputs(P_avail=3e3, P_signal=-2.5e3))
+    assert power == -2e3
+    assert reject == -0.5e3
 
-    SB.control(P_avail=0.25e3, P_signal=1e3)
-    assert SB.P_charge == 0.25e3
-    assert SB.P_reject == 0.75e3
+    SB.x = 0
+    (power, reject, soc) = SB.step(step_inputs(P_avail=0.25e3, P_signal=1e3))
+    assert power == 0.25e3
+    assert reject == 0.75e3
 
 
 def test_control_energy_constraint(SB: SimpleBattery):

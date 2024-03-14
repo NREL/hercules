@@ -1,6 +1,7 @@
 """This module provides unit tests for 'SimpleBattery'."""
+
 import pytest
-from hercules.python_simulators.simple_battery import SimpleBattery
+from hercules.python_simulators.battery import SimpleBattery
 from numpy.testing import assert_almost_equal
 
 
@@ -84,6 +85,8 @@ def step_inputs(P_avail, P_signal):
             "py_sims": {"inputs": {"available_power": P_avail}},
         }
     )
+
+
 def test_control_power_constraint(SB: SimpleBattery):
 
     # step_inputs = dict(

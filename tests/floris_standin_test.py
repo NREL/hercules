@@ -276,3 +276,25 @@ def test_FlorisStandin_with_standin_data_power_setpoints():
     assert (fs_tp_all[6, :] == 1e3).all()
     assert fs_tp_all[7, 0] > 1e3
     assert fs_tp_all[7, 1] <= 1e3
+
+def test_FlorisStandin_smoothing_coefficient():
+    floris_standin_no_smoothing = FlorisStandin(CONFIG, AMR_INPUT, smoothing_coefficient=0.0)
+    floris_standin_default_smoothing = FlorisStandin(CONFIG, AMR_INPUT)
+    floris_standin_heavy_smoothing = FlorisStandin(CONFIG, AMR_INPUT, smoothing_coefficient=0.9)
+
+    # Start at zero power
+    floris_standin_no_smoothing.turbine_powers_prev = np.zeros(2)
+    floris_standin_default_smoothing.turbine_powers_prev = np.zeros(2)
+    floris_standin_heavy_smoothing.turbine_powers_prev = np.zeros(2)
+
+    # Step forward
+    fs_tp_no_smoothing = floris_standin_no_smoothing.get_step(1.0)[2]
+    fs_tp_default_smoothing = floris_standin_default_smoothing.get_step(1.0)[2]
+    fs_tp_heavy_smoothing = floris_standin_heavy_smoothing.get_step(1.0)[2]
+
+    # Check smoothing ordering correct
+    assert (np.array(fs_tp_no_smoothing) > np.array(fs_tp_default_smoothing)).all()
+    assert (np.array(fs_tp_default_smoothing) > np.array(fs_tp_heavy_smoothing)).all()
+
+    # Check magnitude is correct
+    assert np.allclose(0.1*np.array(fs_tp_no_smoothing), np.array(fs_tp_heavy_smoothing))

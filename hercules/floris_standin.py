@@ -128,7 +128,27 @@ def construct_floris_from_amr_input(amr_wind_input):
 
 
 class FlorisStandin(AMRWindStandin):
-    def __init__(self, config_dict, amr_input_file, amr_standin_data_file=None):
+    """
+    FlorisStandin class, which stands in for AMR-Wind. 
+    Arguments:
+    config_dict: dictionary of configuration parameters
+    amr_input_file: path to the AMR-Wind input file
+    amr_standin_data_file [optional]: path to the AMR-Wind standin data file.
+        Defaults to None
+    smoothing_coefficient [optional]: smoothing coefficient for turbine power
+        output. Must be in [0, 1). If 0, no smoothing is applied; if near 1,
+        the output is heavily smoothed. Defaults to 0.5.
+    """
+    def __init__(
+            self,
+            config_dict,
+            amr_input_file,
+            amr_standin_data_file=None,
+            smoothing_coefficient=0.5
+        ):
+        """
+        Constructor for the FlorisStandin class
+        """
         # Ensure outputs folder exists
         Path("outputs").mkdir(parents=True, exist_ok=True)
 
@@ -150,6 +170,11 @@ class FlorisStandin(AMRWindStandin):
         # Initialize storage
         self.yaw_angles_stored = [0.0] * self.num_turbines
         self.turbine_powers_prev = np.zeros(self.num_turbines)
+
+        # Check and save smoothing coefficient
+        if smoothing_coefficient < 0 or smoothing_coefficient >= 1:
+            raise ValueError("Smoothing coefficient must be in [0, 1).")
+        self.smoothing_coefficient = smoothing_coefficient
 
     def get_step(self, sim_time_s, yaw_angles=None, power_setpoints=None):
         """Retreive or calculate wind speed, direction, and turbine powers
@@ -221,17 +246,12 @@ class FlorisStandin(AMRWindStandin):
         self.fmodel.run()
         turbine_powers_floris = (self.fmodel.get_turbine_powers() / 1000).flatten()  # in kW
 
-        smooth_output = True
-        if smooth_output:
-            a = 0.5
-            print("power setpoints:", power_setpoints)
-            print("floris power:", turbine_powers_floris)
-            print("previous power:", self.turbine_powers_prev)
-            turbine_powers = (a*self.turbine_powers_prev + (1-a)*turbine_powers_floris)
-            print("smoothed power:", turbine_powers)
-            self.turbine_powers_prev = turbine_powers
-        else:
-            turbine_powers = turbine_powers_floris.tolist()
+        # Smooth output
+        turbine_powers = (
+            self.smoothing_coefficient*self.turbine_powers_prev
+            + (1-self.smoothing_coefficient)*turbine_powers_floris
+        )
+        self.turbine_powers_prev = turbine_powers
         turbine_powers = turbine_powers.tolist()
 
         return (

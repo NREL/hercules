@@ -57,7 +57,7 @@ def test_FlorisStandin_instantiation():
 
 
 def test_FlorisStandin_get_step_yaw_angles():
-    floris_standin = FlorisStandin(CONFIG, AMR_INPUT)
+    floris_standin = FlorisStandin(CONFIG, AMR_INPUT, smoothing_coefficient=0.0)
 
     # Get FLORIS equivalent, match layout and turbines
     fmodel_true = FlorisModel(default_floris_dict)
@@ -122,7 +122,7 @@ def test_FlorisStandin_get_step_yaw_angles():
     )
 
 def test_FlorisStandin_get_step_power_setpoints():
-    floris_standin = FlorisStandin(CONFIG, AMR_INPUT)
+    floris_standin = FlorisStandin(CONFIG, AMR_INPUT, smoothing_coefficient=0.0)
 
     # Get FLORIS equivalent, match layout and turbines
     fmodel_true = FlorisModel(default_floris_dict)
@@ -179,7 +179,7 @@ def test_FlorisStandin_get_step_power_setpoints():
 
 
 def test_FlorisStandin_with_standin_data_yaw_angles():
-    floris_standin = FlorisStandin(CONFIG, AMR_INPUT, AMR_EXTERNAL_DATA)
+    floris_standin = FlorisStandin(CONFIG, AMR_INPUT, AMR_EXTERNAL_DATA, smoothing_coefficient=0.0)
 
     yaw_angles_all = [
         [240.0, 240.0],
@@ -231,7 +231,7 @@ def test_FlorisStandin_with_standin_data_yaw_angles():
     assert fs_tp_all[9, :].sum() > fs_tp_all[7, :].sum()
 
 def test_FlorisStandin_with_standin_data_power_setpoints():
-    floris_standin = FlorisStandin(CONFIG, AMR_INPUT, AMR_EXTERNAL_DATA)
+    floris_standin = FlorisStandin(CONFIG, AMR_INPUT, AMR_EXTERNAL_DATA, smoothing_coefficient=0.0)
 
     power_setpoints_all = [
         [None, None],

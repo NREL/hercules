@@ -149,6 +149,7 @@ class FlorisStandin(AMRWindStandin):
 
         # Initialize storage
         self.yaw_angles_stored = [0.0] * self.num_turbines
+        self.turbine_powers_prev = np.zeros(self.num_turbines)
 
     def get_step(self, sim_time_s, yaw_angles=None, power_setpoints=None):
         """Retreive or calculate wind speed, direction, and turbine powers
@@ -218,7 +219,20 @@ class FlorisStandin(AMRWindStandin):
             power_setpoints=power_setpoints
         )
         self.fi.run()
-        turbine_powers = (self.fi.get_turbine_powers() / 1000).flatten().tolist()  # in kW
+        turbine_powers_floris = (self.fi.get_turbine_powers() / 1000).flatten()  # in kW
+
+        smooth_output = True
+        if smooth_output:
+            a = 0.5
+            print("power setpoints:", power_setpoints)
+            print("floris power:", turbine_powers_floris)
+            print("previous power:", self.turbine_powers_prev)
+            turbine_powers = (a*self.turbine_powers_prev + (1-a)*turbine_powers_floris)
+            print("smoothed power:", turbine_powers)
+            self.turbine_powers_prev = turbine_powers
+        else:
+            turbine_powers = turbine_powers_floris.tolist()
+        turbine_powers = turbine_powers.tolist()
 
         return (
             amr_wind_speed,

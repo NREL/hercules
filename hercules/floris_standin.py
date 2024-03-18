@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from floris.tools import FlorisInterface
+from floris import FlorisModel
 from floris.turbine_library import build_cosine_loss_turbine_dict
 
 from hercules.amr_wind_standin import AMRWindStandin, read_amr_wind_input
@@ -119,12 +119,12 @@ def construct_floris_from_amr_input(amr_wind_input):
         turb_dict["power_thrust_model"] = "mixed"
 
         # load a default model
-        fi = FlorisInterface(default_floris_dict)
-        fi.set(
+        fmodel = FlorisModel(default_floris_dict)
+        fmodel.set(
             layout_x=layout_x, layout_y=layout_y, turbine_type=[turb_dict] * len(layout_x)
         )
 
-    return fi
+    return fmodel
 
 
 class FlorisStandin(AMRWindStandin):
@@ -139,10 +139,10 @@ class FlorisStandin(AMRWindStandin):
         )
 
         # Construct the floris object
-        self.fi = construct_floris_from_amr_input(amr_input_file)
+        self.fmodel = construct_floris_from_amr_input(amr_input_file)
 
         # Get the number of turbines
-        self.num_turbines = len(self.fi.layout_x)
+        self.num_turbines = len(self.fmodel.layout_x)
 
         # Print the number of turbines
         logger.info("Number of turbines: {}".format(self.num_turbines))
@@ -212,14 +212,14 @@ class FlorisStandin(AMRWindStandin):
             power_setpoints = power_setpoints * 1000 # in W
 
         # Set up and solve FLORIS
-        self.fi.set(
+        self.fmodel.set(
             wind_speeds=[amr_wind_speed],
             wind_directions=[amr_wind_direction],
             yaw_angles=yaw_misalignments,
             power_setpoints=power_setpoints
         )
-        self.fi.run()
-        turbine_powers_floris = (self.fi.get_turbine_powers() / 1000).flatten()  # in kW
+        self.fmodel.run()
+        turbine_powers_floris = (self.fmodel.get_turbine_powers() / 1000).flatten()  # in kW
 
         smooth_output = True
         if smooth_output:

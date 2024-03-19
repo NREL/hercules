@@ -224,6 +224,7 @@ def test_LI_step_cell(LI):
         ],
     )
 
+
 def test_LI_calc_power(LI):
     assert LI.calc_power(400) == 1593832.1960216616
 
@@ -232,6 +233,7 @@ def test_LI_calc_power(LI):
 
     LI.step_cell(10)
     assert LI.calc_power(400) == 1658686.3702462215
+
 
 def test_LI_step(LI):
 
@@ -244,13 +246,13 @@ def test_LI_step(LI):
     assert LI.SOC == 0.10200356700632712
     assert LI.V_RC == 0.0005503468409411925
 
+
 def test_LI_control(LI):
-    
+
     P_avail = 1.5e3
     P_signal = 1e3
     I_charge, I_reject = LI.control(P_signal, P_avail)
-    assert_almost_equal(LI.calc_power(I_charge), P_signal*1e3, 0)
-
+    assert_almost_equal(LI.calc_power(I_charge), P_signal * 1e3, 0)
 
     # check that the integrator offset improves setpoint tracking as the simulation proceeds
     out1 = LI.step(step_inputs(P_avail, P_signal))
@@ -262,35 +264,35 @@ def test_LI_control(LI):
 
 
 def test_LI_constraints(LI):
-    
+
     # no constraints applied
     I_charge, I_reject = LI.constraints(I_signal=400, I_avail=500)
     assert I_charge == 400
     assert I_reject == 0
 
     # I_avail is insufficient
-    I_charge, I_reject = LI.constraints(I_signal = 400, I_avail=300)
+    I_charge, I_reject = LI.constraints(I_signal=400, I_avail=300)
     assert I_charge == 300
     assert I_reject == 100
 
     # I_signal is above max charginging rate
-    I_charge, I_reject = LI.constraints(I_signal = 500, I_avail=1e3)
+    I_charge, I_reject = LI.constraints(I_signal=500, I_avail=1e3)
     assert I_charge == 488.5972500201703
     assert I_reject == 11.402749979829707
 
     # I_signal will charge the battery beyond max SOC
-    LI.charge = LI.charge_max - .05
-    I_charge, I_reject = LI.constraints(I_signal = 400, I_avail=400)
+    LI.charge = LI.charge_max - 0.05
+    I_charge, I_reject = LI.constraints(I_signal=400, I_avail=400)
     assert I_charge == 179.99999999738066
     assert I_reject == 220.00000000261934
 
     # I_signal is beyond max discharginging rate
-    I_charge, I_reject = LI.constraints(I_signal = -500, I_avail=0)
+    I_charge, I_reject = LI.constraints(I_signal=-500, I_avail=0)
     assert I_charge == -488.5972500201703
     assert I_reject == -11.402749979829707
 
     # I_signal will charge the battery below min SOC
-    LI.charge = LI.charge_min + .05
-    I_charge, I_reject = LI.constraints(I_signal = -400, I_avail=0)
+    LI.charge = LI.charge_min + 0.05
+    I_charge, I_reject = LI.constraints(I_signal=-400, I_avail=0)
     assert I_charge == -179.9999999998363
     assert I_reject == -220.0000000001637

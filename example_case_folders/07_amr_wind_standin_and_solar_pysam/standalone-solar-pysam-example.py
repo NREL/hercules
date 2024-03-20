@@ -31,12 +31,13 @@ solar_dict = {
     "lon": -105.1778, 
     "elev": 1829,
     "initial_conditions": {"power": 25, "dni": 1000},
+    "power_setpoints": {"time": 2, "power_mw": 10}
 }
 
 dt = 0.5  # s - input file has a dt of 1 min
 
 time_start = 0
-time_end = 100  # 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
+time_end = 10 # 100  # 11*3600 #[s] NonAnnualSimulation-sample-data contains 24 hrs
 
 # -------- start simulation
 SPS = SolarPySAM(solar_dict, dt)
@@ -52,7 +53,8 @@ def simulate(SPS, time):
         "py_sims": {"inputs": {"available_power": 100, "sim_time_s": 0}},
     }
 
-    power = np.zeros(len(time))
+    power = np.zeros(len(time)).
+
     dc_power = np.zeros(len(time))
     aoi = np.zeros(len(time))
     irradiance = np.zeros(len(time))

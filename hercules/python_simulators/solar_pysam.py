@@ -37,14 +37,8 @@ class SolarPySAM:
                           "elev": input_dict["elev"]},
             }
         else: # using system info data dictionary in input file
-<<<<<<< HEAD
-            sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
-            # model_params = sys_design.export() # have to flatten this dictionary
-            # sys_design = input_dict["system_info_data_input"]
-=======
             # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
             sys_design = input_dict["system_info_data_input"]
->>>>>>> bcee3c357d19b3205f10fab05bfc95efdedd6c0b
             print("sys_design")
             print(sys_design)
             print("model_params")
@@ -55,6 +49,11 @@ class SolarPySAM:
         self.lat = sys_design["Other"]["lat"]
         self.lon = sys_design["Other"]["lon"]
         self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
+
+        # Power setpoints
+        if input_dict["power_setpoints"]:
+            self.power_setpoints = pd.DataFrame.from_dict(input_dict["power_setpoints"])
+        print('power setpoints = ', self.power_setpoints)
 
         # Define needed inputs
         self.needed_inputs = {}
@@ -95,6 +94,9 @@ class SolarPySAM:
         print("sim_time_s = ", inputs["py_sims"]["inputs"]["sim_time_s"])
         sim_timestep = int(inputs["py_sims"]["inputs"]["sim_time_s"] / self.dt)
         print("sim_timestep = ", sim_timestep)
+
+        if xxx:
+            power_setpoint = inputs["py_sims"]
 
         data = self.data.iloc[[sim_timestep]]  # a single timestep
         # TODO - replace sim_timestep with seconds in sim_time_s and find corresponding
@@ -146,6 +148,11 @@ class SolarPySAM:
 
         ac = np.array(out["gen"]) / 1000  # quick fix for issue being fixed by darice
         dc = np.array(out["dc_net"]) / 1000
+
+        # modify power output based on setpoint
+        if power_setpoint is not None:
+            if ac > power_setpoint:
+                ac = power_setpoint
 
         self.power_mw = ac[0]  # calculating one timestep at a time
         self.dc_power_mw = dc[0]

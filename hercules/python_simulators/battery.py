@@ -1,5 +1,5 @@
 """
-Simple battery dispatch model
+Battery models
 Author: Zack tully - zachary.tully@nrel.gov
 March 2024
 
@@ -25,13 +25,20 @@ def kWh2kJ(kJ):
 
 class Battery:
     def __init__(self, input_dict, dt):
-        if input_dict["py_sim_type"] == SimpleBattery:
+        if input_dict["py_sim_type"] == "SimpleBattery":
             self.battery = SimpleBattery(input_dict, dt)
-        elif input_dict["py_sim_type"] == LIB:
+        elif input_dict["py_sim_type"] == "LIB":
             self.battery = LIB(input_dict, dt)
+        self.needed_inputs = self.battery.needed_inputs
 
     def step(self, inputs):
         return self.battery.step(inputs)
+
+    def return_inputs(self):
+        return self.battery.return_inputs()
+
+    def return_outputs(self):
+        return self.battery.return_outputs()
 
 
 class LIB:
@@ -72,6 +79,8 @@ class LIB:
         self.T = 25  # [C] temperature
         self.SOH = 1  # State of Health
 
+        self.needed_inputs = {"battery_signal": 0.0}
+
         self.post_init()
 
     def post_init(self):
@@ -83,6 +92,7 @@ class LIB:
         self.n_cells = self.energy_capacity * 1e3 / (self.V_cell_nom * self.C_cell)
         # TODO: need a systematic way to decide parallel and series cells
         # TODO: choose a default voltage to choose the series and parallel configuration.
+        # TODO: allow user to specify a specific configuration
         self.n_p = np.sqrt(self.n_cells)  # number of cells in parallel
         self.n_s = np.sqrt(self.n_cells)  # number of cells in series
 
@@ -220,7 +230,7 @@ class LIB:
         - outptuts: see return_outputs() method
         """
 
-        P_signal = inputs["setpoints"]["battery"]["signal"]  # [kW] requested power
+        P_signal = inputs["py_sims"]["inputs"]["battery_signal"]  # [kW] requested power
         P_avail = inputs["py_sims"]["inputs"]["available_power"]  # [kW] avaiable power
 
         # Calculate charging/discharging current [A] from power
@@ -286,7 +296,7 @@ class LIB:
         # actual battery voltage.
         I_signal += self.error_sum * 1e3 / self.V_bat_nom * 0.01
         # Is this calc just as accurate as iterative?
-        I_avail = P_avail * 1e3 / (self.V_cell() * self.n_s) 
+        I_avail = P_avail * 1e3 / (self.V_cell() * self.n_s)
 
         # Check charging, discharging, and amperage constraints.
         I_charge, I_reject = self.constraints(I_signal, I_avail)
@@ -381,18 +391,16 @@ class SimpleBattery:
         self.P_reject = 0
         self.P_charge = 0
 
-        self.needed_inputs = {}
+        self.needed_inputs = {"battery_signal": 0.0}
 
     def return_outputs(self):
         return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC}
 
     def step(self, inputs):
-        P_signal = inputs["setpoints"]["battery"][
-            "signal"
-        ]  # power available for the battery to use for charging (should be >=0)
-        P_avail = inputs["py_sims"]["inputs"][
-            "available_power"
-        ]  # power signal desired by the controller
+        # power available for the battery to use for charging (should be >=0)
+        P_signal = inputs["py_sims"]["inputs"]["battery_signal"]
+        # power signal desired by the controller
+        P_avail = inputs["py_sims"]["inputs"]["available_power"]
 
         self.control(P_avail, P_signal)
 

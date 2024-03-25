@@ -64,11 +64,19 @@ py_sims:
         stack_rating_kW: 500
         # Determines whether degradation is applied to the Stack operation
         include_degradation_penalty: True
+
       control:
         # Number of electrolyzer Stacks in plant
         n_stacks: 10
         # Controller type for electrolyzer plant operation
-        control_type: BaselineDeg # default
+        control_type: PowerSharingRotation
+        # policy: 
+        #   eager_on: False
+        #   eager_off: False
+        #   sequential: False
+        #   even_dist: False
+        #   baseline: True
+
       costs:
 
     initial_conditions:

@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from floris.tools import FlorisInterface
+from floris import FlorisModel
 from floris.turbine_library import build_cosine_loss_turbine_dict
 
 from hercules.amr_wind_standin import AMRWindStandin, read_amr_wind_input
@@ -119,16 +119,36 @@ def construct_floris_from_amr_input(amr_wind_input):
         turb_dict["power_thrust_model"] = "mixed"
 
         # load a default model
-        fi = FlorisInterface(default_floris_dict)
-        fi.set(
+        fmodel = FlorisModel(default_floris_dict)
+        fmodel.set(
             layout_x=layout_x, layout_y=layout_y, turbine_type=[turb_dict] * len(layout_x)
         )
 
-    return fi
+    return fmodel
 
 
 class FlorisStandin(AMRWindStandin):
-    def __init__(self, config_dict, amr_input_file, amr_standin_data_file=None):
+    """
+    FlorisStandin class, which stands in for AMR-Wind. 
+    Arguments:
+    config_dict: dictionary of configuration parameters
+    amr_input_file: path to the AMR-Wind input file
+    amr_standin_data_file [optional]: path to the AMR-Wind standin data file.
+        Defaults to None
+    smoothing_coefficient [optional]: smoothing coefficient for turbine power
+        output. Must be in [0, 1). If 0, no smoothing is applied; if near 1,
+        the output is heavily smoothed. Defaults to 0.5.
+    """
+    def __init__(
+            self,
+            config_dict,
+            amr_input_file,
+            amr_standin_data_file=None,
+            smoothing_coefficient=0.5
+        ):
+        """
+        Constructor for the FlorisStandin class
+        """
         # Ensure outputs folder exists
         Path("outputs").mkdir(parents=True, exist_ok=True)
 
@@ -139,16 +159,22 @@ class FlorisStandin(AMRWindStandin):
         )
 
         # Construct the floris object
-        self.fi = construct_floris_from_amr_input(amr_input_file)
+        self.fmodel = construct_floris_from_amr_input(amr_input_file)
 
         # Get the number of turbines
-        self.num_turbines = len(self.fi.layout_x)
+        self.num_turbines = len(self.fmodel.layout_x)
 
         # Print the number of turbines
         logger.info("Number of turbines: {}".format(self.num_turbines))
 
         # Initialize storage
         self.yaw_angles_stored = [0.0] * self.num_turbines
+        self.turbine_powers_prev = np.zeros(self.num_turbines)
+
+        # Check and save smoothing coefficient
+        if smoothing_coefficient < 0 or smoothing_coefficient >= 1:
+            raise ValueError("Smoothing coefficient must be in [0, 1).")
+        self.smoothing_coefficient = smoothing_coefficient
 
     def get_step(self, sim_time_s, yaw_angles=None, power_setpoints=None):
         """Retreive or calculate wind speed, direction, and turbine powers
@@ -211,14 +237,22 @@ class FlorisStandin(AMRWindStandin):
             power_setpoints = power_setpoints * 1000 # in W
 
         # Set up and solve FLORIS
-        self.fi.set(
+        self.fmodel.set(
             wind_speeds=[amr_wind_speed],
             wind_directions=[amr_wind_direction],
             yaw_angles=yaw_misalignments,
             power_setpoints=power_setpoints
         )
-        self.fi.run()
-        turbine_powers = (self.fi.get_turbine_powers() / 1000).flatten().tolist()  # in kW
+        self.fmodel.run()
+        turbine_powers_floris = (self.fmodel.get_turbine_powers() / 1000).flatten()  # in kW
+
+        # Smooth output
+        turbine_powers = (
+            self.smoothing_coefficient*self.turbine_powers_prev
+            + (1-self.smoothing_coefficient)*turbine_powers_floris
+        )
+        self.turbine_powers_prev = turbine_powers
+        turbine_powers = turbine_powers.tolist()
 
         return (
             amr_wind_speed,

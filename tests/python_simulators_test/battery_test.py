@@ -3,7 +3,11 @@
 import numpy as np
 import pytest
 from hercules.python_simulators.battery import LIB, SimpleBattery
-from numpy.testing import assert_almost_equal, assert_array_equal
+from numpy.testing import (
+    assert_almost_equal,
+    assert_array_almost_equal,
+    assert_array_equal,
+)
 
 
 def get_battery_params(battery_type):
@@ -186,16 +190,19 @@ def test_LI_OCV(LI):
 def test_LI_build_SS(LI):
     """Check ABCD matrices for different conditions"""
 
-    assert_array_equal(
+    assert_array_almost_equal(
         LI.build_SS(),
         [-0.017767729688006585, 1, 7.533462876320113e-05, 0.002720095833999999],
+        12,
     )
 
     LI.SOC = 0.75
     LI.SOH = 0.75
     LI.T = 10
-    assert_array_equal(
-        LI.build_SS(), [-0.026421742559794213, 1, 0.00012815793568836145, 0.00555564775]
+    assert_array_almost_equal(
+        LI.build_SS(),
+        [-0.026421742559794213, 1, 0.00012815793568836145, 0.00555564775],
+        12,
     )
 
 

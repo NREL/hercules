@@ -11,19 +11,38 @@ import PySAM.Pvsamv1 as pvsam
 class SolarPySAM:
     def __init__(self, input_dict, dt):
         # load weather data
-        data = pd.read_csv(input_dict["weather_file_name"])
+        if input_dict["weather_file_name"]: # using a weather file
+            data = pd.read_csv(input_dict["weather_file_name"])
+        else: # using an input dictionary
+            data = pd.DataFrame.from_dict(input_dict["weather_data_input"])
+
+        print(data)
         data["Timestamp"] = pd.DatetimeIndex(
-            pd.to_datetime(data["Timestamp"], format="ISO8601", utc=True)
+                pd.to_datetime(data["Timestamp"], format="ISO8601", utc=True)
         )
         data = data.set_index("Timestamp")
+        
+        # print('input_dict = ')
+        # print(input_dict)
 
         # set PV system model parameters
-        with open(input_dict["system_info_file_name"], "r") as f:
-            model_params = json.load(f)
-        sys_design = {
-            "ModelParams": model_params,
-            "Other": {"lat": 39.7442, "lon": -105.1778, "elev": 1829},
-        }
+        if input_dict["system_info_file_name"]: # using system info json file
+            with open(input_dict["system_info_file_name"], "r") as f:
+                model_params = json.load(f)
+            sys_design = {
+                "ModelParams": model_params,
+                # "Other": input_dict["other"],
+                "Other": {"lat": input_dict["lat"], 
+                          "lon": input_dict["lon"], 
+                          "elev": input_dict["elev"]},
+            }
+        else: # using system info data dictionary in input file
+            # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
+            sys_design = input_dict["system_info_data_input"]
+            print("sys_design")
+            print(sys_design)
+            print("model_params")
+            print(sys_design["ModelParams"])
 
         self.model_params = sys_design["ModelParams"]
         self.elev = sys_design["Other"]["elev"]
@@ -39,14 +58,14 @@ class SolarPySAM:
         # Save the initial condition
         self.power_mw = input_dict["initial_conditions"]["power"]
         self.dc_power_mw = input_dict["initial_conditions"]["power"]
-        self.irradiance = input_dict["initial_conditions"]["irradiance"]
+        self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
 
     def return_outputs(self):
         return {
-            "power": self.power_mw,
-            "dc_power": self.dc_power_mw,
-            "irradiance": self.irradiance,
+            "power_mw": self.power_mw,
+            "dc_power_mw": self.dc_power_mw,
+            "dni": self.dni,
             "aoi": self.aoi,
         }
 
@@ -61,9 +80,10 @@ class SolarPySAM:
         for k, v in self.model_params.items():
             try:
                 system_model.value(k, v)
-            except KeyError:
+            except Exception:
                 print(k)
         #### TODO: Check with Brooke about this "except KeyError" line ####
+                # Brooke: I got errors with KeyError so changed it to Exception and it's working
         # print('model params = ',self.model_params)
 
         print("sim_time_s = ", inputs["py_sims"]["inputs"]["sim_time_s"])
@@ -114,9 +134,9 @@ class SolarPySAM:
         system_model.execute()
         out = system_model.Outputs.export()
 
-        if sim_timestep == 0:
-            with open("out-example.json", "w") as f:
-                json.dump(out, f)
+        # if sim_timestep == 0:
+        #     with open("out-example.json", "w") as f:
+        #         json.dump(out, f)
 
         ac = np.array(out["gen"]) / 1000  # quick fix for issue being fixed by darice
         dc = np.array(out["dc_net"]) / 1000
@@ -124,11 +144,17 @@ class SolarPySAM:
         self.power_mw = ac[0]  # calculating one timestep at a time
         self.dc_power_mw = dc[0]
         print("self.power_mw = ", self.power_mw)
+        print("self.dc_power_mw = ", self.dc_power_mw)
+        
         if self.power_mw < 0.0:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
-        self.irradiance = out["gh"][0]  # TODO check that gh is the accurate irradiance output
+        # self.irradiance = out["gh"][0]  # TODO check that gh is the accurate irradiance output
+        self.dni = out["dn"][0] # direct normal irradiance
+        self.dhi = out["df"][0] # diffuse horizontal irradiance
+        self.ghi = out["gh"][0] # global horizontal irradiance
+        print("self.dni = ", self.dni)
 
         self.aoi = out["subarray1_aoi"][0]  # angle of incidence
 

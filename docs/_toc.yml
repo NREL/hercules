@@ -12,5 +12,22 @@ parts:
     - file: install_spack
   - caption: Usage
     chapters:
-    - file: examples
     - file: order_of_op
+  - caption: Technologies
+    chapters:
+    - file: wind
+    - file: battery
+    - file: solar_pv
+  - caption: Examples
+    chapters:
+    - file: examples_overview
+    - file: examples/06_amr_wind_standin_and_battery
+    - file: examples/07_amr_wind_standin_and_solar_pysam
+
+
+
+
+
+
+
+

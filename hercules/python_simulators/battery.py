@@ -4,9 +4,9 @@ Author: Zack tully - zachary.tully@nrel.gov
 March 2024
 
 References:
-[1] M.-K. Tran et al., “A comprehensive equivalent circuit model for lithium-ion 
-batteries, incorporating the effects of state of health, state of charge, and 
-temperature on model parameters,” Journal of Energy Storage, vol. 43, p. 103252, 
+[1] M.-K. Tran et al., “A comprehensive equivalent circuit model for lithium-ion
+batteries, incorporating the effects of state of health, state of charge, and
+temperature on model parameters,” Journal of Energy Storage, vol. 43, p. 103252,
 Nov. 2021, doi: 10.1016/j.est.2021.103252.
 """
 
@@ -33,9 +33,6 @@ class Battery:
 
     def step(self, inputs):
         return self.battery.step(inputs)
-
-    def return_inputs(self):
-        return self.battery.return_inputs()
 
     def return_outputs(self):
         return self.battery.return_outputs()
@@ -223,7 +220,7 @@ class LIB:
 
         Inputs:
         - inputs: dictionary of inputs for the current time step which must have:
-            - setpoints:{battery:{signal: ___ }} [kW] charging/discharging power desired
+            - setpoints:{inputs:{battery_signal: ___ }} [kW] charging/discharging power desired
             - py_sims:{inputs:{available_power: ___ }} [kW] power available for charging/discharging
 
         Outputs:

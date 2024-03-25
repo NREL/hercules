@@ -44,8 +44,8 @@ def LI():
 def step_inputs(P_avail, P_signal):
     return dict(
         {
-            "setpoints": {"battery": {"signal": P_signal}},
-            "py_sims": {"inputs": {"available_power": P_avail}},
+            # "setpoints": {"battery": {"signal": P_signal}},
+            "py_sims": {"inputs": {"available_power": P_avail, "battery_signal": P_signal}},
         }
     )
 
@@ -121,12 +121,7 @@ def test_SB_control_energy_constraint(SB: SimpleBattery):
 
 
 def test_SB_step(SB: SimpleBattery):
-    step_inputs = {
-        "setpoints": {"battery": {"signal": 1e3}},
-        "py_sims": {"inputs": {"available_power": 1e3}},
-    }
-
-    SB.step(step_inputs)
+    SB.step(step_inputs(P_avail=1e3, P_signal=1e3))
 
     assert_almost_equal(SB.E, 29377000, decimal=0)
     assert_almost_equal(SB.current_batt_state, 8160.27, decimal=1)
@@ -134,10 +129,9 @@ def test_SB_step(SB: SimpleBattery):
     assert SB.P_charge == 1e3
 
     SB.E = SB.E_min + 5e3
-    step_inputs["setpoints"]["battery"].update({"signal": -2e3})
 
     for i in range(4):
-        SB.step(step_inputs)
+        SB.step(step_inputs(P_avail=1e3, P_signal=-2e3))
 
     assert SB.E == 28800000
     assert SB.current_batt_state == 8000
@@ -182,7 +176,6 @@ def test_LI_post_init():
 
 
 def test_LI_OCV(LI):
-
     LI.SOC = 0.25
     assert LI.OCV() == 3.2654698427383457
 
@@ -207,7 +200,6 @@ def test_LI_build_SS(LI):
 
 
 def test_LI_step_cell(LI):
-
     V_RC = np.zeros(5)
     for i in range(5):
         V_RC[i] = LI.V_RC
@@ -236,7 +228,6 @@ def test_LI_calc_power(LI):
 
 
 def test_LI_step(LI):
-
     P_avail = 1.5e3
     P_signal = 1e3
 
@@ -248,7 +239,6 @@ def test_LI_step(LI):
 
 
 def test_LI_control(LI):
-
     P_avail = 1.5e3
     P_signal = 1e3
     I_charge, I_reject = LI.control(P_signal, P_avail)
@@ -264,7 +254,6 @@ def test_LI_control(LI):
 
 
 def test_LI_constraints(LI):
-
     # no constraints applied
     I_charge, I_reject = LI.constraints(I_signal=400, I_avail=500)
     assert I_charge == 400

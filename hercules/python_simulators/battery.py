@@ -220,7 +220,7 @@ class LIB:
 
         Inputs:
         - inputs: dictionary of inputs for the current time step which must have:
-            - setpoints:{inputs:{battery_signal: ___ }} [kW] charging/discharging power desired
+            - py_sims:{inputs:{battery_signal: ___ }} [kW] charging/discharging power desired
             - py_sims:{inputs:{available_power: ___ }} [kW] power available for charging/discharging
 
         Outputs:

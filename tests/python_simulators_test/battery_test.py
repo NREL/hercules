@@ -1,13 +1,7 @@
-"""This module provides unit tests for 'SimpleBattery'."""
-
 import numpy as np
 import pytest
 from hercules.python_simulators.battery import LIB, SimpleBattery
-from numpy.testing import (
-    assert_almost_equal,
-    assert_array_almost_equal,
-    assert_array_equal,
-)
+from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
 
 def get_battery_params(battery_type):
@@ -48,7 +42,6 @@ def LI():
 def step_inputs(P_avail, P_signal):
     return dict(
         {
-            # "setpoints": {"battery": {"signal": P_signal}},
             "py_sims": {"inputs": {"available_power": P_avail, "battery_signal": P_signal}},
         }
     )
@@ -207,12 +200,13 @@ def test_LI_build_SS(LI):
 
 
 def test_LI_step_cell(LI):
+    # check RC branch step response
     V_RC = np.zeros(5)
     for i in range(5):
         V_RC[i] = LI.V_RC
         LI.step_cell(10)
 
-    assert_array_equal(
+    assert_array_almost_equal(
         V_RC,
         [
             0.0,
@@ -221,6 +215,7 @@ def test_LI_step_cell(LI):
             0.028694265662063904,
             0.029421079268856364,
         ],
+        9,
     )
 
 

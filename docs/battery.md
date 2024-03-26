@@ -38,6 +38,7 @@ Outputs are returned as a dict containing the following values
 `SimpleBattery` is defined by $E_t = \sum_{k=0}^t P_k \Delta t$, where $E_t$ is the energy stored and $P_t$ is the charging/discharging power at time $t$. Both $E$ and $P$ are constrained by upper and lower limits.
 
 $\underline{E} \leq E \leq \overline{E}$
+
 $\underline{P} \leq P \leq \overline{P}$
 
 

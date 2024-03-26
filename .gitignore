@@ -40,9 +40,9 @@ hercules/local_amr_wind_demo/sample_copy.nc
 # Some output files to ignore
 t_00*
 logdummy
-loghercules
+loghercules*
 logstandin
-logfloris
+logfloris*
 *echo
 *out-example.json
 

@@ -43,7 +43,6 @@ class ElectrolyzerPlant:
         power_in = inputs["py_sims"]["inputs"][
             "available_power"
         ]  # TODO check what units this is in
-
         # Run electrolyzer forward one step
         ######## Electrolyzer needs input in Watts ########
         H2_produced, H2_mfr, power_left, power_curtailed = self.elec_sys.run_control(power_in * 1e3)

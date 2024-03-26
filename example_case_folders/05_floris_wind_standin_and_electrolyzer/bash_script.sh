@@ -15,5 +15,5 @@ export HELICS_PORT=32000
 
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
 python3 hercules_runscript_CLcontrol.py hercules_input_000.yaml >> loghercules_cl 2>&1 &
-python3 floris_runscript.py amr_input.inp amr_standin_data-higher.csv >> logfloris_cl 2>&1
+python3 floris_runscript.py amr_input.inp floris_standin_data.csv >> logfloris_cl 2>&1
 

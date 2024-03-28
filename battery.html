@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Local installation instructions &#8212; HERCULES</title>
+    <title>Battery &#8212; HERCULES</title>
   
   
   
@@ -70,11 +70,13 @@
                 gtag('config', 'G-3V1BDK8KEJ');
             </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'install_local';</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'battery';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation on Kestrel" href="install_on_kestrel.html" />
-    <link rel="prev" title="Installation" href="install_instructions.html" />
+    <link rel="next" title="Solar PV" href="solar_pv.html" />
+    <link rel="prev" title="Order of operations" href="order_of_op.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -190,9 +192,9 @@
             </li>
         </ul>
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Installation</span></p>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="install_instructions.html">Installation</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Local installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install_local.html">Local installation instructions</a></li>
 
 
 
@@ -204,8 +206,8 @@
 <li class="toctree-l1"><a class="reference internal" href="order_of_op.html">Order of operations</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Technologies</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="battery.html">Battery</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Battery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solar_pv.html">Solar PV</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
@@ -284,7 +286,7 @@
       
       
       
-      <li><a href="https://github.com/NREL/hercules/edit/develop/docs/install_local.md" target="_blank"
+      <li><a href="https://github.com/NREL/hercules/edit/develop/docs/battery.md" target="_blank"
    class="btn btn-sm btn-source-edit-button dropdown-item"
    title="Suggest edit"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -301,7 +303,7 @@
       
       
       
-      <li><a href="https://github.com/NREL/hercules/issues/new?title=Issue%20on%20page%20%2Finstall_local.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/NREL/hercules/issues/new?title=Issue%20on%20page%20%2Fbattery.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -331,7 +333,7 @@
       
       
       
-      <li><a href="_sources/install_local.md" target="_blank"
+      <li><a href="_sources/battery.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -415,7 +417,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Local installation instructions</h1>
+    <h1>Battery</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -425,12 +427,15 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Local installation instructions</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-local">Running [Local]</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-kestrel">Running [Kestrel]</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inputs">Inputs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs">Outputs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simplebattery"><code class="docutils literal notranslate"><span class="pre">SimpleBattery</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#lib"><code class="docutils literal notranslate"><span class="pre">LIB</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 </ul>
-
+</li>
+</ul>
             </nav>
         </div>
     </div>
@@ -441,224 +446,60 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="local-installation-instructions">
-<h1>Local installation instructions<a class="headerlink" href="#local-installation-instructions" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="battery">
+<h1>Battery<a class="headerlink" href="#battery" title="Link to this heading">#</a></h1>
+<p>There are two battery models currently implemented in Hercules: <code class="docutils literal notranslate"><span class="pre">SimpleBattery</span></code> and <code class="docutils literal notranslate"><span class="pre">LIB</span></code>. Both interact with Hercules through a simple wrapper class: <code class="docutils literal notranslate"><span class="pre">Battery</span></code>.</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
+<p>Battery parameters are defined in the hercules input yaml file used to initialize <code class="docutils literal notranslate"><span class="pre">emulator</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">py_sim_type</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;SimpleBattery&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;LIB&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">energy_capacity</span></code>: [kWh]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">charge_rate</span></code>: [kW]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_SOC</span></code>: between 0 and 1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_SOC</span></code>: between 0 and 1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">initial_conditions</span></code></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">SOC</span></code>: between <code class="docutils literal notranslate"><span class="pre">min_SOC</span></code> and <code class="docutils literal notranslate"><span class="pre">max_SOC</span></code></p></li>
+</ul>
+</li>
+</ul>
+<p>Once initialized, the battery is only interacted with using the <code class="docutils literal notranslate"><span class="pre">step</span></code> method.</p>
 </section>
-<section class="tex2jax_ignore mathjax_ignore" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
-<p>Create a new conda environment for hercules:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">hercules</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11</span>
-<span class="n">conda</span> <span class="n">activate</span> <span class="n">hercules</span>
+<section id="inputs">
+<h2>Inputs<a class="headerlink" href="#inputs" title="Link to this heading">#</a></h2>
+<p>Inputs are passed to <code class="docutils literal notranslate"><span class="pre">step()</span></code> as a dict named <code class="docutils literal notranslate"><span class="pre">inputs</span></code>, which must have the following fields:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">py_sims</span><span class="p">:{</span><span class="n">inputs</span><span class="p">:{</span><span class="n">battery_signal</span><span class="p">:</span> <span class="n">____</span><span class="p">,</span>
+                 <span class="n">available_power</span><span class="p">:</span> <span class="n">____</span>
+                 <span class="p">}}}</span>
 </pre></div>
 </div>
-<p>If you haven’t already cloned hercules:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NREL</span><span class="o">/</span><span class="n">hercules</span>
-</pre></div>
-</div>
-<p>Then,</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">hercules</span>
-</pre></div>
-</div>
-<p>Possibly, <code class="docutils literal notranslate"><span class="pre">cd</span></code> into hercules and switch to the
-develop branch.</p>
-<p>SEAS is also required for hercules. To install
-SEAS, use</p>
-<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">https://github.com/NREL/SEAS/blob/main/SEAS.tar.gz?raw=true</span></code></p>
-<p>If this fails, the following may work instead (but you need permissions):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">nrel</span><span class="o">.</span><span class="n">gov</span><span class="o">/</span><span class="n">SEAS</span><span class="o">/</span><span class="n">SEAS</span>
-<span class="n">cd</span> <span class="n">SEAS</span>
-<span class="n">git</span> <span class="n">fetch</span> <span class="o">--</span><span class="nb">all</span>
-<span class="n">git</span> <span class="n">switch</span> <span class="n">dv</span><span class="o">/</span><span class="n">emuwind</span>
-</pre></div>
-</div>
-<p>Older versions of git (e.g. the one on Eagle) don’t have the <code class="docutils literal notranslate"><span class="pre">switch</span></code> feature; instead, use</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">dv</span><span class="o">/</span><span class="n">emuwind</span>
-</pre></div>
-</div>
-<p>Then,</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">..</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">SEAS</span>
-</pre></div>
-</div>
-<p>A python electrolyzer model is also required for hercules. To install
-the electrolyzer, use</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">NREL</span><span class="o">/</span><span class="n">electrolyzer</span><span class="o">.</span><span class="n">git</span>
-<span class="n">cd</span> <span class="n">electrolyzer</span>
-<span class="n">git</span> <span class="n">fetch</span> <span class="o">--</span><span class="nb">all</span>
-<span class="n">git</span> <span class="n">switch</span> <span class="n">develop</span>
-</pre></div>
-</div>
-<p>Older versions of git (e.g. the one on Eagle) don’t have the <code class="docutils literal notranslate"><span class="pre">switch</span></code> feature; instead, use</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">develop</span>
-</pre></div>
-</div>
-<p>Then,</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">..</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">electrolyzer</span>
-</pre></div>
-</div>
-<p>NREL’s PySAM software is also required for hercules. To install, use</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">nrel</span><span class="o">-</span><span class="n">pysam</span><span class="o">==</span><span class="mf">4.2.0</span>
-</pre></div>
-</div>
-<p>You may also want to run the FLORIS standin for AMR-Wind for a steady-state representation
-of wind farm flows. In this case, run</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NREL</span><span class="o">/</span><span class="n">floris</span><span class="o">.</span><span class="n">git</span><span class="nd">@v4</span>
-</pre></div>
-</div>
-<p>to get the correct branch of FLORIS installed.</p>
-<p>If you run hercules and get an error that <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code> is missing, you may also need to install it using</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">pyyaml</span>
-</pre></div>
-</div>
-<p>NREL’s Wind Hybrid Open Controller (WHOC) software is used to implement controllers in the Hercules platform. This package is not essential to run Hercules by itself, but is needed to implement any controls in the platform. Example 06 has an example of how this is used to control a battery based on wind farm power output.</p>
-<p>To install:
-Go back to herc_root</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">NREL</span><span class="o">/</span><span class="n">wind</span><span class="o">-</span><span class="n">hybrid</span><span class="o">-</span><span class="nb">open</span><span class="o">-</span><span class="n">controller</span><span class="o">.</span><span class="n">git</span>
-<span class="n">cd</span> <span class="n">wind</span><span class="o">-</span><span class="n">hybrid</span><span class="o">-</span><span class="nb">open</span><span class="o">-</span><span class="n">controller</span>
-<span class="n">git</span> <span class="n">fetch</span> <span class="o">--</span><span class="nb">all</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
-</pre></div>
-</div>
-<p>Note: if you want the newest updates to the WHOC repository, you can checkout the develop branch instead of the main branch.</p>
-<!--
-# Other steps for era 5
-Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account
-
-The instructions said to place it in the folder
-OpenOA/operational_analysis/toolkits
-
-But I found I also had to copy it down to here:
-/Users/pfleming/opt/anaconda3/envs/hercules/lib/python3.8/site-packages/operational_analysis/toolkits/
-
-Col
--->
 </section>
-<section class="tex2jax_ignore mathjax_ignore" id="running-local">
-<h1>Running [Local]<a class="headerlink" href="#running-local" title="Link to this heading">#</a></h1>
-<p>To run locally using a standin for AMR-Wind, launch 3 separate
-terminals. In each, <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span></code> your hercules environment (<code class="docutils literal notranslate"><span class="pre">conda</span>&#160; <span class="pre">activate</span> <span class="pre">hercules</span></code>).</p>
-<p>In the first terminal, run</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT &amp;
-</pre></div>
-</div>
-<p>from any directory.</p>
-<p>In the second and third terminals, navigate to
-hercules/example_case_folders/example_sim_05 (you’ll need to be on the
-develop branch of hercules). Then, in one of these
-terminals, run</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">hercules_runscript_dummy_amr</span><span class="o">.</span><span class="n">py</span> <span class="n">amr_input</span><span class="o">.</span><span class="n">inp</span>
-</pre></div>
-</div>
-<p>and in the other, run</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">hercules_runscript</span><span class="o">.</span><span class="n">py</span> <span class="n">hercules_input_000</span><span class="o">.</span><span class="n">yaml</span>
-</pre></div>
-</div>
-<p>The first of these launches the dummy stand-in for AMR-wind, and the second
-launches the hercules emulator. These will connect to the helics_broker and
-run the co-simulation. You should see printout from both the dummy AMR-wind
-process and the hercules emulator printed to your screen.</p>
-<p>Alternatively, the bash files in each example are set up to be run from the terminal using</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">bash_script</span><span class="o">.</span><span class="n">sh</span>
-</pre></div>
-</div>
-<p>However, if the simulation hangs, be sure to check if there are multiple processes running with</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span>
-</pre></div>
-</div>
-<p>which will tell you all of the processes currently working.  You can kill processes that you do not want by using the kill command, paired with the process ID (filled into the blank in the command below).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kill</span> <span class="o">&lt;</span><span class="n">PID</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<!--
-In 4 different terminals with location set to hercules/, type the following commands
-(This is more and more out of date)
-
-- Terminal 1: `python control_center.py`
-- Terminal 2: `python testclient.py`
-- Terminal 3: `python vis_client.py`
-- Terminal 4: `python front_end_dash.py`
--->
+<section id="outputs">
+<h2>Outputs<a class="headerlink" href="#outputs" title="Link to this heading">#</a></h2>
+<p>Outputs are returned as a dict containing the following values</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">power</span></code> The charging/discharging power of the battery</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reject</span></code> The amount of charging/discharging requested of the battery that it could not fulfill. Can be positive or negative.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">soc</span></code> The battery state of charge</p></li>
+</ul>
 </section>
-<section class="tex2jax_ignore mathjax_ignore" id="running-kestrel">
-<h1>Running [Kestrel]<a class="headerlink" href="#running-kestrel" title="Link to this heading">#</a></h1>
-<p>Running hercules in full requires installing AMR-Wind (likely on Kestrel/HPC).
-The steps are detailed in section <strong>HPC Installation</strong>.</p>
-<!--
-
-below, and assume that you have already installed 
-the other parts of hercules as described above under **Installation**. 
--->
-<!--
-```bash
-    # After connecting to eagle, reconnect or start a new screen (helpful for disconnects)
-    # To detach later while keeping session: ctrl+a d
-    screen -r emulator # If already exists, otherwise: screen -S emulator
-
-    # Next request nodes, in my case I use a saved alias from Matt C
-    interactive_4node_high # Requesting 4 nodes
-
-    # When you have the interactive node, note the name of the node in the command line, 
-    # You will need this, it will be something like rXXXnXX or something
-
-    # Once these are granted can run AMRWind, first need to call the setup function
-    # Defined in your .bashrc or .bash_profile:
-    # amr_env_emulator <- what I used to do
-    module purge
-    module load helics
-    --or--
-    module load helics/helics-3.1.0_openmpi
-    
-    module load netcdf-c/4.7.3/gcc-mpi
-
-    # Go to the AMR-Wind case folder
-    cd test_folder
-
-    # When ready to run AMR wind, something like:
-    # srun -n 144 amr_wind input.i # Where 144 comes from nodes=4 * 36
-    mpirun -n 1 ~/c2c/amr-wind/build/amr_wind input.i
-    --or--
-    mpirun -n 1 /projects/aumc/mbrazell/amr-wind/build4/amr_wind input.i
-    
-```
-
-### Setting up tunnel for serving the front end
-```bash
-    # Use the name of the node in the command, run locally from your machine
-    # In a new terminal
-    ssh -L 8050:rXXXnXX:8050 el1.hpc.nrel.gov
-```
-
-### Running the python codes
-```bash
-    # Will now need 4 additional terminals logged into eagle, in each case:
-
-    # ssh all 4 into the same node
-    ssh rXXXnXX
-
-    # Probably you then need to setup your conda environment, in my case 
-    # I call a function saved to my profile
-    hercules_go
-
-    # Launch the helics broker
-    helics_broker -f 2
-
-    # Finally launch one of these in each terminal
-    python control_center.py
-    # OR #
-    python vis_client.py
-    # OR #
-    python front_end_dash.py
-```
-
-### Final setps
-```bash
-    # If not already running, run amr_wind
-
-    # The terminal running front_end_dash.py will show a web address
-    # Enter that address into a web browser on your local machine
-```
--->
+<section id="simplebattery">
+<h2><code class="docutils literal notranslate"><span class="pre">SimpleBattery</span></code><a class="headerlink" href="#simplebattery" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">SimpleBattery</span></code> is defined by <span class="math notranslate nohighlight">\(E_t = \sum_{k=0}^t P_k \Delta t\)</span>, where <span class="math notranslate nohighlight">\(E_t\)</span> is the energy stored and <span class="math notranslate nohighlight">\(P_t\)</span> is the charging/discharging power at time <span class="math notranslate nohighlight">\(t\)</span>. Both <span class="math notranslate nohighlight">\(E\)</span> and <span class="math notranslate nohighlight">\(P\)</span> are constrained by upper and lower limits.</p>
+<p><span class="math notranslate nohighlight">\(\underline{E} \leq E \leq \overline{E}\)</span></p>
+<p><span class="math notranslate nohighlight">\(\underline{P} \leq P \leq \overline{P}\)</span></p>
+</section>
+<section id="lib">
+<h2><code class="docutils literal notranslate"><span class="pre">LIB</span></code><a class="headerlink" href="#lib" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">LIB</span></code> models a lithium ion battery based on the lithium ion cell model presented in [1.]. The main difference between <code class="docutils literal notranslate"><span class="pre">LIB</span></code> and <code class="docutils literal notranslate"><span class="pre">SimpleBattery</span></code> is that <code class="docutils literal notranslate"><span class="pre">LIB</span></code> includes diffusion transients and losses both of which are modeled as an equivalent circuit model following the approach in [1.].</p>
+<section id="references">
+<h3>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>M.-K. Tran et al., “A comprehensive equivalent circuit model for lithium-ion batteries, incorporating the effects of state of health, state of charge, and temperature on model parameters,” Journal of Energy Storage, vol. 43, p. 103252, Nov. 2021, doi: 10.1016/j.est.2021.103252.</p></li>
+</ol>
+</section>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -692,20 +533,20 @@ the other parts of hercules as described above under **Installation**.
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="install_instructions.html"
+       href="order_of_op.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Installation</p>
+        <p class="prev-next-title">Order of operations</p>
       </div>
     </a>
     <a class="right-next"
-       href="install_on_kestrel.html"
+       href="solar_pv.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Installation on Kestrel</p>
+        <p class="prev-next-title">Solar PV</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -725,12 +566,15 @@ the other parts of hercules as described above under **Installation**.
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Local installation instructions</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-local">Running [Local]</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-kestrel">Running [Kestrel]</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inputs">Inputs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs">Outputs</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simplebattery"><code class="docutils literal notranslate"><span class="pre">SimpleBattery</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#lib"><code class="docutils literal notranslate"><span class="pre">LIB</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 </ul>
-
+</li>
+</ul>
   </nav></div>
 
 </div></div>

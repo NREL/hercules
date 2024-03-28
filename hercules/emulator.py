@@ -267,7 +267,6 @@ class Emulator(FederateAgent):
         print("AMRWindSpeed:", wind_speed_amr_wind)
         print("AMRWindDirection:", wind_direction_amr_wind)
         print("AMRWindTurbinePowers:", turbine_power_array)
-        print(" AMRWIND number of turbines here: ", self.num_turbines)
         print("AMRWindTurbineWD:", turbine_wd_array)
         print("=======================================")
 
@@ -303,7 +302,7 @@ class Emulator(FederateAgent):
                             self.main_dict_flat[prefix + k + ".%03d" % i] = vi
 
                 # If v is a string, int, or float, enter it directly
-                if isinstance(v, (int, float)):
+                if isinstance(v, (int, np.integer, float)):
                     self.main_dict_flat[prefix + k] = v
 
     def log_main_dict(self):

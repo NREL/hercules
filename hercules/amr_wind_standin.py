@@ -33,6 +33,7 @@ from SEAS.federate_agent import FederateAgent
 
 # Set up the logger
 # Useful for when running on eagle
+Path("outputs").mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
@@ -114,8 +115,6 @@ def read_amr_wind_input(amr_wind_input):
 
 class AMRWindStandin(FederateAgent):
     def __init__(self, config_dict, amr_wind_input, amr_standin_data_file=None):
-        # Ensure outputs folder exists
-        Path("outputs").mkdir(parents=True, exist_ok=True)
 
         super(AMRWindStandin, self).__init__(
             name=config_dict["name"],

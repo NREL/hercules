@@ -41,9 +41,9 @@ hercules/local_amr_wind_demo/sample_copy.nc
 t_00*
 logdummy
 loghelics
-loghercules
-logstandin
-logfloris
+loghercules*
+logstandin*
+logfloris*
 *echo
 *out-example.json
 

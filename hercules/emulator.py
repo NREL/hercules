@@ -10,6 +10,7 @@ from SEAS.federate_agent import FederateAgent
 
 LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace(".", "_")
 
+Path("outputs").mkdir(parents=True, exist_ok=True)
 
 class Emulator(FederateAgent):
     def __init__(self, controller, py_sims, input_dict):

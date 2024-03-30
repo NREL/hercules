@@ -10,6 +10,7 @@ from SEAS.federate_agent import FederateAgent
 
 LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace(".", "_")
 
+Path("outputs").mkdir(parents=True, exist_ok=True)
 
 class Emulator(FederateAgent):
     def __init__(self, controller, py_sims, input_dict):
@@ -266,7 +267,6 @@ class Emulator(FederateAgent):
         print("AMRWindSpeed:", wind_speed_amr_wind)
         print("AMRWindDirection:", wind_direction_amr_wind)
         print("AMRWindTurbinePowers:", turbine_power_array)
-        print(" AMRWIND number of turbines here: ", self.num_turbines)
         print("AMRWindTurbineWD:", turbine_wd_array)
         print("=======================================")
 
@@ -302,7 +302,7 @@ class Emulator(FederateAgent):
                             self.main_dict_flat[prefix + k + ".%03d" % i] = vi
 
                 # If v is a string, int, or float, enter it directly
-                if isinstance(v, (int, float)):
+                if isinstance(v, (int, np.integer, float)):
                     self.main_dict_flat[prefix + k] = v
 
     def log_main_dict(self):

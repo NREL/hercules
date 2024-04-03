@@ -189,7 +189,7 @@ class FlorisStandin(AMRWindStandin):
         amr_wind_direction: wind direction at current time step [deg]
         turbine_powers: turbine powers at current time step [kW]
         """
-
+        
         if hasattr(self, "standin_data"):
             amr_wind_speed = np.interp(
                 sim_time_s,
@@ -253,12 +253,16 @@ class FlorisStandin(AMRWindStandin):
         )
         self.turbine_powers_prev = turbine_powers
         turbine_powers = turbine_powers.tolist()
-
+        turbine_yaw_angles = (np.array(turbine_wind_directions) - self.fmodel.core.farm.yaw_angles[0, :]).tolist()
+        
+        # TODO MISHA does this go to the receive_amrwind_data method in the emulator
+        # TODO why are these initially all zero
         return (
             amr_wind_speed,
             amr_wind_direction,
             turbine_powers,
             turbine_wind_directions,
+            turbine_yaw_angles
         )
 
     def process_endpoint_event(self, msg):

@@ -219,15 +219,17 @@ class Emulator(FederateAgent):
                 + [0 for t in range(self.num_turbines)]
                 + [0 for t in range(self.num_turbines)]
             )
-
+        print("subscription_value:", subscription_value)
         # TODO Parse returns from AMRWind
+        
         (
             sim_time_s_amr_wind,
             wind_speed_amr_wind,
             wind_direction_amr_wind,
         ) = subscription_value[:3]
         turbine_power_array = subscription_value[3 : 3 + self.num_turbines]
-        turbine_wd_array = subscription_value[3 + self.num_turbines :]
+        turbine_wd_array = subscription_value[3 + self.num_turbines:3 + 2*self.num_turbines]
+        turbine_yaw_angle_array = subscription_value[3 + 2*self.num_turbines:]
         self.wind_speed = wind_speed_amr_wind
         self.wind_direction = wind_direction_amr_wind
 
@@ -241,10 +243,13 @@ class Emulator(FederateAgent):
 
         ## TODO add other parameters that need to be logged to csv here.
         # Write turbine power and turbine wind direction to csv logfile.
+        # TODO MISHA write yaw angles
         aa = [str(xx) for xx in turbine_power_array]
         xyz = ",".join(aa)
         bb = [str(xx) for xx in turbine_wd_array]
         zyx = ",".join(bb)
+        cc = [str(xx) for xx in turbine_yaw_angle_array]
+        yxz = ",".join(cc)
         with open(f"{LOGFILE}.csv", "a") as filex:
             filex.write(
                 str(self.absolute_helics_time)
@@ -258,6 +263,8 @@ class Emulator(FederateAgent):
                 + xyz
                 + ","
                 + zyx
+                + ","
+                + yxz
                 + os.linesep
             )
 
@@ -268,10 +275,13 @@ class Emulator(FederateAgent):
         print("AMRWindDirection:", wind_direction_amr_wind)
         print("AMRWindTurbinePowers:", turbine_power_array)
         print("AMRWindTurbineWD:", turbine_wd_array)
+        print("AMRWindTurbineYawAngles:", turbine_yaw_angle_array)
         print("=======================================")
 
         # Store turbine powers back to the dict
         # TODO hard-coded for now assuming only one AMR-WIND
+        self.amr_wind_dict[self.amr_wind_names[0]]["amr_wind_speed"] = wind_speed_amr_wind
+        self.amr_wind_dict[self.amr_wind_names[0]]["amr_wind_direction"] = wind_direction_amr_wind
         self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = turbine_power_array
         self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = turbine_wd_array
         self.turbine_power_array = turbine_power_array
@@ -429,11 +439,13 @@ class Emulator(FederateAgent):
 
             self.num_turbines = num_turbines
             print("Number of turbines in amrwind: ", num_turbines)
-
+            # TODO MISHA add yaw angles here
             aa = [f"power_{i}" for i in range(num_turbines)]
             xyz = ",".join(aa)
             bb = [f"turbine_wd_direction_{i}" for i in range(num_turbines)]
             zyx = ",".join(bb)
+            cc = [f"turbine_yaw_angles_{i}" for i in range(num_turbines)]
+            yxz = ",".join(cc)
             with open(f"{LOGFILE}.csv", "a") as filex:
                 filex.write(
                     "helics_time"
@@ -447,6 +459,8 @@ class Emulator(FederateAgent):
                     + xyz
                     + ","
                     + zyx
+                    + ","
+                    + yxz
                     + os.linesep
                 )
 
@@ -477,6 +491,8 @@ class Emulator(FederateAgent):
             xyz = ",".join(aa)
             bb = [f"turbine_wd_direction_{i}" for i in range(self.num_turbines)]
             zyx = ",".join(bb)
+            cc = [f"turbine_yaw_angles_{i}" for i in range(self.num_turbines)]
+            yxz = ",".join(cc)
             with open(f"{LOGFILE}.csv", "a") as filex:
                 filex.write(
                     "helics_time"
@@ -490,6 +506,8 @@ class Emulator(FederateAgent):
                     + xyz
                     + ","
                     + zyx
+                    + ","
+                    + yxz
                     + os.linesep
                 )
 

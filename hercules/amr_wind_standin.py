@@ -178,8 +178,8 @@ class AMRWindStandin(FederateAgent):
 
         logger.info("** Initial Received reply: {}".format(message_from_server))
 
-        logger.info("** Intial Wind Speed: {}".format(amr_wind_speed))
-        logger.info("** Intial Wind Direction: {}".format(amr_wind_direction))
+        logger.info("** Initial Wind Speed: {}".format(amr_wind_speed))
+        logger.info("** Initial Wind Direction: {}".format(amr_wind_direction))
         logger.info("...STARTING TIME LOOP...")
 
         self.message_from_server = None
@@ -205,11 +205,14 @@ class AMRWindStandin(FederateAgent):
             else:
                 yaw_angles = None
                 power_setpoints = None
+            # TODO MISHA add yaw_angles to FLORIS standin or just use most re?
+            # TODO why are these initially all zero
             (
                 amr_wind_speed,
                 amr_wind_direction,
                 turbine_powers,
                 turbine_wind_directions,
+                turbine_yaw_angles
             ) = self.get_step(sim_time_s, yaw_angles, power_setpoints)
 
             # ================================================================
@@ -226,6 +229,7 @@ class AMRWindStandin(FederateAgent):
                 ]
                 + turbine_powers
                 + turbine_wind_directions
+                + turbine_yaw_angles
             )
 
             # Send helics message to Control Center

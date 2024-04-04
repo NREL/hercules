@@ -219,7 +219,6 @@ class Emulator(FederateAgent):
                 + [0 for t in range(self.num_turbines)]
                 + [0 for t in range(self.num_turbines)]
             )
-        print("subscription_value:", subscription_value)
         # TODO Parse returns from AMRWind
         
         (

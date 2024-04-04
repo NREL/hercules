@@ -255,8 +255,6 @@ class FlorisStandin(AMRWindStandin):
         turbine_powers = turbine_powers.tolist()
         turbine_yaw_angles = (np.array(turbine_wind_directions) - self.fmodel.core.farm.yaw_angles[0, :]).tolist()
         
-        # TODO MISHA does this go to the receive_amrwind_data method in the emulator
-        # TODO why are these initially all zero
         return (
             amr_wind_speed,
             amr_wind_direction,

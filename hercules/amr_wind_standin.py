@@ -205,8 +205,6 @@ class AMRWindStandin(FederateAgent):
             else:
                 yaw_angles = None
                 power_setpoints = None
-            # TODO MISHA add yaw_angles to FLORIS standin or just use most re?
-            # TODO why are these initially all zero
             (
                 amr_wind_speed,
                 amr_wind_direction,

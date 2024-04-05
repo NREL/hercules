@@ -53,7 +53,7 @@ def simulate(SPS, time):
         "py_sims": {"inputs": {"available_power": 100, "sim_time_s": 0}},
     }
 
-    power = np.zeros(len(time)).
+    power = np.zeros(len(time))
 
     dc_power = np.zeros(len(time))
     aoi = np.zeros(len(time))

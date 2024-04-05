@@ -16,7 +16,7 @@ class SolarPySAM:
         else: # using an input dictionary
             data = pd.DataFrame.from_dict(input_dict["weather_data_input"])
 
-        print(data)
+        # print(data)
         data["Timestamp"] = pd.DatetimeIndex(
                 pd.to_datetime(data["Timestamp"], format="ISO8601", utc=True)
         )
@@ -50,13 +50,23 @@ class SolarPySAM:
         self.lon = sys_design["Other"]["lon"]
         self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
 
-        # Power setpoints
-        if input_dict["power_setpoints"]:
-            self.power_setpoints = pd.DataFrame.from_dict(input_dict["power_setpoints"])
-        print('power setpoints = ', self.power_setpoints)
+        # Power setpoints if they were inputs
+        if "power_setpoints" in input_dict.keys():
+            
+            # read it in differently if it's a single timestep or multiple
+            if np.shape(np.array(input_dict['power_setpoints']['time_s'])): # truthy if more than one value in list
+                self.power_setpoints = pd.DataFrame.from_dict(input_dict["power_setpoints"])
+                # print('more than one timestep')
+            else:
+                self.power_setpoints = pd.DataFrame([input_dict["power_setpoints"]])
+
+            # write to input_dict to reformat data as dictionary? seems like bad practice
+            # input_dict["power_setpoints"] = self.power_setpoints
+
+            print('power setpoints = ', self.power_setpoints)
 
         # Define needed inputs
-        self.needed_inputs = {}
+        self.needed_inputs = {"power_setpoints": 0.0}
         self.data = data
         self.dt = dt
 
@@ -73,6 +83,20 @@ class SolarPySAM:
             "dni": self.dni,
             "aoi": self.aoi,
         }
+    
+    def control(self, power_setpoint_mw):
+        """
+        Low-level controller to enforce PV plant power setpoints
+        Notes:
+        - Currently applies uniform curtailment to entire plant
+        - DC power output is not controlled because it is not used elsewhere in the code
+
+        Inputs
+        - power_setpoint_mw: [MW] the desired total PV plant output
+        """
+        # modify power output based on setpoint
+        if self.power_mw > power_setpoint_mw:
+            self.power_mw = power_setpoint_mw
 
     def step(self, inputs):
         # print('inputs',inputs)
@@ -91,12 +115,10 @@ class SolarPySAM:
                 # Brooke: I got errors with KeyError so changed it to Exception and it's working
         # print('model params = ',self.model_params)
 
-        print("sim_time_s = ", inputs["py_sims"]["inputs"]["sim_time_s"])
-        sim_timestep = int(inputs["py_sims"]["inputs"]["sim_time_s"] / self.dt)
+        sim_time_s = inputs["py_sims"]["inputs"]["sim_time_s"]
+        print("sim_time_s = ", sim_time_s)
+        sim_timestep = int(sim_time_s / self.dt)
         print("sim_timestep = ", sim_timestep)
-
-        if xxx:
-            power_setpoint = inputs["py_sims"]
 
         data = self.data.iloc[[sim_timestep]]  # a single timestep
         # TODO - replace sim_timestep with seconds in sim_time_s and find corresponding
@@ -142,22 +164,25 @@ class SolarPySAM:
         system_model.execute()
         out = system_model.Outputs.export()
 
-        # if sim_timestep == 0:
-        #     with open("out-example.json", "w") as f:
-        #         json.dump(out, f)
-
-        ac = np.array(out["gen"]) / 1000  # quick fix for issue being fixed by darice
-        dc = np.array(out["dc_net"]) / 1000
-
-        # modify power output based on setpoint
-        if power_setpoint is not None:
-            if ac > power_setpoint:
-                ac = power_setpoint
+        ac = np.array(out["gen"]) / 1000  # in MW
+        # dc = np.array(out["dc_net"]) / 1000
 
         self.power_mw = ac[0]  # calculating one timestep at a time
-        self.dc_power_mw = dc[0]
+        # self.dc_power_mw = dc[0]
         print("self.power_mw = ", self.power_mw)
-        print("self.dc_power_mw = ", self.dc_power_mw)
+        # print("self.dc_power_mw = ", self.dc_power_mw)
+
+        if self.power_setpoints is not None:
+            # print(inputs["py_sims"]["inputs"])
+            # P_signal = inputs["py_sims"]["inputs"]["power_setpoints"].loc[self.power_setpoints['time_s']==sim_time_s]['power_mw'].values[0]
+            
+            # get power setpoint at time
+            # print('time_s col',self.power_setpoints['time_s'])
+            P_setpoint = self.power_setpoints.loc[self.power_setpoints['time_s']==sim_time_s, 'power_mw'].iloc[0]
+            print('power_setpoint = ',P_setpoint)
+            # print('ac = ',ac)
+
+            self.control(P_setpoint)
         
         if self.power_mw < 0.0:
             self.power_mw = 0.0
@@ -167,7 +192,7 @@ class SolarPySAM:
         self.dni = out["dn"][0] # direct normal irradiance
         self.dhi = out["df"][0] # diffuse horizontal irradiance
         self.ghi = out["gh"][0] # global horizontal irradiance
-        print("self.dni = ", self.dni)
+        # print("self.dni = ", self.dni)
 
         self.aoi = out["subarray1_aoi"][0]  # angle of incidence
 

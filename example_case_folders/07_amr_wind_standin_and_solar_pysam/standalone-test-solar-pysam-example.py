@@ -58,8 +58,10 @@ solar_dict = {
         "dni": 1000 # direct normal irradiance
     },
 
-    "power_setpoints": {"time_s": [0.0, 0.5, 1.0, 1.5, 2.0], 
-                                  "power_mw": [10., 11., 12., 11., 10.]}
+    # "power_setpoints": {"time_s": [0.0, 0.5, 1.0, 1.5, 2.0], 
+    #                               "power_mw": [10., 11., 12., 11., 10.]}
+
+    "external_data_file": "solar_power_reference_data.csv"
 }
 
 dt = 0.5 # s - input file has a dt of 1 min
@@ -79,7 +81,7 @@ def simulate(SPS, time):
         "controller": {"signal": 0},
         "py_sims": {"inputs": {"available_power": 100,
                                "sim_time_s": 0}},
-        "power_setpoints": {"time_s": 0.0, "power_mw": 10.},
+        "external_signals": {"solar_power_reference": {"time_s": 0.0, "power_mw": 10.}},
     }
 
     power = np.zeros(len(time))

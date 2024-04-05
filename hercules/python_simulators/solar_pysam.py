@@ -51,19 +51,19 @@ class SolarPySAM:
         self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
 
         # Power setpoints if they were inputs
-        if "power_setpoints" in input_dict.keys():
+        # if "power_setpoints" in input_dict.keys():
             
-            # read it in differently if it's a single timestep or multiple
-            if np.shape(np.array(input_dict['power_setpoints']['time_s'])): # truthy if more than one value in list
-                self.power_setpoints = pd.DataFrame.from_dict(input_dict["power_setpoints"])
-                # print('more than one timestep')
-            else:
-                self.power_setpoints = pd.DataFrame([input_dict["power_setpoints"]])
+        #     # read it in differently if it's a single timestep or multiple
+        #     if np.shape(np.array(input_dict['power_setpoints']['time_s'])): # truthy if more than one value in list
+        #         self.power_setpoints = pd.DataFrame.from_dict(input_dict["power_setpoints"])
+        #         # print('more than one timestep')
+        #     else:
+        #         self.power_setpoints = pd.DataFrame([input_dict["power_setpoints"]])
 
             # write to input_dict to reformat data as dictionary? seems like bad practice
             # input_dict["power_setpoints"] = self.power_setpoints
 
-            print('power setpoints = ', self.power_setpoints)
+            # print('power setpoints = ', self.power_setpoints)
 
         # Define needed inputs
         self.needed_inputs = {"power_setpoints": 0.0}
@@ -172,13 +172,15 @@ class SolarPySAM:
         print("self.power_mw = ", self.power_mw)
         # print("self.dc_power_mw = ", self.dc_power_mw)
 
-        if self.power_setpoints is not None:
+        print("inputs",inputs)
+        if "solar_power_reference" in inputs["external_signals"].keys():
             # print(inputs["py_sims"]["inputs"])
             # P_signal = inputs["py_sims"]["inputs"]["power_setpoints"].loc[self.power_setpoints['time_s']==sim_time_s]['power_mw'].values[0]
             
             # get power setpoint at time
             # print('time_s col',self.power_setpoints['time_s'])
-            P_setpoint = self.power_setpoints.loc[self.power_setpoints['time_s']==sim_time_s, 'power_mw'].iloc[0]
+            # P_setpoint = self.power_setpoints.loc[self.power_setpoints['time_s']==sim_time_s, 'power_mw'].iloc[0]
+            P_setpoint = inputs["external_signals"]
             print('power_setpoint = ',P_setpoint)
             # print('ac = ',ac)
 

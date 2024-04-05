@@ -54,6 +54,7 @@ class Emulator(FederateAgent):
             self._read_external_data_file(input_dict["external_data_file"])
             self.external_signals = {}
             self.main_dict["external_signals"] = {}
+        print('main_dict in emulator init,',self.main_dict)
 
         # Write the time step into helics config dict
         self.helics_config_dict["helics"]["deltat"] = self.dt
@@ -178,12 +179,15 @@ class Emulator(FederateAgent):
                 self.main_dict["external_signals"][k] = self.external_data_all[k][
                     self.external_data_all["time"] == self.absolute_helics_time
                 ][0]
+            print('main_dict external signals')
+            print(self.main_dict["external_signals"])
 
             # Update controller and py sims
             # TODO: Should 'time' in the main dict be AMR-wind time or
             # helics time? Why aren't they the same?
             self.main_dict["time"] = self.absolute_helics_time
             self.main_dict = self.controller.step(self.main_dict)
+            print('main_dict',self.main_dict)
             self.py_sims.step(self.main_dict)
             self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 

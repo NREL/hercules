@@ -179,8 +179,8 @@ class Emulator(FederateAgent):
                 self.main_dict["external_signals"][k] = self.external_data_all[k][
                     self.external_data_all["time"] == self.absolute_helics_time
                 ][0]
-            print('main_dict external signals')
-            print(self.main_dict["external_signals"])
+            # print('main_dict external signals')
+            # print(self.main_dict["external_signals"])
 
             # Update controller and py sims
             # TODO: Should 'time' in the main dict be AMR-wind time or

@@ -2,7 +2,7 @@
 # I just run these one at a t time
 
 # A lot of modules and conda stuff
-conda activate hercules
+# conda activate hercules
 
 # Set the helics port to use: 
 export HELICS_PORT=32000

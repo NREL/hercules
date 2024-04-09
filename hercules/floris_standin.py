@@ -317,6 +317,7 @@ default_floris_dict = {
         "enable_secondary_steering": True,
         "enable_yaw_added_recovery": True,
         "enable_transverse_velocities": True,
+        "enable_active_wake_mixing": False,
         "wake_deflection_parameters": {
             "gauss": {
                 "ad": 0.0,

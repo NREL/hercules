@@ -66,7 +66,8 @@ class SolarPySAM:
             # print('power setpoints = ', self.power_setpoints)
 
         # Define needed inputs
-        self.needed_inputs = {"power_setpoints": 0.0}
+        # self.needed_inputs = {"power_setpoints": 0.0}
+        self.needed_inputs = {}
         self.data = data
         self.dt = dt
 
@@ -173,18 +174,19 @@ class SolarPySAM:
         # print("self.dc_power_mw = ", self.dc_power_mw)
 
         print("inputs",inputs)
-        if "solar_power_reference" in inputs["external_signals"].keys():
-            # print(inputs["py_sims"]["inputs"])
-            # P_signal = inputs["py_sims"]["inputs"]["power_setpoints"].loc[self.power_setpoints['time_s']==sim_time_s]['power_mw'].values[0]
-            
-            # get power setpoint at time
-            # print('time_s col',self.power_setpoints['time_s'])
-            # P_setpoint = self.power_setpoints.loc[self.power_setpoints['time_s']==sim_time_s, 'power_mw'].iloc[0]
-            P_setpoint = inputs["external_signals"]
-            print('power_setpoint = ',P_setpoint)
-            # print('ac = ',ac)
+        if "external_signals" in inputs.keys():
+            if "solar_power_reference" in inputs["external_signals"].keys():
+                # print(inputs["py_sims"]["inputs"])
+                # P_signal = inputs["py_sims"]["inputs"]["power_setpoints"].loc[self.power_setpoints['time_s']==sim_time_s]['power_mw'].values[0]
+                
+                # get power setpoint at time
+                # print('time_s col',self.power_setpoints['time_s'])
+                # P_setpoint = self.power_setpoints.loc[self.power_setpoints['time_s']==sim_time_s, 'power_mw'].iloc[0]
+                P_setpoint = inputs["external_signals"]
+                print('power_setpoint = ',P_setpoint)
+                # print('ac = ',ac)
 
-            self.control(P_setpoint)
+                self.control(P_setpoint)
         
         if self.power_mw < 0.0:
             self.power_mw = 0.0

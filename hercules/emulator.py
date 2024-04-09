@@ -54,6 +54,7 @@ class Emulator(FederateAgent):
             self._read_external_data_file(input_dict["external_data_file"])
             self.external_signals = {}
             self.main_dict["external_signals"] = {}
+            print('added field for external signals -----------------')
         print('main_dict in emulator init,',self.main_dict)
 
         # Write the time step into helics config dict

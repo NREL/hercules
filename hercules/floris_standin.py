@@ -116,7 +116,7 @@ def construct_floris_from_amr_input(amr_wind_input):
             ref_air_density=ref_air_density,
             generator_efficiency=1.0,
         )
-        turb_dict["power_thrust_model"] = "mixed"
+        turb_dict["operation_model"] = "mixed"
 
         # load a default model
         fmodel = FlorisModel(default_floris_dict)

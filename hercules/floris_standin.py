@@ -116,7 +116,7 @@ def construct_floris_from_amr_input(amr_wind_input):
             ref_air_density=ref_air_density,
             generator_efficiency=1.0,
         )
-        turb_dict["power_thrust_model"] = "mixed"
+        turb_dict["operation_model"] = "mixed"
 
         # load a default model
         fmodel = FlorisModel(default_floris_dict)
@@ -317,6 +317,7 @@ default_floris_dict = {
         "enable_secondary_steering": True,
         "enable_yaw_added_recovery": True,
         "enable_transverse_velocities": True,
+        "enable_active_wake_mixing": False,
         "wake_deflection_parameters": {
             "gauss": {
                 "ad": 0.0,

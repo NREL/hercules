@@ -220,7 +220,7 @@ class Emulator(FederateAgent):
                 + [0 for t in range(self.num_turbines)]
             )
         # TODO Parse returns from AMRWind
-        
+        print(f"subscription_value = {subscription_value}")
         (
             sim_time_s_amr_wind,
             wind_speed_amr_wind,
@@ -404,8 +404,8 @@ class Emulator(FederateAgent):
         # publish on topic: control
         tmp = np.array(
             [self.absolute_helics_time, self.wind_speed, self.wind_direction]
-            + yaw_angles
             + power_setpoints
+            + yaw_angles
         ).tolist()
 
         self.send_via_helics("control", str(tmp))

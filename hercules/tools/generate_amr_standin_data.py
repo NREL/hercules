@@ -219,7 +219,7 @@ if __name__ == "__main__":
     time_stop = 900
     time_delta = 0.5
 
-    turb_rating = 1000
+    turb_rating = 5000 # 5 MW NREL reference turbine default, units is kilowatts
     time = np.arange(time_start, time_stop, time_delta)
     amr_wind_speed = np.linspace(0, 20, len(time))
     amr_wind_direction = np.linspace(200, 240, len(time))

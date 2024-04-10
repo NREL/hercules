@@ -165,7 +165,7 @@ class Emulator(FederateAgent):
         self.sync_time_helics(self.absolute_helics_time + self.deltat)
         # Initialize the first iteration flag
         self.first_iteration = True
-
+        # control_actions = [self.controller.controls_dict["yaw_angles"]]
         # Run simulation till  endtime
         # while self.absolute_helics_time < self.endtime:
         while self.absolute_helics_time < (self.endtime - self.starttime + 1):
@@ -184,6 +184,7 @@ class Emulator(FederateAgent):
             # helics time? Why aren't they the same?
             self.main_dict["time"] = self.absolute_helics_time
             self.main_dict = self.controller.step(self.main_dict)
+            # control_actions.append(self.controller.controls_dict["yaw_angles"])
             self.py_sims.step(self.main_dict)
             self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 
@@ -220,7 +221,6 @@ class Emulator(FederateAgent):
                 + [0 for t in range(self.num_turbines)]
             )
         # TODO Parse returns from AMRWind
-        print(f"subscription_value = {subscription_value}")
         (
             sim_time_s_amr_wind,
             wind_speed_amr_wind,
@@ -228,7 +228,7 @@ class Emulator(FederateAgent):
         ) = subscription_value[:3]
         turbine_power_array = subscription_value[3 : 3 + self.num_turbines]
         turbine_wd_array = subscription_value[3 + self.num_turbines:3 + 2*self.num_turbines]
-        turbine_yaw_angle_array = subscription_value[3 + 2*self.num_turbines:]
+        # turbine_yaw_angle_array = subscription_value[3 + 2*self.num_turbines:]
         self.wind_speed = wind_speed_amr_wind
         self.wind_direction = wind_direction_amr_wind
 
@@ -247,8 +247,8 @@ class Emulator(FederateAgent):
         xyz = ",".join(aa)
         bb = [str(xx) for xx in turbine_wd_array]
         zyx = ",".join(bb)
-        cc = [str(xx) for xx in turbine_yaw_angle_array]
-        yxz = ",".join(cc)
+        # cc = [str(xx) for xx in turbine_yaw_angle_array]
+        # yxz = ",".join(cc)
         with open(f"{LOGFILE}.csv", "a") as filex:
             filex.write(
                 str(self.absolute_helics_time)
@@ -262,8 +262,8 @@ class Emulator(FederateAgent):
                 + xyz
                 + ","
                 + zyx
-                + ","
-                + yxz
+                # + ","
+                # + yxz
                 + os.linesep
             )
 
@@ -274,7 +274,7 @@ class Emulator(FederateAgent):
         print("AMRWindDirection:", wind_direction_amr_wind)
         print("AMRWindTurbinePowers:", turbine_power_array)
         print("AMRWindTurbineWD:", turbine_wd_array)
-        print("AMRWindTurbineYawAngles:", turbine_yaw_angle_array)
+        # print("AMRWindTurbineYawAngles:", turbine_yaw_angle_array)
         print("=======================================")
 
         # Store turbine powers back to the dict
@@ -358,7 +358,7 @@ class Emulator(FederateAgent):
         pass
 
     def process_subscription_messages(self, msg):
-        # process data from HELICS subscription
+        # process data from HELICS subscription, sent to it by amrwind
         print(
             f"{self.name}, {self.absolute_helics_time} subscribed to message {msg}",
             flush=True,
@@ -387,6 +387,7 @@ class Emulator(FederateAgent):
             yaw_angles = self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
                 "turbine_yaw_angles"
             ]
+            print(f"yaw_angles = {yaw_angles}")
         else:  # set yaw_angles based on self.wind_direction
             yaw_angles = [self.wind_direction] * self.num_turbines
 
@@ -402,6 +403,7 @@ class Emulator(FederateAgent):
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control
+        # TODO GEN I think yaw angles are assumed to be last values by amr wind?
         tmp = np.array(
             [self.absolute_helics_time, self.wind_speed, self.wind_direction]
             + power_setpoints

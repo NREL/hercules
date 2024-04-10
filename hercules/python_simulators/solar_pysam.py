@@ -85,19 +85,19 @@ class SolarPySAM:
             "aoi": self.aoi,
         }
     
-    def control(self, power_setpoint_mw):
-        """
-        Low-level controller to enforce PV plant power setpoints
-        Notes:
-        - Currently applies uniform curtailment to entire plant
-        - DC power output is not controlled because it is not used elsewhere in the code
+    # def control(self, power_setpoint_mw):
+    #     """
+    #     Low-level controller to enforce PV plant power setpoints
+    #     Notes:
+    #     - Currently applies uniform curtailment to entire plant
+    #     - DC power output is not controlled because it is not used elsewhere in the code
 
-        Inputs
-        - power_setpoint_mw: [MW] the desired total PV plant output
-        """
-        # modify power output based on setpoint
-        if self.power_mw > power_setpoint_mw:
-            self.power_mw = power_setpoint_mw
+    #     Inputs
+    #     - power_setpoint_mw: [MW] the desired total PV plant output
+    #     """
+    #     # modify power output based on setpoint
+    #     if self.power_mw > power_setpoint_mw:
+    #         self.power_mw = power_setpoint_mw
 
     def step(self, inputs):
         # print('inputs',inputs)
@@ -173,20 +173,20 @@ class SolarPySAM:
         print("self.power_mw = ", self.power_mw)
         # print("self.dc_power_mw = ", self.dc_power_mw)
 
-        print("inputs",inputs)
-        if "external_signals" in inputs.keys():
-            if "solar_power_reference" in inputs["external_signals"].keys():
-                # print(inputs["py_sims"]["inputs"])
-                # P_signal = inputs["py_sims"]["inputs"]["power_setpoints"].loc[self.power_setpoints['time_s']==sim_time_s]['power_mw'].values[0]
+        # print("inputs",inputs)
+        # if "external_signals" in inputs.keys():
+        #     if "solar_power_reference" in inputs["external_signals"].keys():
+        #         # print(inputs["py_sims"]["inputs"])
+        #         # P_signal = inputs["py_sims"]["inputs"]["power_setpoints"].loc[self.power_setpoints['time_s']==sim_time_s]['power_mw'].values[0]
                 
-                # get power setpoint at time
-                # print('time_s col',self.power_setpoints['time_s'])
-                # P_setpoint = self.power_setpoints.loc[self.power_setpoints['time_s']==sim_time_s, 'power_mw'].iloc[0]
-                P_setpoint = inputs["external_signals"]
-                print('power_setpoint = ',P_setpoint)
-                # print('ac = ',ac)
+        #         # get power setpoint at time
+        #         # print('time_s col',self.power_setpoints['time_s'])
+        #         # P_setpoint = self.power_setpoints.loc[self.power_setpoints['time_s']==sim_time_s, 'power_mw'].iloc[0]
+        #         P_setpoint = inputs["external_signals"]
+        #         print('power_setpoint = ',P_setpoint)
+        #         # print('ac = ',ac)
 
-                self.control(P_setpoint)
+        #         self.control(P_setpoint)
         
         if self.power_mw < 0.0:
             self.power_mw = 0.0

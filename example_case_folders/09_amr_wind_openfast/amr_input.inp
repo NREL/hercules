@@ -99,7 +99,8 @@ ABL.normal_direction                     = 2
 ABL.wall_shear_stress_type               = "Moeng"
 
 # Whether to use helics
-helics.activated                         = false
+helics.activated                         = true
+helics.broker_port                       = 32000
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #              SAMPLING                 #
@@ -185,11 +186,12 @@ tagging.T0_level_1_zone.T0_level_1_zone.zaxis = 0 0 310
 #               TURBINES                #
 #.......................................#
 Actuator.sample_vel_nmhalf			 = true
-Actuator.labels                          = T0            
-Actuator.T0.type                         = TurbineFastLine     
+Actuator.labels                          = T0     
+Actuator.type                         = TurbineFastLine 
+Actuator.TurbineFastLine.rotor_diameter  = 126     
 Actuator.T0.openfast_input_file          = "NREL-5MW/NREL-5MW.fst"
 Actuator.T0.base_position                = 2000.0 1500.0 0.0   
-Actuator.T0.rotor_diameter               = 126               
+#Actuator.T0.rotor_diameter               = 126               
 Actuator.T0.hub_height                   = 90                
 Actuator.T0.num_points_blade 			 = 300
 Actuator.T0.num_points_tower 			 = 11

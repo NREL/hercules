@@ -396,7 +396,7 @@ class Emulator(FederateAgent):
         tmp = np.array(
             [self.absolute_helics_time, self.wind_speed, self.wind_direction]
             + yaw_angles
-            #+ power_setpoints
+            + power_setpoints
         ).tolist()
 
         self.send_via_helics("control", str(tmp))

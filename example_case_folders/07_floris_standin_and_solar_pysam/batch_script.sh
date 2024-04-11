@@ -24,8 +24,8 @@ helics_broker -t zmq  -f 2 --loglevel="debug" --consoleloglevel=trace --local_po
 
 # Start the controller center and pass in input file
 echo "Starting hercules"
-python3 hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
-# python3 hercules_runscript.py hercules_controller_input_000.yaml >> outputs/loghercules.log 2>&1
+# python3 hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
+python3 hercules_runscript.py hercules_controller_input_000.yaml >> outputs/loghercules.log 2>&1 &
 
 # Start the floris standin
 # echo "Starting amr stand-in"

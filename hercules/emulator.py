@@ -50,7 +50,7 @@ class Emulator(FederateAgent):
 
         # Read in any external data
         self.external_data_all = {}
-        if "external_data_file" in input_dict:
+        if "external_data_file" in input_dict.keys():
             self._read_external_data_file(input_dict["external_data_file"])
             self.external_signals = {}
             self.main_dict["external_signals"] = {}
@@ -176,6 +176,7 @@ class Emulator(FederateAgent):
             # if self.absolute_helics_time < self.starttime:
             #     continue
             # Get any external data
+            print('self.external_data_all = ',self.external_data_all)
             for k in self.external_data_all:
                 self.main_dict["external_signals"][k] = self.external_data_all[k][
                     self.external_data_all["time"] == self.absolute_helics_time

@@ -5,7 +5,7 @@ name: example_000
 
 ###
 # Describe this emulator setup
-description: AMR Wind (Dummy) and Solar PV
+description: Floris and Solar PV
 
 dt: 0.5
 
@@ -33,7 +33,7 @@ hercules_comms:
         publication_interval: 1
         endpoint_interval: 1
         starttime: 0
-        stoptime: 2.5
+        stoptime: 2
         Agent: ControlCenter
 
 py_sims:

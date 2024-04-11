@@ -2,6 +2,7 @@ import ast
 import datetime as dt
 import os
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -9,9 +10,13 @@ from SEAS.federate_agent import FederateAgent
 
 LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace(".", "_")
 
+Path("outputs").mkdir(parents=True, exist_ok=True)
 
 class Emulator(FederateAgent):
     def __init__(self, controller, py_sims, input_dict):
+        # Make sure output folder exists
+        Path("outputs").mkdir(parents=True, exist_ok=True)
+
         # Save the input dict to main dict
         self.main_dict = input_dict
 
@@ -22,7 +27,7 @@ class Emulator(FederateAgent):
         if "output_file" in input_dict:
             self.output_file = input_dict["output_file"]
         else:
-            self.output_file = "hercules_output.csv"
+            self.output_file = "outputs/hercules_output.csv"
 
         # Save time step
         self.dt = input_dict["dt"]
@@ -139,12 +144,10 @@ class Emulator(FederateAgent):
         df_ext = pd.read_csv(filename)
         if "time" not in df_ext.columns:
             raise ValueError("External data file must have a 'time' column")
-        
+
         # Interpolate the external data according to time
         times = np.arange(
-            self.helics_config_dict["starttime"],
-            self.helics_config_dict["stoptime"],
-            self.dt
+            self.helics_config_dict["starttime"], self.helics_config_dict["stoptime"], self.dt
         )
         self.external_data_all["time"] = times
         for c in df_ext.columns:
@@ -264,7 +267,6 @@ class Emulator(FederateAgent):
         print("AMRWindSpeed:", wind_speed_amr_wind)
         print("AMRWindDirection:", wind_direction_amr_wind)
         print("AMRWindTurbinePowers:", turbine_power_array)
-        print(" AMRWIND number of turbines here: ", self.num_turbines)
         print("AMRWindTurbineWD:", turbine_wd_array)
         print("=======================================")
 
@@ -300,7 +302,7 @@ class Emulator(FederateAgent):
                             self.main_dict_flat[prefix + k + ".%03d" % i] = vi
 
                 # If v is a string, int, or float, enter it directly
-                if isinstance(v, (int, float)):
+                if isinstance(v, (int, np.integer, float)):
                     self.main_dict_flat[prefix + k] = v
 
     def log_main_dict(self):
@@ -313,7 +315,6 @@ class Emulator(FederateAgent):
         # The keys and values as two lists
         keys = list(self.main_dict_flat.keys())
         values = list(self.main_dict_flat.values())
-
 
         # If this is first iteration, write the keys as csv header
         if self.first_iteration:
@@ -339,7 +340,7 @@ class Emulator(FederateAgent):
         # to see full dictionary in interpreting log
 
         original_stdout = sys.stdout
-        with open("main_dict.echo", "w") as f_i:
+        with open("outputs/main_dict.echo", "w") as f_i:
             sys.stdout = f_i  # Change the standard output to the file we created.
             print(self.main_dict)
             sys.stdout = original_stdout  # Reset the standard output to its original value
@@ -387,12 +388,11 @@ class Emulator(FederateAgent):
             power_setpoints = self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
                 "turbine_power_setpoints"
             ]
-        else:  # set yaw_angles based on self.wind_direction
-            power_setpoints = [None] * self.num_turbines
+        else:  # pass no power setpoints
+            power_setpoints = [] * self.num_turbines
 
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control
-        # TODO: power_setpoints part will not work with AMRWind proper.
         tmp = np.array(
             [self.absolute_helics_time, self.wind_speed, self.wind_direction]
             + yaw_angles

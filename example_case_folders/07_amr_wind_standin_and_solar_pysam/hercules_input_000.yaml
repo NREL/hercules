@@ -43,13 +43,16 @@ py_sims:
     py_sim_type: SolarPySAM
     weather_file_name: NonAnnualSimulation-sample_data-interpolated-daytime.csv
     system_info_file_name: 100MW_1axis_pvsamv1.json
+    lat: 39.7442
+    lon: -105.1778
+    elev: 1829
 
     # capacity: 100 # MW
 
     initial_conditions:
 
       power: 25 # MW
-      irradiance: 1000
+      dni: 1000
 
 controller:
 

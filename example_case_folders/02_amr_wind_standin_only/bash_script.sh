@@ -8,6 +8,7 @@ conda activate hercules
 export HELICS_PORT=32000
 
 #make sure you use the same port number in the amr_input.inp and hercules_input_000.yaml files. 
+rm loghercules logstandin
 
 # Set up the helics broker
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 

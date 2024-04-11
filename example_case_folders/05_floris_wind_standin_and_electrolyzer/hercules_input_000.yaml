@@ -5,7 +5,7 @@ name: example_000
 
 ###
 # Describe this emulator setup
-description: Wind standin plant plus electrolyzer plant
+description: Wind standin plant using FLORIS plus electrolyzer plant
 
 dt: 0.5
 
@@ -16,6 +16,7 @@ hercules_comms:
     wind_farm_0:
       type: amr_wind_local #options are amr_wind or amr_wind_local
       amr_wind_input_file: amr_input.inp
+      yaw_simulator_name: yaw_system_0 # can also use "none" (without quotes)
 
   helics:
 
@@ -63,21 +64,33 @@ py_sims:
         stack_rating_kW: 500
         # Determines whether degradation is applied to the Stack operation
         include_degradation_penalty: True
+
       control:
         # Number of electrolyzer Stacks in plant
         n_stacks: 10
         # Controller type for electrolyzer plant operation
-        control_type: BaselineDeg # default
+        control_type: PowerSharingRotation
+        # policy: 
+        #   eager_on: False
+        #   eager_off: False
+        #   sequential: False
+        #   even_dist: False
+        #   baseline: True
+
       costs:
 
     initial_conditions:
       # Initial power input to electrolyzer 
       power_available_kw: 3000
 
-
-
-
 controller:
+
+  controller_type: SimpleYawController # This may not be needed
+  num_turbines: 2 # Should match AMR-Wind! Ideally, would come from AMR-wind
+  initial_conditions:
+      yaw: 270. # degrees (same for all turbines) (will this work?)
+
+external_data_file: wind_power_reference_data.csv
 
 
 

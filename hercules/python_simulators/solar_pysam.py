@@ -50,23 +50,6 @@ class SolarPySAM:
         self.lon = sys_design["Other"]["lon"]
         self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
 
-        # Power setpoints if they were inputs
-        # if "power_setpoints" in input_dict.keys():
-            
-        #     # read it in differently if it's a single timestep or multiple
-        #     if np.shape(np.array(input_dict['power_setpoints']['time_s'])): # truthy if more than one value in list
-        #         self.power_setpoints = pd.DataFrame.from_dict(input_dict["power_setpoints"])
-        #         # print('more than one timestep')
-        #     else:
-        #         self.power_setpoints = pd.DataFrame([input_dict["power_setpoints"]])
-
-            # write to input_dict to reformat data as dictionary? seems like bad practice
-            # input_dict["power_setpoints"] = self.power_setpoints
-
-            # print('power setpoints = ', self.power_setpoints)
-
-        # Define needed inputs
-        # self.needed_inputs = {"power_setpoints": 0.0}
         self.needed_inputs = {}
         self.data = data
         self.dt = dt
@@ -98,6 +81,7 @@ class SolarPySAM:
         # modify power output based on setpoint
         if self.power_mw > power_setpoint_mw:
             self.power_mw = power_setpoint_mw
+            self.excess_power = self.power_mw - power_setpoint_mw # to keep track of power that could go to charging battery
 
     def step(self, inputs):
         # print('inputs',inputs)
@@ -112,9 +96,6 @@ class SolarPySAM:
                 system_model.value(k, v)
             except Exception:
                 print(k)
-        #### TODO: Check with Brooke about this "except KeyError" line ####
-                # Brooke: I got errors with KeyError so changed it to Exception and it's working
-        # print('model params = ',self.model_params)
 
         sim_time_s = inputs["py_sims"]["inputs"]["sim_time_s"]
         print("sim_time_s = ", sim_time_s)
@@ -171,20 +152,12 @@ class SolarPySAM:
         self.power_mw = ac[0]  # calculating one timestep at a time
         # self.dc_power_mw = dc[0]
         print("self.power_mw = ", self.power_mw)
-        # print("self.dc_power_mw = ", self.dc_power_mw)
 
         print("inputs[external_signals]",inputs["external_signals"])
         if "external_signals" in inputs.keys():
             if "solar_power_reference" in inputs["external_signals"].keys():
-                # print(inputs["py_sims"]["inputs"])
-                # P_signal = inputs["py_sims"]["inputs"]["power_setpoints"].loc[self.power_setpoints['time_s']==sim_time_s]['power_mw'].values[0]
-                
-                # get power setpoint at time
-                # print('time_s col',self.power_setpoints['time_s'])
-                # P_setpoint = self.power_setpoints.loc[self.power_setpoints['time_s']==sim_time_s, 'power_mw'].iloc[0]
                 P_setpoint = inputs["external_signals"]["solar_power_reference"]
                 print('power_setpoint = ',P_setpoint)
-                print('ac after control = ',ac)
 
                 self.control(P_setpoint)
 
@@ -194,7 +167,6 @@ class SolarPySAM:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
-        # self.irradiance = out["gh"][0]  # TODO check that gh is the accurate irradiance output
         self.dni = out["dn"][0] # direct normal irradiance
         self.dhi = out["df"][0] # diffuse horizontal irradiance
         self.ghi = out["gh"][0] # global horizontal irradiance

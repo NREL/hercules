@@ -50,12 +50,10 @@ class Emulator(FederateAgent):
 
         # Read in any external data
         self.external_data_all = {}
-        if "external_data_file" in input_dict.keys():
+        if "external_data_file" in input_dict:
             self._read_external_data_file(input_dict["external_data_file"])
             self.external_signals = {}
             self.main_dict["external_signals"] = {}
-            print('added field for external signals -----------------')
-        print('main_dict in emulator init,',self.main_dict)
 
         # Write the time step into helics config dict
         self.helics_config_dict["helics"]["deltat"] = self.dt
@@ -176,7 +174,7 @@ class Emulator(FederateAgent):
             # if self.absolute_helics_time < self.starttime:
             #     continue
             # Get any external data
-            print('self.external_data_all = ',self.external_data_all)
+            # print('self.external_data_all = ',self.external_data_all)
             for k in self.external_data_all:
                 self.main_dict["external_signals"][k] = self.external_data_all[k][
                     self.external_data_all["time"] == self.absolute_helics_time
@@ -189,7 +187,7 @@ class Emulator(FederateAgent):
             # helics time? Why aren't they the same?
             self.main_dict["time"] = self.absolute_helics_time
             self.main_dict = self.controller.step(self.main_dict)
-            print('main_dict',self.main_dict)
+            # print('main_dict',self.main_dict)
             self.py_sims.step(self.main_dict)
             self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 

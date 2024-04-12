@@ -1,4 +1,5 @@
-time,solar_power_reference
-0.0,11.0
-1.0,12.0
-2.0,11.0
+time,solar_power_reference_mw
+0,11
+1,12
+2,11
+3,10

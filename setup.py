@@ -38,7 +38,7 @@ REQUIRED = [
     "numpy~=1.20",
     "matplotlib~=3.0",
     "pandas~=2.0",
-    "floris",
+    "floris>=4",
     "nrel-pysam~=4.2",
     # "dash>=2.0.0",
     # GUI Stuff

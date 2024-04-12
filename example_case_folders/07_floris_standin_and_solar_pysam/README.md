@@ -1,8 +1,8 @@
-# Example 07: AMR Wind Standin and Solar PySAM
+# Example 07: FLORIS Standin and Solar PySAM
 
 ## Description
 
-This example demonstrates how to use the AMR Wind Standin and a solar model using pysam.
+This example demonstrates how to use the FLORIS Standin and a solar model using pysam.
 
 ## Running
 

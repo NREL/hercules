@@ -84,9 +84,9 @@ class SolarPySAM:
             self.excess_power = self.power_mw - power_setpoint_mw # to keep track of power that could go to charging battery
 
     def step(self, inputs):
-        print('-------------------')
-        print('inputs',inputs)
-        print('-------------------')
+        # print('-------------------')
+        # print('inputs',inputs)
+        # print('-------------------')
         # print('vars(self) = ',vars(self))
 
         # predict power
@@ -157,7 +157,7 @@ class SolarPySAM:
         # self.dc_power_mw = dc[0]
         print("self.power_mw = ", self.power_mw)
 
-        print("inputs[external_signals]",inputs["external_signals"])
+        # print("inputs[external_signals]",inputs["external_signals"])
         if "external_signals" in inputs.keys():
             if "solar_power_reference_mw" in inputs["external_signals"].keys():
                 P_setpoint = inputs["external_signals"]["solar_power_reference_mw"]

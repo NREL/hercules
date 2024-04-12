@@ -33,7 +33,7 @@ hercules_comms:
         publication_interval: 1
         endpoint_interval: 1
         starttime: 0
-        stoptime: 2 # must be at least 2*dt smaller than last timestep in weather file
+        stoptime: 100 # must be at least 2*dt smaller than last timestep in weather file
         Agent: ControlCenter
 
 py_sims:
@@ -41,7 +41,7 @@ py_sims:
   solar_farm_0: # The name of py_sim object 1
 
     py_sim_type: SolarPySAM
-    weather_file_name: fivetimesteps-sample_data-interpolated.csv
+    weather_file_name: NonAnnualSimulation-sample_data-interpolated-daytime.csv
     system_info_file_name: 100MW_1axis_pvsamv1.json
     lat: 39.7442
     lon: -105.1778
@@ -56,7 +56,7 @@ py_sims:
 
 controller:
 
-external_data_file: solar_power_reference_data.csv
+external_data_file: solar_power_reference.csv
 
 
 

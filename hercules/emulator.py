@@ -174,7 +174,7 @@ class Emulator(FederateAgent):
             # if self.absolute_helics_time < self.starttime:
             #     continue
             # Get any external data
-            print('self.external_data_all = ',self.external_data_all)
+            # print('self.external_data_all = ',self.external_data_all)
             for k in self.external_data_all:
                 self.main_dict["external_signals"][k] = self.external_data_all[k][
                     self.external_data_all["time"] == self.absolute_helics_time

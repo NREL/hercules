@@ -98,16 +98,6 @@ If you run hercules and get an error that `pyyaml` is missing, you may also need
 ```
 conda install -c conda-forge pyyaml
 ```
-### Install FLORIS 
-You may also want to run the FLORIS standin for AMR-Wind for a steady-state representation  of wind farm flows. 
-In this case, go back to herc_root,
-Then run
-```
-pip install git+https://github.com/NREL/floris.git@v4
-```
-to get the correct branch of FLORIS installed.
-
-Note that that pyyaml package is also required for FLORIS. 
 
 ### Install the NREL Wind Hybrid Open Controller (WHOC)
 

@@ -68,13 +68,6 @@ NREL's PySAM software is also required for hercules. To install, use
 pip install nrel-pysam==4.2.0
 ```
 
-You may also want to run the FLORIS standin for AMR-Wind for a steady-state representation 
-of wind farm flows. In this case, run
-```
-pip install git+https://github.com/NREL/floris.git@v4
-```
-to get the correct branch of FLORIS installed.
-
 If you run hercules and get an error that `pyyaml` is missing, you may also need to install it using
 ```
 conda install -c conda-forge pyyaml

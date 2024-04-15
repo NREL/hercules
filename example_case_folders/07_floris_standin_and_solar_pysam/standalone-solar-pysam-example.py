@@ -55,7 +55,7 @@ def simulate(SPS, time):
 
     power = np.zeros(len(time))
 
-    dc_power = np.zeros(len(time))
+    # dc_power = np.zeros(len(time))
     aoi = np.zeros(len(time))
     irradiance = np.zeros(len(time))
 

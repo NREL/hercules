@@ -19,7 +19,7 @@ fi
 mkdir -p outputs
 
 # Set up the helics broker
-helics_broker -t zmq  -f 2 --loglevel="debug" --consoleloglevel=trace --local_port=$HELICS_PORT & 
+helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
 # For debugging add --consoleloglevel=trace
 
 # Start the controller center and pass in input file

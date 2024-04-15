@@ -28,8 +28,6 @@ echo "Starting hercules"
 python3 hercules_runscript.py hercules_controller_input_000.yaml >> outputs/loghercules.log 2>&1 &
 
 # Start the floris standin
-# echo "Starting amr stand-in"
-# python3 hercules_runscript_amr_standin.py amr_input.inp >> outputs/logstandin.log 2>&1 &
 echo "Starting floris"
 python3 floris_runscript.py amr_input.inp >> outputs/logfloris.log 2>&1 &
 

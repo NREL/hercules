@@ -145,9 +145,12 @@ class Emulator(FederateAgent):
         if "time" not in df_ext.columns:
             raise ValueError("External data file must have a 'time' column")
 
-        # Interpolate the external data according to time; goes to 1 timestep past stoptime from input file
+        # Interpolate the external data according to time.
+        # Goes to 1 time step past stoptime specified in the input file.
         times = np.arange(
-            self.helics_config_dict["starttime"], self.helics_config_dict["stoptime"]+(2*self.dt), self.dt
+            self.helics_config_dict["starttime"],
+            self.helics_config_dict["stoptime"]+(2*self.dt),
+            self.dt
         )
         self.external_data_all["time"] = times
         for c in df_ext.columns:

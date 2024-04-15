@@ -81,7 +81,8 @@ class SolarPySAM:
         # modify power output based on setpoint
         if self.power_mw > power_setpoint_mw:
             self.power_mw = power_setpoint_mw
-            self.excess_power = self.power_mw - power_setpoint_mw # to keep track of power that could go to charging battery
+            # Keep track of power that could go to charging battery
+            self.excess_power = self.power_mw - power_setpoint_mw 
 
     def step(self, inputs):
         # print('-------------------')

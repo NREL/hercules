@@ -50,7 +50,7 @@ print("time = ", time)
 def simulate(SPS, time):
     inputs = {
         "controller": {"signal": 0},
-        "py_sims": {"inputs": {"available_power": 100, "sim_time_s": 0}},
+        "py_sims": {"inputs": {"available_power": 100, "time": 0}},
     }
 
     power = np.zeros(len(time))

@@ -63,7 +63,7 @@ class SolarPySAM:
     def return_outputs(self):
         return {
             "power_mw": self.power_mw,
-            "dc_power_mw": self.dc_power_mw,
+            # "dc_power_mw": self.dc_power_mw,
             "dni": self.dni,
             "aoi": self.aoi,
         }

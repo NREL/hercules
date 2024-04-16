@@ -16,7 +16,7 @@ class SolarPySAM:
         else: # using an input dictionary
             data = pd.DataFrame.from_dict(input_dict["weather_data_input"])
 
-        print(data)
+        # print(data)
         data["Timestamp"] = pd.DatetimeIndex(
                 pd.to_datetime(data["Timestamp"], format="ISO8601", utc=True)
         )
@@ -50,7 +50,6 @@ class SolarPySAM:
         self.lon = sys_design["Other"]["lon"]
         self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
 
-        # Define needed inputs
         self.needed_inputs = {}
         self.data = data
         self.dt = dt
@@ -64,13 +63,32 @@ class SolarPySAM:
     def return_outputs(self):
         return {
             "power_mw": self.power_mw,
-            "dc_power_mw": self.dc_power_mw,
+            # "dc_power_mw": self.dc_power_mw,
             "dni": self.dni,
             "aoi": self.aoi,
         }
+    
+    def control(self, power_setpoint_mw):
+        """
+        Low-level controller to enforce PV plant power setpoints
+        Notes:
+        - Currently applies uniform curtailment to entire plant
+        - DC power output is not controlled because it is not used elsewhere in the code
+
+        Inputs
+        - power_setpoint_mw: [MW] the desired total PV plant output
+        """
+        # modify power output based on setpoint
+        if self.power_mw > power_setpoint_mw:
+            self.power_mw = power_setpoint_mw
+            # Keep track of power that could go to charging battery
+            self.excess_power = self.power_mw - power_setpoint_mw 
 
     def step(self, inputs):
+        # print('-------------------')
         # print('inputs',inputs)
+        # print('-------------------')
+        # print('vars(self) = ',vars(self))
 
         # predict power
         system_model = pvsam.new()
@@ -82,12 +100,11 @@ class SolarPySAM:
                 system_model.value(k, v)
             except Exception:
                 print(k)
-        #### TODO: Check with Brooke about this "except KeyError" line ####
-                # Brooke: I got errors with KeyError so changed it to Exception and it's working
-        # print('model params = ',self.model_params)
 
-        print("sim_time_s = ", inputs["py_sims"]["inputs"]["sim_time_s"])
-        sim_timestep = int(inputs["py_sims"]["inputs"]["sim_time_s"] / self.dt)
+        # sim_time_s = inputs["py_sims"]["inputs"]["sim_time_s"]
+        sim_time_s = inputs["time"]
+        print("sim_time_s = ", sim_time_s)
+        sim_timestep = int(sim_time_s / self.dt)
         print("sim_timestep = ", sim_timestep)
 
         data = self.data.iloc[[sim_timestep]]  # a single timestep
@@ -134,27 +151,31 @@ class SolarPySAM:
         system_model.execute()
         out = system_model.Outputs.export()
 
-        # if sim_timestep == 0:
-        #     with open("out-example.json", "w") as f:
-        #         json.dump(out, f)
-
-        ac = np.array(out["gen"]) / 1000  # quick fix for issue being fixed by darice
-        dc = np.array(out["dc_net"]) / 1000
+        ac = np.array(out["gen"]) / 1000  # in MW
+        # dc = np.array(out["dc_net"]) / 1000
 
         self.power_mw = ac[0]  # calculating one timestep at a time
-        self.dc_power_mw = dc[0]
+        # self.dc_power_mw = dc[0]
         print("self.power_mw = ", self.power_mw)
-        print("self.dc_power_mw = ", self.dc_power_mw)
+
+        # print("inputs[external_signals]",inputs["external_signals"])
+        if "external_signals" in inputs.keys():
+            if "solar_power_reference_mw" in inputs["external_signals"].keys():
+                P_setpoint = inputs["external_signals"]["solar_power_reference_mw"]
+                print('power_setpoint = ',P_setpoint)
+
+                self.control(P_setpoint)
+
+                print('self.power_mw after control = ',self.power_mw)
         
         if self.power_mw < 0.0:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
-        # self.irradiance = out["gh"][0]  # TODO check that gh is the accurate irradiance output
         self.dni = out["dn"][0] # direct normal irradiance
         self.dhi = out["df"][0] # diffuse horizontal irradiance
         self.ghi = out["gh"][0] # global horizontal irradiance
-        print("self.dni = ", self.dni)
+        # print("self.dni = ", self.dni)
 
         self.aoi = out["subarray1_aoi"][0]  # angle of incidence
 

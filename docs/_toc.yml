@@ -23,7 +23,9 @@ parts:
     - file: examples_overview
     - file: examples/05_floris_wind_standin_and_electrolyzer
     - file: examples/06_amr_wind_standin_and_battery
-    - file: examples/07_amr_wind_standin_and_solar_pysam
+    - file: examples/07_floris_wind_standin_and_solar_pysam
+    - file: examples/08_floris_only
+    - file: examples/09_amr_wind_openfast
 
 
 

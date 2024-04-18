@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Example 07: AMR Wind Standin and Solar PySAM &#8212; HERCULES</title>
+    <title>Example 08: FLORIS Only &#8212; HERCULES</title>
   
   
   
@@ -42,7 +42,7 @@
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
@@ -70,10 +70,11 @@
                 gtag('config', 'G-3V1BDK8KEJ');
             </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/07_amr_wind_standin_and_solar_pysam';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/08_floris_only';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Example 06: AMR Wind Standin and Battery" href="06_amr_wind_standin_and_battery.html" />
+    <link rel="next" title="Example 09: AMR Wind with OpenFAST" href="09_amr_wind_openfast.html" />
+    <link rel="prev" title="Example 07: FLORIS Standin and Solar PySAM" href="07_floris_standin_and_solar_pysam.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -212,7 +213,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples_overview.html">Examples Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="05_floris_wind_standin_and_electrolyzer.html">Example 05: FLORIS Wind Standin and Electrolyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="06_amr_wind_standin_and_battery.html">Example 06: AMR Wind Standin and Battery</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Example 07: AMR Wind Standin and Solar PySAM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_floris_standin_and_solar_pysam.html">Example 07: FLORIS Standin and Solar PySAM</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Example 08: FLORIS Only</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_amr_wind_openfast.html">Example 09: AMR Wind with OpenFAST</a></li>
 </ul>
 
     </div>
@@ -284,7 +287,7 @@
       
       
       
-      <li><a href="https://github.com/NREL/hercules/edit/develop/docs/examples/07_amr_wind_standin_and_solar_pysam.md" target="_blank"
+      <li><a href="https://github.com/NREL/hercules/edit/develop/docs/examples/08_floris_only.md" target="_blank"
    class="btn btn-sm btn-source-edit-button dropdown-item"
    title="Suggest edit"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -301,7 +304,7 @@
       
       
       
-      <li><a href="https://github.com/NREL/hercules/issues/new?title=Issue%20on%20page%20%2Fexamples/07_amr_wind_standin_and_solar_pysam.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/NREL/hercules/issues/new?title=Issue%20on%20page%20%2Fexamples/08_floris_only.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -331,7 +334,7 @@
       
       
       
-      <li><a href="../_sources/examples/07_amr_wind_standin_and_solar_pysam.md" target="_blank"
+      <li><a href="../_sources/examples/08_floris_only.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -415,7 +418,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Example 07: AMR Wind Standin and Solar PySAM</h1>
+    <h1>Example 08: FLORIS Only</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -439,16 +442,16 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="example-07-amr-wind-standin-and-solar-pysam">
-<h1>Example 07: AMR Wind Standin and Solar PySAM<a class="headerlink" href="#example-07-amr-wind-standin-and-solar-pysam" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="example-08-floris-only">
+<h1>Example 08: FLORIS Only<a class="headerlink" href="#example-08-floris-only" title="Link to this heading">#</a></h1>
 <section id="description">
 <h2>Description<a class="headerlink" href="#description" title="Link to this heading">#</a></h2>
-<p>This example demonstrates how to use the AMR Wind Standin and a solar model using pysam.</p>
+<p>This example demonstrates how to use the FLORIS as the AMR Wind Standin model. This model uses the ‘floris_runscript.py’ in the bash file and still requires ‘amr_input.inp’ as an input file.</p>
 </section>
 <section id="running">
 <h2>Running<a class="headerlink" href="#running" title="Link to this heading">#</a></h2>
 <p>To run the example, execute the following command in the terminal:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>batch_script.sh
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>sbash_script.sh
 </pre></div>
 </div>
 </section>
@@ -489,13 +492,22 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="06_amr_wind_standin_and_battery.html"
+       href="07_floris_standin_and_solar_pysam.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Example 06: AMR Wind Standin and Battery</p>
+        <p class="prev-next-title">Example 07: FLORIS Standin and Solar PySAM</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="09_amr_wind_openfast.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Example 09: AMR Wind with OpenFAST</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>

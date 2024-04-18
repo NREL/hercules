@@ -15,7 +15,7 @@ The `SolarPySAM` module uses [PySAM](https://nrel-pysam.readthedocs.io/en/main/o
 2.  A JSON file that specifies the PV plant system design (e.g. 100MW_1axis_pvsamv1.json).
 The system location (latitude, longitude, and elevation) is specified in the input `yaml` file.
 
-The example folder `07_amr_wind_standin_and_solar_pysam` specifies:
+The example folder `07_floris_standin_and_solar_pysam` specifies:
 - weather conditions on May 10, 2018 (from [this PySAM example](https://github.com/NREL/pysam/blob/main/Examples/NonAnnualSimulation.ipynb))
 - latitude, longitude, and elevation of Golden, CO
 - system design information for a 100 MW single-axis PV tracking system generated using the SAM GUI

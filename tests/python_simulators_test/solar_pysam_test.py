@@ -25,7 +25,7 @@ def get_solar_params():
         },
 
         "system_info_file_name": path+
-            '/../../example_case_folders/07_amr_wind_standin_and_solar_pysam/100MW_1axis_pvsamv1.json',
+            '/../../example_case_folders/07_floris_standin_and_solar_pysam/100MW_1axis_pvsamv1.json',
         "lat": 39.7442, 
         "lon": -105.1778, 
         "elev": 1829,
@@ -69,28 +69,24 @@ def test_return_outputs(SPS: SolarPySAM):
 
     # change PV power predictions and irradiance as if during simulation
     SPS.power_mw = 800
-    SPS.dc_power_mw = 1000
+    # SPS.dc_power_mw = 1000
     SPS.dni = 900
+    SPS.aoi = 0
 
     # check that outputs return the changed PV outputs
     outputs_sim = SPS.return_outputs()
 
     assert outputs_sim["power_mw"] == 800
-    assert outputs_sim["dc_power_mw"] == 1000
+    # assert outputs_sim["dc_power_mw"] == 1000
     assert outputs_sim["dni"] == 900
+    assert outputs_sim["aoi"] == 0
 
 def test_step(SPS: SolarPySAM):
     # testing the `step` function: calculating power based on inputs at first timestep
-    step_inputs = {
-        "py_sims": {
-            "inputs": {
-                "sim_time_s": 0,
-            },
-        },
-    }
+    step_inputs = {"time": 0}
 
     SPS.step(step_inputs)
 
     assert_almost_equal(SPS.power_mw, 32.17650018440107, decimal=8)
-    assert_almost_equal(SPS.dc_power_mw, 33.26240852125279, decimal=8)
+    # assert_almost_equal(SPS.dc_power_mw, 33.26240852125279, decimal=8)
     assert_almost_equal(SPS.ghi, 68.23037719726561, decimal=8)

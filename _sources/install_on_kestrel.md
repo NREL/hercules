@@ -86,6 +86,12 @@ git switch develop
 pip install -e .
 ```
 
+If you encounter authorization issues cloning the repository, you may need to follow [these](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) steps to generate and add a SSH key to GitHub for your machine, and then set permissions for the SSH keys with:
+```
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/*
+```
+
 ### Install PySAM
 
 Note: This section is untested.

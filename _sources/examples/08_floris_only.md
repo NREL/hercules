@@ -2,7 +2,7 @@
 
 ## Description
 
-This example demonstrates how to use the FLORIS as the AMR Wind Standin model. This model uses the 'floris_runscript.py' in the bash file and still requires 'amr_input.inp' as an input file.
+This example demonstrates how to use the FLORIS as the AMR Wind Standin model. This model uses the `floris_runscript.py` in the bash file and still requires `amr_input.inp` as an input file.
 
 ## Running
 

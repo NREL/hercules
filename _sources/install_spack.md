@@ -18,6 +18,7 @@ Next, you need to pull the version of spack set up with the helics module:
 ```
 git fetch origin
 git checkout exawind
+git pull --recurse-submodules
 ```
 
 ### Adding spack to bash_profile
@@ -49,7 +50,7 @@ The last step to installing Hercules and all its dependencies is creating a Herc
 cd <path to directory where you want to install hercules>
 mkdir environment_hercules
 cd environment_hercules
-
+bash
 quick-create-dev -d . -s "amr-wind@main+helics+openfast helics@3.3.2+mpi openfast@3.4.0+rosco"
 ```
 

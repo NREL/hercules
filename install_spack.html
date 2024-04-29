@@ -466,6 +466,7 @@ document.write(`
 <p>Next, you need to pull the version of spack set up with the helics module:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">origin</span>
 <span class="n">git</span> <span class="n">checkout</span> <span class="n">exawind</span>
+<span class="n">git</span> <span class="n">pull</span> <span class="o">--</span><span class="n">recurse</span><span class="o">-</span><span class="n">submodules</span>
 </pre></div>
 </div>
 <section id="adding-spack-to-bash-profile">
@@ -498,7 +499,7 @@ spack-start
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">directory</span> <span class="n">where</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">install</span> <span class="n">hercules</span><span class="o">&gt;</span>
 <span class="n">mkdir</span> <span class="n">environment_hercules</span>
 <span class="n">cd</span> <span class="n">environment_hercules</span>
-
+<span class="n">bash</span>
 <span class="n">quick</span><span class="o">-</span><span class="n">create</span><span class="o">-</span><span class="n">dev</span> <span class="o">-</span><span class="n">d</span> <span class="o">.</span> <span class="o">-</span><span class="n">s</span> <span class="s2">&quot;amr-wind@main+helics+openfast helics@3.3.2+mpi openfast@3.4.0+rosco&quot;</span>
 </pre></div>
 </div>

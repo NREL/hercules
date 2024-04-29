@@ -445,14 +445,14 @@ document.write(`
 <h1>Example 09: AMR Wind with OpenFAST<a class="headerlink" href="#example-09-amr-wind-with-openfast" title="Link to this heading">#</a></h1>
 <section id="description">
 <h2>Description<a class="headerlink" href="#description" title="Link to this heading">#</a></h2>
-<p>This example demonstrates how to run AMR Wind while also using OpenFAST and ROSCO as the turbine model.  This example contains OpenFAST files for the NREL 5MW reference wind turbine.  The support for this example in documentation is for running on an NREL supercomputer (either Eagle or Kestrel, both with sample bash files in the example). To run this example, you will need your own compiled version of AMR Wind, following the instructions in Section <a class="reference internal" href="#install_spack"><span class="xref myst">Install via spack</span></a>.</p>
+<p>This example demonstrates how to run AMR Wind while also using OpenFAST and ROSCO as the turbine model.  This example contains OpenFAST files for the NREL 5MW reference wind turbine.  The support for this example in documentation is for running on an NREL supercomputer (either Eagle or Kestrel, both with sample bash files in the example). To run this example, you will need your own compiled version of AMR Wind, following the instructions in Section <a class="reference external" href="https://nrel.github.io/hercules/install_spack.html">Install via spack</a>.</p>
 </section>
 <section id="running">
 <h2>Running<a class="headerlink" href="#running" title="Link to this heading">#</a></h2>
 <p>To run the example, you will need to change some of the paths to match your own compilation of AMR Wind. You will need to follow the following steps to run this example:</p>
 <ol class="arabic simple">
-<li><p>First, you will need to change line 36 in ‘bash_kestrel.sh’ to match your own path to your AMR Wind executable.</p></li>
-<li><p>Then, you will need to change line 77 in ‘NRELOffshrBsline_5MW_Onshore_ServoDyn.dat’ under the NREL-5MW folder to match your installation of the ‘<a class="reference external" href="http://libdiscon.so">libdiscon.so</a>’ library in your ROSCO installation.</p></li>
+<li><p>First, you will need to change line 36 in <code class="docutils literal notranslate"><span class="pre">bash_kestrel.sh</span></code> to match your own path to your AMR Wind executable.</p></li>
+<li><p>Then, you will need to change line 77 in <code class="docutils literal notranslate"><span class="pre">NRELOffshrBsline_5MW_Onshore_ServoDyn.dat</span></code> under the NREL-5MW folder to match your installation of the <code class="docutils literal notranslate"><span class="pre">libdiscon.so</span></code> library in your ROSCO installation.</p></li>
 <li><p>Finally, you can submit your job to run on Kestrel using the following command in the terminal:</p></li>
 </ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>bash_kestrel.sh

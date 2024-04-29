@@ -534,6 +534,11 @@ The steps are detailed in section <strong>HPC Installation</strong>.</p>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
 </pre></div>
 </div>
+<p>If you encounter authorization issues cloning the repository, you may need to follow <a class="reference external" href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account">these</a> steps to generate and add a SSH key to GitHub for your machine, and then set permissions for the SSH keys with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chmod</span> <span class="mi">700</span> <span class="o">~/.</span><span class="n">ssh</span>
+<span class="n">chmod</span> <span class="mi">600</span> <span class="o">~/.</span><span class="n">ssh</span><span class="o">/*</span>
+</pre></div>
+</div>
 </section>
 <section id="install-pysam">
 <h3>Install PySAM<a class="headerlink" href="#install-pysam" title="Link to this heading">#</a></h3>

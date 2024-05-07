@@ -290,6 +290,9 @@ class Emulator(FederateAgent):
         self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
             "wind_direction"
         ] = wind_direction_amr_wind
+        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+            "wind_speed"
+        ] = wind_speed_amr_wind
 
         return None
 

@@ -162,7 +162,7 @@ class SolarPySAM:
         print("self.power_mw = ", self.power_mw)
 
         # Apply control, if setpoint is provided
-        if "solar_setpoint_mw" in inputs["py_sims"]["inputs"]:
+        if "py_sims" in inputs and "solar_setpoint_mw" in inputs["py_sims"]["inputs"]:
             P_setpoint = inputs["py_sims"]["inputs"]["solar_setpoint_mw"]
         elif "external_signals" in inputs.keys():
             if "solar_power_reference_mw" in inputs["external_signals"].keys():

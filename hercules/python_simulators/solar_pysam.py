@@ -68,7 +68,7 @@ class SolarPySAM:
             "aoi": self.aoi,
         }
     
-    def control(self, power_setpoint_mw):
+    def control(self, power_setpoint_mw=None):
         """
         Low-level controller to enforce PV plant power setpoints
         Notes:
@@ -79,10 +79,13 @@ class SolarPySAM:
         - power_setpoint_mw: [MW] the desired total PV plant output
         """
         # modify power output based on setpoint
-        if self.power_mw > power_setpoint_mw:
-            self.power_mw = power_setpoint_mw
-            # Keep track of power that could go to charging battery
-            self.excess_power = self.power_mw - power_setpoint_mw 
+        if power_setpoint_mw is not None:
+            print('power_setpoint = ', power_setpoint_mw)
+            if self.power_mw > power_setpoint_mw:
+                self.power_mw = power_setpoint_mw
+                # Keep track of power that could go to charging battery
+                self.excess_power = self.power_mw - power_setpoint_mw
+            print('self.power_mw after control = ',self.power_mw)
 
     def step(self, inputs):
         # print('-------------------')
@@ -158,15 +161,15 @@ class SolarPySAM:
         # self.dc_power_mw = dc[0]
         print("self.power_mw = ", self.power_mw)
 
-        # print("inputs[external_signals]",inputs["external_signals"])
-        if "external_signals" in inputs.keys():
+        # Apply control, if setpoint is provided
+        if "py_sims" in inputs and "solar_setpoint_mw" in inputs["py_sims"]["inputs"]:
+            P_setpoint = inputs["py_sims"]["inputs"]["solar_setpoint_mw"]
+        elif "external_signals" in inputs.keys():
             if "solar_power_reference_mw" in inputs["external_signals"].keys():
                 P_setpoint = inputs["external_signals"]["solar_power_reference_mw"]
-                print('power_setpoint = ',P_setpoint)
-
-                self.control(P_setpoint)
-
-                print('self.power_mw after control = ',self.power_mw)
+        else:
+            P_setpoint = None
+        self.control(P_setpoint)
         
         if self.power_mw < 0.0:
             self.power_mw = 0.0

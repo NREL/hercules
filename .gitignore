@@ -5,7 +5,15 @@
 data.db
 *.python-version
 *.DS_Store
+*.conda
 slices
+
+# macOS files
+.DS_Store
+
+# ide settings and files
+.idea
+.vscode
 
 # Some c++ stuff
 a.out
@@ -26,9 +34,17 @@ hercules/local_amr_wind_demo/sample_copy.nc
 
 #Ignore csv files
 *.csv
+!tests/test_inputs/amr_standin_data.csv
+!tests/test_inputs/external_data.csv
 
 # Some output files to ignore
 t_00*
 logdummy
-loghercules
+loghelics
+loghercules*
+logstandin*
+logfloris*
 *echo
+*out-example.json
+
+.vscode/*

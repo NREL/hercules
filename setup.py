@@ -23,8 +23,7 @@ import io
 import os
 from pathlib import Path
 
-from setuptools import setup, find_packages
-
+from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = "hercules"
@@ -32,42 +31,38 @@ DESCRIPTION = "Python front-end to the emulator."
 URL = "https://github.com/NREL/hercules"
 EMAIL = "paul.fleming@nrel.gov"
 AUTHOR = "NREL National Wind Technology Center"
-REQUIRES_PYTHON = ">=3.6.0"
+REQUIRES_PYTHON = ">=3.6.0,<3.12.0"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    "numpy>=1.20",
-    "matplotlib>=3",
-    "pandas",
-    "seaborn",
-    "dash>=2.0.0",
-
-    #GUI Stuff
+    "numpy~=1.20",
+    "matplotlib~=3.0",
+    "pandas~=2.0",
+    "floris~=4.0",
+    "nrel-pysam~=4.2",
+    # "dash>=2.0.0",
+    # GUI Stuff
     # "tkinter", # Comes with python?
-    "plotly==5.5.0",
-    "dash",
-    "dash-daq==0.5.0",
-    "scikit-image",
-
-    #ZMQ stuff
-    "zmq",
-
+    # "plotly==5.5.0",
+    # "dash",
+    # "dash-daq==0.5.0",
+    # "scikit-image",
+    # ZMQ stuff
+    # "zmq",
     # NETCDF
     "netCDF4",
-
-    #YAML
-    "pyyaml"
-
+    # YAML
+    # "pyyaml"
 ]
 
 # What packages are optional?
 EXTRAS = {
     "docs": {
-        "jupyter-book<=0.13.3",
+        "jupyter-book",
         "sphinx-book-theme",
-        "sphinx-autodoc-typehints",
-        "sphinxcontrib-autoyaml",
-        "sphinxcontrib.mermaid",
+        # "sphinx-autodoc-typehints",
+        # "sphinxcontrib-autoyaml",
+        # "sphinxcontrib.mermaid",
     },
     "develop": {
         "pytest",
@@ -108,7 +103,7 @@ setup(
     python_requires=REQUIRES_PYTHON,
     url=URL,
     # package_dir={"": "hercules"},
-    packages=find_packages( exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
     # entry_points={

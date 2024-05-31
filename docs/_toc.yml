@@ -7,10 +7,30 @@ parts:
   - caption: Installation
     chapters:
     - file: install_instructions
-    - file: install_old
+    - file: install_local
     - file: install_on_kestrel
     - file: install_spack
   - caption: Usage
     chapters:
-    - file: examples
     - file: order_of_op
+  - caption: Technologies
+    chapters:
+    - file: wind
+    - file: battery
+    - file: solar_pv
+  - caption: Examples
+    chapters:
+    - file: examples_overview
+    - file: examples/05_floris_wind_standin_and_electrolyzer
+    - file: examples/06_amr_wind_standin_and_battery
+    - file: examples/07_floris_standin_and_solar_pysam
+    - file: examples/08_floris_only
+    - file: examples/09_amr_wind_openfast
+
+
+
+
+
+
+
+

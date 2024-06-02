@@ -213,6 +213,11 @@ class FlorisStandin(AMRWindStandin):
         else:
             # Cannot currently handle both power setpoints and nonzero yaw angles. 
             # If power setpoints are provided, overwrite any yaw angles.
+            logger.warning((
+                "Received combination of power_setpoints and nonzero yaw angles, "
+                +"which can not currently be handled by the FlorisStandin. Setting "
+                +"yaw angles to None."
+            ))
             yaw_angles = None
 
         if yaw_angles is None or (np.array(yaw_angles) == -1000).any():

@@ -208,15 +208,23 @@ class FlorisStandin(AMRWindStandin):
 
         turbine_wind_directions = [amr_wind_direction] * self.num_turbines
 
-        if power_setpoints is None or (np.array(power_setpoints) == 1e9).all():
+        if power_setpoints is None or yaw_angles is None:
+            pass # No conflict with yaw angles
+        elif (
+            (((np.array(power_setpoints) == 1e9)
+              | (np.array([ps is None for ps in power_setpoints])))
+            | ((np.array(yaw_angles) == -1000) | (np.array([ya is None for ya in yaw_angles])) |
+               (np.array(yaw_angles) == amr_wind_direction))
+            ).all()
+        ):
             pass # No conflict with yaw angles
         else:
             # Cannot currently handle both power setpoints and nonzero yaw angles. 
             # If power setpoints are provided, overwrite any yaw angles.
             logger.warning((
-                "Received combination of power_setpoints and nonzero yaw angles, "
-                +"which can not currently be handled by the FlorisStandin. Setting "
-                +"yaw angles to None."
+                "Received combination of power_setpoints and nonzero yaw_angles for some turbines, "
+                +"which can not currently be handled by the FlorisStandin. Setting yaw_angles to "
+                +"None."
             ))
             yaw_angles = None
 

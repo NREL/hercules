@@ -1,8 +1,7 @@
+import logging
 from pathlib import Path
 
-import logging
 import numpy as np
-import pytest
 from floris import FlorisModel
 from hercules.amr_wind_standin import AMRWindStandin
 from hercules.floris_standin import (

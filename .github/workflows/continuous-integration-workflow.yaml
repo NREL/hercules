@@ -33,7 +33,7 @@ jobs:
       run: |
         # -rA displays the captured output for all tests after they're run
         # See the docs: https://doc.pytest.org/en/latest/reference/reference.html#command-line-flags
-        pytest -rA tests/
+        pytest -vv -rA tests/
     - name: Generate coverage report
       # Run these tests on unit tests only so that we avoid inflating our code
       # coverage through the regression tests

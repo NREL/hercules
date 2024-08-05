@@ -1,7 +1,7 @@
+import logging
 from pathlib import Path
 
 import numpy as np
-import pytest
 from floris import FlorisModel
 from hercules.amr_wind_standin import AMRWindStandin
 from hercules.floris_standin import (
@@ -121,7 +121,7 @@ def test_FlorisStandin_get_step_yaw_angles():
         [260.0, 230.0]
     )
 
-def test_FlorisStandin_get_step_power_setpoints():
+def test_FlorisStandin_get_step_power_setpoints(caplog):
     floris_standin = FlorisStandin(CONFIG, AMR_INPUT, smoothing_coefficient=0.0)
 
     # Get FLORIS equivalent, match layout and turbines
@@ -155,10 +155,12 @@ def test_FlorisStandin_get_step_power_setpoints():
     fmodel_true_tp = fmodel_true.get_turbine_powers() / 1000
     assert np.allclose(fs_tp, fmodel_true_tp.flatten().tolist())
 
-    # Test with invalid combination of yaw angles and power setpoints
-    with pytest.raises(ValueError):
+    # Test warning raise with invalid combination of yaw angles and power setpoints
+    with caplog.at_level(logging.WARNING):
         floris_standin.get_step(5.0, yaw_angles=[230.0, 240.0], power_setpoints=[1e3, 1e3])
-    
+    assert caplog.text != "" # Checking not empty
+    caplog.clear()
+
     # Test with valid combination of yaw angles and power setpoints
     yaw_angles = [260.0, 240.0]
     power_setpoints = [None, 1e3]

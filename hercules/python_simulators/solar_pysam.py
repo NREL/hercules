@@ -18,7 +18,7 @@ class SolarPySAM:
 
         # print(data)
         data["Timestamp"] = pd.DatetimeIndex(
-                pd.to_datetime(data["Timestamp"], format="ISO8601", utc=True)
+                pd.to_datetime(data["Timestamp"], format="ISO8601")
         )
         data = data.set_index("Timestamp")
         
@@ -48,7 +48,12 @@ class SolarPySAM:
         self.elev = sys_design["Other"]["elev"]
         self.lat = sys_design["Other"]["lat"]
         self.lon = sys_design["Other"]["lon"]
-        self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
+        # self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
+        try:
+            self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
+        except:
+            print('Error: Timezone (UTC offset) must be provided in input solar weather file timestamps.')
+        print('self.tz = ',self.tz)
 
         self.needed_inputs = {}
         self.data = data
@@ -104,28 +109,30 @@ class SolarPySAM:
             except Exception:
                 print(k)
 
-        # sim_time_s = inputs["py_sims"]["inputs"]["sim_time_s"]
         sim_time_s = inputs["time"]
         print("sim_time_s = ", sim_time_s)
-        sim_timestep = int(sim_time_s / self.dt)
-        print("sim_timestep = ", sim_timestep)
 
-        data = self.data.iloc[[sim_timestep]]  # a single timestep
-        # TODO - replace sim_timestep with seconds in sim_time_s and find corresponding
-        #           timestep in weather file
+        # select appropriate row based on current time
+        time_index = self.data.index[0]+pd.Timedelta(seconds=sim_time_s)
+        print('time_index = ', time_index)
+        try:
+            data = self.data.loc[time_index]  # a single timestep
+            # print(data)
+        except Exception:
+            print("ERROR: Input solar weather file doesn't have data at requested timestamp. Try setting dt in .yaml file equal to (or a multiple of) temporal resolution of input solar weather file.")
 
         weather_data = np.array(
             [
-                data.index.year,
-                data.index.month,
-                data.index.day,
-                data.index.hour,
-                data.index.minute,
-                data["SRRL BMS Direct Normal Irradiance (W/m²_irr)"],
-                data["SRRL BMS Diffuse Horizontal Irradiance (W/m²_irr)"],
-                data["SRRL BMS Global Horizontal Irradiance (W/m²_irr)"],
-                data["SRRL BMS Wind Speed at 19' (m/s)"],
-                data["SRRL BMS Dry Bulb Temperature (°C)"],
+                [time_index.year], # forcing this to be an array of lists so that tuple doesn't unpack it in next section of code
+                [time_index.month],
+                [time_index.day],
+                [time_index.hour],
+                [time_index.minute],
+                [data["SRRL BMS Direct Normal Irradiance (W/m²_irr)"]],
+                [data["SRRL BMS Diffuse Horizontal Irradiance (W/m²_irr)"]],
+                [data["SRRL BMS Global Horizontal Irradiance (W/m²_irr)"]],
+                [data["SRRL BMS Wind Speed at 19' (m/s)"]],
+                [data["SRRL BMS Dry Bulb Temperature (°C)"]],
             ]
         )
 
@@ -178,7 +185,7 @@ class SolarPySAM:
         self.dni = out["dn"][0] # direct normal irradiance
         self.dhi = out["df"][0] # diffuse horizontal irradiance
         self.ghi = out["gh"][0] # global horizontal irradiance
-        # print("self.dni = ", self.dni)
+        print("self.dni = ", self.dni)
 
         self.aoi = out["subarray1_aoi"][0]  # angle of incidence
 

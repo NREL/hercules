@@ -1,13 +1,13 @@
 # Input YAML for emy_python
 
 # Name
-name: OK_ARM_precursor
+name: Flatirons_site
 
 ###
 # Describe this emulator setup
 description: Floris and Solar PV
 
-dt: 60.0 # 1.0 #0.5
+dt: 1.0 #0.5 [s] # must be equal to (or a multiple of) temporal resolution of input solar data
 
 hercules_comms:
 
@@ -33,7 +33,7 @@ hercules_comms:
         publication_interval: 1
         endpoint_interval: 1
         starttime: 0
-        stoptime: 300 # 26000 # 100
+        stoptime: 6 # 100
         Agent: ControlCenter
 
 py_sims:
@@ -41,11 +41,11 @@ py_sims:
   solar_farm_0: # The name of py_sim object 1
 
     py_sim_type: SolarPySAM
-    weather_file_name: ARM_solar_data_precursor.csv
+    weather_file_name: Flatirons_solar_data_precursor-tztest.csv
     system_info_file_name: 100MW_1axis_pvsamv1.json
-    lat: 36.605
-    lon: -97.485
-    elev: 318.0
+    lat: 39.7442
+    lon: -105.1778
+    elev: 1829
 
     # capacity: 100 # MW
 

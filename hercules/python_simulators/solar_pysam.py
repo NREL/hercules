@@ -11,32 +11,32 @@ import PySAM.Pvsamv1 as pvsam
 class SolarPySAM:
     def __init__(self, input_dict, dt):
         # load weather data
-        if input_dict["weather_file_name"]: # using a weather file
+        if input_dict["weather_file_name"]:  # using a weather file
             data = pd.read_csv(input_dict["weather_file_name"])
-        else: # using an input dictionary
+        else:  # using an input dictionary
             data = pd.DataFrame.from_dict(input_dict["weather_data_input"])
 
         # print(data)
-        data["Timestamp"] = pd.DatetimeIndex(
-                pd.to_datetime(data["Timestamp"], format="ISO8601")
-        )
+        data["Timestamp"] = pd.DatetimeIndex(pd.to_datetime(data["Timestamp"], format="ISO8601"))
         data = data.set_index("Timestamp")
-        
+
         # print('input_dict = ')
         # print(input_dict)
 
         # set PV system model parameters
-        if input_dict["system_info_file_name"]: # using system info json file
+        if input_dict["system_info_file_name"]:  # using system info json file
             with open(input_dict["system_info_file_name"], "r") as f:
                 model_params = json.load(f)
             sys_design = {
                 "ModelParams": model_params,
                 # "Other": input_dict["other"],
-                "Other": {"lat": input_dict["lat"], 
-                          "lon": input_dict["lon"], 
-                          "elev": input_dict["elev"]},
+                "Other": {
+                    "lat": input_dict["lat"],
+                    "lon": input_dict["lon"],
+                    "elev": input_dict["elev"],
+                },
             }
-        else: # using system info data dictionary in input file
+        else:  # using system info data dictionary in input file
             # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
             sys_design = input_dict["system_info_data_input"]
             print("sys_design")
@@ -51,9 +51,9 @@ class SolarPySAM:
         # self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
         try:
             self.tz = data.index[0].utcoffset().total_seconds() / 60 / 60
-        except:
-            print('Error: Timezone (UTC offset) must be provided in input solar weather file timestamps.')
-        print('self.tz = ',self.tz)
+        except Exception:
+            print("Error: Timezone (UTC offset) required in input solar weather file timestamps.")
+        print("self.tz = ", self.tz)
 
         self.needed_inputs = {}
         self.data = data
@@ -72,7 +72,7 @@ class SolarPySAM:
             "dni": self.dni,
             "aoi": self.aoi,
         }
-    
+
     def control(self, power_setpoint_mw=None):
         """
         Low-level controller to enforce PV plant power setpoints
@@ -85,12 +85,12 @@ class SolarPySAM:
         """
         # modify power output based on setpoint
         if power_setpoint_mw is not None:
-            print('power_setpoint = ', power_setpoint_mw)
+            print("power_setpoint = ", power_setpoint_mw)
             if self.power_mw > power_setpoint_mw:
                 self.power_mw = power_setpoint_mw
                 # Keep track of power that could go to charging battery
                 self.excess_power = self.power_mw - power_setpoint_mw
-            print('self.power_mw after control = ',self.power_mw)
+            print("self.power_mw after control = ", self.power_mw)
 
     def step(self, inputs):
         # print('-------------------')
@@ -113,17 +113,22 @@ class SolarPySAM:
         print("sim_time_s = ", sim_time_s)
 
         # select appropriate row based on current time
-        time_index = self.data.index[0]+pd.Timedelta(seconds=sim_time_s)
-        print('time_index = ', time_index)
+        time_index = self.data.index[0] + pd.Timedelta(seconds=sim_time_s)
+        print("time_index = ", time_index)
         try:
             data = self.data.loc[time_index]  # a single timestep
             # print(data)
         except Exception:
-            print("ERROR: Input solar weather file doesn't have data at requested timestamp. Try setting dt in .yaml file equal to (or a multiple of) temporal resolution of input solar weather file.")
+            print("ERROR: Input solar weather file doesn't have data at requested timestamp.")
+            print(
+                "Try setting dt in .yaml file equal to (or a multiple of) dt in solar weather file."
+            )
 
-        weather_data = np.array(
+        # forcing this to be an array of lists so that tuple doesn't 
+        # unpack it in solar_resource_data
+        weather_data = np.array( 
             [
-                [time_index.year], # forcing this to be an array of lists so that tuple doesn't unpack it in next section of code
+                [time_index.year], 
                 [time_index.month],
                 [time_index.day],
                 [time_index.hour],
@@ -177,14 +182,14 @@ class SolarPySAM:
         else:
             P_setpoint = None
         self.control(P_setpoint)
-        
+
         if self.power_mw < 0.0:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
-        self.dni = out["dn"][0] # direct normal irradiance
-        self.dhi = out["df"][0] # diffuse horizontal irradiance
-        self.ghi = out["gh"][0] # global horizontal irradiance
+        self.dni = out["dn"][0]  # direct normal irradiance
+        self.dhi = out["df"][0]  # diffuse horizontal irradiance
+        self.ghi = out["gh"][0]  # global horizontal irradiance
         print("self.dni = ", self.dni)
 
         self.aoi = out["subarray1_aoi"][0]  # angle of incidence

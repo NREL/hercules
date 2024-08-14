@@ -7,7 +7,7 @@ name: OK_ARM_precursor
 # Describe this emulator setup
 description: Floris and Solar PV
 
-dt: 60.0 # 1.0 #0.5
+dt: 60.0 # 1.0 #0.5 
 
 hercules_comms:
 

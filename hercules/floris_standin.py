@@ -24,11 +24,13 @@
 
 import logging
 import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
 from floris import FlorisModel
 from floris.turbine_library import build_cosine_loss_turbine_dict
+from scipy.interpolate import interp1d
 
 from hercules.amr_wind_standin import AMRWindStandin, read_amr_wind_input
 
@@ -202,9 +204,32 @@ class FlorisStandin(AMRWindStandin):
                 self.standin_data["amr_wind_direction"],
             )
 
+            if "heterogeneous_inflow_config" in self.standin_data.columns:
+                if sim_time_s < self.standin_data["time"].iloc[-1]:
+                    next_idx = (
+                        self.standin_data["time"][self.standin_data["time"] > sim_time_s].idxmin()
+                    )
+                else:
+                    next_idx = len(self.standin_data) - 1
+                prev_idx = next_idx - 1
+
+                prev_dict = eval(self.standin_data["heterogeneous_inflow_config"].iloc[prev_idx])
+                next_dict = eval(self.standin_data["heterogeneous_inflow_config"].iloc[next_idx])
+                
+                heterogeneous_inflow_config = self.interpolate_heterogeneous_inflow_config(
+                    prev_dict,
+                    next_dict,
+                    self.standin_data["time"].iloc[prev_idx],
+                    self.standin_data["time"].iloc[next_idx],
+                    sim_time_s
+                )
+            else: # No heterogeneous data supplied
+                heterogeneous_inflow_config = None
+
         else:
             amr_wind_speed = 8.0
             amr_wind_direction = 240.0
+            heterogeneous_inflow_config = None
 
         turbine_wind_directions = [amr_wind_direction] * self.num_turbines
 
@@ -260,6 +285,7 @@ class FlorisStandin(AMRWindStandin):
         self.fmodel.set(
             wind_speeds=[amr_wind_speed],
             wind_directions=[amr_wind_direction],
+            heterogeneous_inflow_config=heterogeneous_inflow_config,
             yaw_angles=yaw_misalignments,
             power_setpoints=power_setpoints
         )
@@ -293,6 +319,47 @@ class FlorisStandin(AMRWindStandin):
 
     def process_subscription_messages(self, msg):
         pass
+
+    @staticmethod
+    def interpolate_heterogeneous_inflow_config(dict_0, dict_1, time_0, time_1, time):
+        # Check for valid keys; if not there, raise warning and return None
+        default_dist = 1.0e6
+        default_heterogeneous_inflow_config = {
+            "x": np.array([-default_dist, -default_dist, default_dist, default_dist]),
+            "y": np.array([-default_dist, default_dist, -default_dist, default_dist]),
+            "speed_multipliers": np.array([[1.0, 1.0, 1.0, 1.0]]),
+        }
+        for k in ["x", "y", "speed_multipliers"]:
+            if (k not in dict_0.keys()) or (k not in dict_1.keys()):
+                warnings.warn((
+                    f"Needed key '{k}' missing from heterogeneous_inflow_config."+
+                    " Proceeding with homogeneous inflow."
+                ))
+                return default_heterogeneous_inflow_config
+        
+        # Check that x and y are the same between time stamps
+        # (changing x, y not currently supported)
+        if (dict_0["x"] != dict_1["x"]) or (dict_0["y"] != dict_1["y"]):
+            warnings.warn((
+                "Changing x, y between time stamps not currently supported."+
+                " Proceeding with homogeneous inflow."
+            ))
+            return default_heterogeneous_inflow_config
+        
+        # Interpolate speed multipliers
+        sm_interpolator = interp1d(
+            [time_0, time_1],
+            [dict_0["speed_multipliers"][0], dict_1["speed_multipliers"][0]],
+            axis=0,
+        )
+        speed_multipliers = sm_interpolator(time)
+
+        # Create return dictionary
+        return {
+            "x": np.array(dict_0["x"]),
+            "y": np.array(dict_0["y"]),
+            "speed_multipliers": np.array([speed_multipliers])
+        }
 
 
 def launch_floris(amr_input_file, amr_standin_data_file=None):

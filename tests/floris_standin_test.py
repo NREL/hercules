@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from floris import FlorisModel
 from hercules.amr_wind_standin import AMRWindStandin
 from hercules.floris_standin import (
@@ -13,6 +14,7 @@ from SEAS.federate_agent import FederateAgent
 
 AMR_INPUT = Path(__file__).resolve().parent / "test_inputs" / "amr_input_florisstandin.inp"
 AMR_EXTERNAL_DATA = Path(__file__).resolve().parent / "test_inputs" / "amr_standin_data.csv"
+AMR_EXTERNAL_DATA_HET = Path(__file__).resolve().parent / "test_inputs" / "amr_standin_data_het.csv"
 
 CONFIG = {
     "name": "floris_standin",
@@ -300,3 +302,87 @@ def test_FlorisStandin_smoothing_coefficient():
 
     # Check magnitude is correct
     assert np.allclose(0.1*np.array(fs_tp_no_smoothing), np.array(fs_tp_heavy_smoothing))
+
+def test_FlorisStandin_with_heterogeneous_inflow():
+    floris_standin = FlorisStandin(
+        CONFIG,
+        AMR_INPUT,
+        AMR_EXTERNAL_DATA_HET,
+        smoothing_coefficient=0.0
+    )
+
+    # Set the wind shear to zero to simplify comparisons
+    floris_standin.fmodel.set(wind_shear=0.0)
+
+    # Check heterogeneous map interpolation at specified time
+    floris_standin.get_step(0)
+    turbine_vels_norm_0 = floris_standin.fmodel.turbine_average_velocities / 8.0
+    assert np.allclose(turbine_vels_norm_0[0,0], 0.9)
+    assert 0.9 < turbine_vels_norm_0[0,1] < 1.0 # Unwaked at 0 degrees
+    # Check matches data at time 0
+
+    # Check changed correctly at time 4
+    floris_standin.get_step(4)
+    turbine_vels_norm_4 = floris_standin.fmodel.turbine_average_velocities / 8.0
+    assert np.allclose(turbine_vels_norm_4[0,:], 1.0)
+
+    # Check interpolates correctly for time step 2.
+    floris_standin.get_step(2)
+    turbine_vels_norm_2 = floris_standin.fmodel.turbine_average_velocities / 8.0
+    assert (turbine_vels_norm_0 < turbine_vels_norm_2).all()
+    assert (turbine_vels_norm_2 < turbine_vels_norm_4).all()
+
+def test_FlorisStandin_with_bad_heterogeneous_inflow():
+    # Read in valid heterogeneous inflow data
+    df_het_orig = pd.read_csv(AMR_EXTERNAL_DATA_HET)
+
+    # Add extra key to heterogeneous_inflow_config; reprint
+    for i in range(len(df_het_orig)):
+        dict_temp = eval(df_het_orig.heterogeneous_inflow_config.iloc[i])
+        dict_temp["bad_key"] = 0.0
+        df_het_orig.heterogeneous_inflow_config.iloc[i] = str(dict_temp)
+    
+    # Write to new file
+    AMR_EXTERNAL_DATA_HET_BAD = (
+        Path(__file__).resolve().parent / "test_inputs" / "amr_standin_data_het_bad.csv"
+    )
+    df_het_orig.to_csv(AMR_EXTERNAL_DATA_HET_BAD, index=False)
+
+    # Check that the extra key is just ignored
+    floris_standin = FlorisStandin(
+        CONFIG,
+        AMR_INPUT,
+        AMR_EXTERNAL_DATA_HET_BAD,
+        smoothing_coefficient=0.0
+    )
+    
+    # Set the wind shear to zero to simplify comparisons
+    floris_standin.fmodel.set(wind_shear=0.0)
+    
+    # Step, check ok
+    floris_standin.get_step(0)
+    turbine_vels_norm_0 = floris_standin.fmodel.turbine_average_velocities / 8.0
+    assert np.allclose(turbine_vels_norm_0[0,0], 0.9)
+
+    # Remove needed key for heterogeneous_inflow_config
+    df_het_orig = pd.read_csv(AMR_EXTERNAL_DATA_HET)
+    for i in range(len(df_het_orig)):
+        dict_temp = eval(df_het_orig.heterogeneous_inflow_config.iloc[i])
+        del dict_temp["speed_multipliers"]
+        df_het_orig.heterogeneous_inflow_config.iloc[i] = str(dict_temp)
+    df_het_orig.to_csv(AMR_EXTERNAL_DATA_HET_BAD, index=False)
+
+    # Check proceeds without heterogeneity
+    floris_standin = FlorisStandin(
+        CONFIG,
+        AMR_INPUT,
+        AMR_EXTERNAL_DATA_HET_BAD,
+        smoothing_coefficient=0.0
+    )
+    floris_standin.fmodel.set(wind_shear=0.0)
+    floris_standin.get_step(0)
+    turbine_vels_norm_0 = floris_standin.fmodel.turbine_average_velocities / 8.0
+    assert np.allclose(turbine_vels_norm_0, 1.0) # No heterogeneity applied
+
+    # Delete the bad file
+    AMR_EXTERNAL_DATA_HET_BAD.unlink()

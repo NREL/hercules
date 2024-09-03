@@ -26,8 +26,8 @@ helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT &
 echo "Starting hercules"
 # python3 hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
 # python3 hercules_runscript.py hercules_controller_input_000.yaml >> outputs/loghercules.log 2>&1 &
-# python3 hercules_runscript.py hercules_input_OK_ARM.yaml >> outputs/loghercules.log 2>&1 &
-python3 hercules_runscript.py hercules_input_Flatirons.yaml >> outputs/loghercules.log 2>&1 &
+python3 hercules_runscript.py hercules_input_OK_ARM.yaml >> outputs/loghercules.log 2>&1 &
+# python3 hercules_runscript.py hercules_input_Flatirons.yaml >> outputs/loghercules.log 2>&1 &
 
 # Start the floris standin
 echo "Starting floris"

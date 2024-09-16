@@ -36,6 +36,7 @@ hercules/local_amr_wind_demo/sample_copy.nc
 *.csv
 !tests/test_inputs/*.csv
 !example_case_folders/10_heterogeneous_wind/floris_standin_data.csv
+!example_case_folders/10_heterogeneous_wind/wind_power_reference_data.csv
 
 # Some output files to ignore
 t_00*

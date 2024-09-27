@@ -2,15 +2,21 @@ import ast
 import datetime as dt
 import os
 import sys
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from SEAS.federate_agent import FederateAgent
 
 LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace(".", "_")
 
+Path("outputs").mkdir(parents=True, exist_ok=True)
 
 class Emulator(FederateAgent):
     def __init__(self, controller, py_sims, input_dict):
+        # Make sure output folder exists
+        Path("outputs").mkdir(parents=True, exist_ok=True)
+
         # Save the input dict to main dict
         self.main_dict = input_dict
 
@@ -18,9 +24,12 @@ class Emulator(FederateAgent):
         self.main_dict_flat = {}
 
         # Initialize the output file
-        self.output_file = "hercules_output.csv"
+        if "output_file" in input_dict:
+            self.output_file = input_dict["output_file"]
+        else:
+            self.output_file = "outputs/hercules_output.csv"
 
-        # Save timt step
+        # Save time step
         self.dt = input_dict["dt"]
 
         # Initialize components
@@ -38,6 +47,13 @@ class Emulator(FederateAgent):
         self.hercules_comms_dict = input_dict["hercules_comms"]
         self.hercules_helics_dict = self.hercules_comms_dict["helics"]
         self.helics_config_dict = self.hercules_comms_dict["helics"]["config"]
+
+        # Read in any external data
+        self.external_data_all = {}
+        if "external_data_file" in input_dict:
+            self._read_external_data_file(input_dict["external_data_file"])
+            self.external_signals = {}
+            self.main_dict["external_signals"] = {}
 
         # Write the time step into helics config dict
         self.helics_config_dict["helics"]["deltat"] = self.dt
@@ -79,7 +95,7 @@ class Emulator(FederateAgent):
             )
 
         # TODO For now, need to assume for simplicity there is one and only
-        # one AMR_Wind simualtion
+        # one AMR_Wind simulation
         self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]]["num_turbines"]
         self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]]["rotor_diameter"]
         self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_locations"]
@@ -123,22 +139,49 @@ class Emulator(FederateAgent):
         # list(self.pub.values())[0].publish(str("[-1,-1,-1]"))
         # self.logger.info(" #### Entering main loop #### ")
 
+    def _read_external_data_file(self, filename):
+        # Read in the external data file
+        df_ext = pd.read_csv(filename)
+        if "time" not in df_ext.columns:
+            raise ValueError("External data file must have a 'time' column")
+
+        # Interpolate the external data according to time.
+        # Goes to 1 time step past stoptime specified in the input file.
+        times = np.arange(
+            self.helics_config_dict["starttime"],
+            self.helics_config_dict["stoptime"]+(2*self.dt),
+            self.dt
+        )
+        self.external_data_all["time"] = times
+        for c in df_ext.columns:
+            if c != "time":
+                self.external_data_all[c] = np.interp(times, df_ext.time, df_ext[c])
+
     def run(self):
         # TODO In future code that doesnt insist on AMRWInd can make this optional
         print("... waiting for initial connection from AMRWind")
         # Send initial connection signal to AMRWind
         # publish on topic: control
+        self.receive_amrwind_data()
         self.send_via_helics("control", str("[-1,-1,-1]"))
         print(" #### Entering main loop #### ")
-
+        self.sync_time_helics(self.absolute_helics_time + self.deltat)
         # Initialize the first iteration flag
         self.first_iteration = True
 
         # Run simulation till  endtime
-        while self.absolute_helics_time < self.endtime:
+        # while self.absolute_helics_time < self.endtime:
+        while self.absolute_helics_time < (self.endtime - self.starttime + 1):
+            print(self.absolute_helics_time)
             # Loop till we reach simulation startime.
-            if self.absolute_helics_time < self.starttime:
-                continue
+            # if self.absolute_helics_time < self.starttime:
+            #     continue
+            # Get any external data
+            # print('self.external_data_all = ',self.external_data_all)
+            for k in self.external_data_all:
+                self.main_dict["external_signals"][k] = self.external_data_all[k][
+                    self.external_data_all["time"] == self.absolute_helics_time
+                ][0]
 
             # Update controller and py sims
             # TODO: Should 'time' in the main dict be AMR-wind time or
@@ -172,6 +215,7 @@ class Emulator(FederateAgent):
         incoming_messages = self.helics_connector.get_all_waiting_messages()
         if incoming_messages != {}:
             subscription_value = self.process_subscription_messages(incoming_messages)
+            # print("What did we receive ", subscription_value)
         else:
             print("Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
             subscription_value = (
@@ -194,7 +238,7 @@ class Emulator(FederateAgent):
         # Assign Py_sim outputs
         if self.main_dict["py_sims"]:
             self.main_dict["py_sims"]["inputs"]["available_power"] = sum(turbine_power_array)
-            print("sim_time_s_amr_wind = ", sim_time_s_amr_wind)
+            # print("sim_time_s_amr_wind = ", sim_time_s_amr_wind)
             self.main_dict["py_sims"]["inputs"]["sim_time_s"] = sim_time_s_amr_wind
             # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ',
             #           self.main_dict['py_sims']['inputs']['sim_time_s'])
@@ -227,7 +271,6 @@ class Emulator(FederateAgent):
         print("AMRWindSpeed:", wind_speed_amr_wind)
         print("AMRWindDirection:", wind_direction_amr_wind)
         print("AMRWindTurbinePowers:", turbine_power_array)
-        print(" AMRWIND number of turbines here: ", self.num_turbines)
         print("AMRWindTurbineWD:", turbine_wd_array)
         print("=======================================")
 
@@ -247,6 +290,9 @@ class Emulator(FederateAgent):
         self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
             "wind_direction"
         ] = wind_direction_amr_wind
+        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+            "wind_speed"
+        ] = wind_speed_amr_wind
 
         return None
 
@@ -263,7 +309,7 @@ class Emulator(FederateAgent):
                             self.main_dict_flat[prefix + k + ".%03d" % i] = vi
 
                 # If v is a string, int, or float, enter it directly
-                if isinstance(v, (int, float)):
+                if isinstance(v, (int, np.integer, float)):
                     self.main_dict_flat[prefix + k] = v
 
     def log_main_dict(self):
@@ -301,7 +347,7 @@ class Emulator(FederateAgent):
         # to see full dictionary in interpreting log
 
         original_stdout = sys.stdout
-        with open("main_dict.echo", "w") as f_i:
+        with open("outputs/main_dict.echo", "w") as f_i:
             sys.stdout = f_i  # Change the standard output to the file we created.
             print(self.main_dict)
             sys.stdout = original_stdout  # Reset the standard output to its original value
@@ -342,10 +388,22 @@ class Emulator(FederateAgent):
         else:  # set yaw_angles based on self.wind_direction
             yaw_angles = [self.wind_direction] * self.num_turbines
 
+        if (
+            "turbine_power_setpoints"
+            in self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]
+        ):
+            power_setpoints = self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+                "turbine_power_setpoints"
+            ]
+        else:  # pass no power setpoints
+            power_setpoints = [] * self.num_turbines
+
         # Send timing and yaw information to AMRWind via helics
         # publish on topic: control
         tmp = np.array(
-            [self.absolute_helics_time, self.wind_speed, self.wind_direction] + yaw_angles
+            [self.absolute_helics_time, self.wind_speed, self.wind_direction]
+            + yaw_angles
+            + power_setpoints
         ).tolist()
 
         self.send_via_helics("control", str(tmp))
@@ -358,6 +416,7 @@ class Emulator(FederateAgent):
 
     def read_amr_wind_input(self, amr_wind_input):
         # TODO this function is ugly and uncommented
+        # print("How many times does this get called ", amr_wind_input)
 
         # TODO Initialize to empty in case doesn't run
         # Probably want a file not found error instead
@@ -371,6 +430,9 @@ class Emulator(FederateAgent):
                 if "Actuator.labels" in line:
                     turbine_labels = line.split()[2:]
                     num_turbines = len(turbine_labels)
+            for line in Lines:
+                if "Actuator.type" in line:
+                    actuator_type = line.split()[-1]
 
             self.num_turbines = num_turbines
             print("Number of turbines in amrwind: ", num_turbines)
@@ -397,7 +459,7 @@ class Emulator(FederateAgent):
 
             # Find the diameter
             for line in Lines:
-                if "rotor_diameter" in line:
+                if "Actuator.%s.rotor_diameter" % actuator_type in line:
                     D = float(line.split()[-1])
 
             # Get the turbine locations

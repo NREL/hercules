@@ -64,6 +64,7 @@ class PySims:
 
     def step(self, main_dict):
         # Collect the py_sim objects
+        py_sims_available_power = 0.0
         for py_sim_name in self.py_sim_names:
             print(py_sim_name)
 
@@ -73,3 +74,8 @@ class PySims:
             self.py_sim_dict[py_sim_name]["outputs"] = self.py_sim_dict[py_sim_name]["object"].step(
                 main_dict
             )
+            if "Solar" in self.py_sim_dict[py_sim_name]["py_sim_type"]:
+                py_sims_available_power += self.py_sim_dict[py_sim_name]["outputs"]["power_mw"]*1000
+                
+        self.py_sim_dict["inputs"]["available_power"] = 0.0
+        self.py_sim_dict["inputs"]["available_power"] += py_sims_available_power

@@ -234,11 +234,11 @@ class Emulator(FederateAgent):
         turbine_wd_array = subscription_value[3 + self.num_turbines :]
         self.wind_speed = wind_speed_amr_wind
         self.wind_direction = wind_direction_amr_wind
-        farm_power = sum(turbine_power_array)
+        wind_farm_power = sum(turbine_power_array)
 
         # Assign Py_sim outputs
         if self.main_dict["py_sims"]:
-            self.main_dict["py_sims"]["inputs"]["available_power"] += farm_power
+            self.main_dict["py_sims"]["inputs"]["available_power"] += wind_farm_power
             # print("sim_time_s_amr_wind = ", sim_time_s_amr_wind)
             self.main_dict["py_sims"]["inputs"]["sim_time_s"] = sim_time_s_amr_wind
             # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ',
@@ -278,7 +278,7 @@ class Emulator(FederateAgent):
         # Store turbine powers back to the dict
         # TODO hard-coded for now assuming only one AMR-WIND
         self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = turbine_power_array
-        self.amr_wind_dict[self.amr_wind_names[0]]["farm_power"] = farm_power
+        self.amr_wind_dict[self.amr_wind_names[0]]["wind_farm_power"] = wind_farm_power
         self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = turbine_wd_array
         self.turbine_power_array = turbine_power_array
         self.amr_wind_dict[self.amr_wind_names[0]]["sim_time_s_amr_wind"] = sim_time_s_amr_wind
@@ -296,8 +296,8 @@ class Emulator(FederateAgent):
             "wind_speed"
         ] = wind_speed_amr_wind
         self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "farm_power"
-        ] = farm_power
+            "wind_farm_power"
+        ] = wind_farm_power
 
         return None
 

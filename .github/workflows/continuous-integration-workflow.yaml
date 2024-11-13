@@ -29,11 +29,16 @@ jobs:
       run: |
         ruff check .
 #        ruff format
+    - name: Setup matplotlib dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y fonts-liberation
+        rm -rf ~/.cache/matplotlib
+        export MPLBACKEND=Agg
     - name: Run tests and collect coverage
       run: |
         # -rA displays the captured output for all tests after they're run
         # See the docs: https://doc.pytest.org/en/latest/reference/reference.html#command-line-flags
-        export MPLBACKEND=Agg
         pytest -rA tests/
     - name: Generate coverage report
       # Run these tests on unit tests only so that we avoid inflating our code

@@ -317,8 +317,8 @@ class AMRWindStandin(FederateAgent):
             # turbine_wind_directions = [sim_time_s + 0.01, sim_time_s + 0.02]
 
         return (
-            float(amr_wind_speed),
-            float(amr_wind_direction),
+            amr_wind_speed,
+            amr_wind_direction,
             turbine_powers,
             turbine_wind_directions,
         )

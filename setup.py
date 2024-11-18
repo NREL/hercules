@@ -39,7 +39,7 @@ REQUIRED = [
     "matplotlib~=3.0",
     "pandas~=2.0",
     "floris~=4.0",
-    "nrel-pysam~=4.2",
+    # "nrel-pysam~=4.2",
     # "dash>=2.0.0",
     # GUI Stuff
     # "tkinter", # Comes with python?

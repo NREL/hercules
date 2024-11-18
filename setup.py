@@ -36,7 +36,7 @@ REQUIRES_PYTHON = ">=3.6.0,<3.12.0"
 # What packages are required for this module to be executed?
 REQUIRED = [
     "numpy~=1.20",
-    "matplotlib~=3.0",
+    "matplotlib~=3.9",
     "pandas~=2.0",
     "floris~=4.0",
     # "nrel-pysam~=4.2",

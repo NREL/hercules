@@ -50,7 +50,7 @@ REQUIRED = [
     # ZMQ stuff
     # "zmq",
     # NETCDF
-    "netCDF4",
+    # "netCDF4",
     # YAML
     # "pyyaml"
 ]

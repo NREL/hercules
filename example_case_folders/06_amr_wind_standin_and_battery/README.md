@@ -11,9 +11,9 @@ called at the start of the bash process.
 To run the example, execute the following command in the terminal:
 
 ```bash
-bash sbatch_script.sh
+bash run_script.sh
 ```
 
-## Notes
+## Checking outputs
 
-Make sure hercules conda or venv is activated before running the example.
+#TODO: Add instructions on how to check the outputs

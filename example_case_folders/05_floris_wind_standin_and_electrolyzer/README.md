@@ -9,7 +9,7 @@ This example demonstrates how to use the FLORIS as the wind standin model combin
 To run the example, execute the following command in the terminal:
 
 ```bash
-source run_script.sh
+bash run_script.sh
 ```
 
 ## Checking outputs

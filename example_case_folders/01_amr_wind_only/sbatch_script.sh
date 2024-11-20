@@ -4,7 +4,7 @@
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=36
 #SBATCH --account=ssc
-# #SBATCH --qos=high
+# #SBATCH --qos=high  # Uncomment for higher prioirty
 
 # A lot of modules and conda stuff
 source /nopt/nrel/apps/anaconda/5.3/etc/profile.d/conda.sh
@@ -24,10 +24,7 @@ export HELICS_PORT=32000
 # Set up the helics broker
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
 
-# Need to set this to your hercules folder
-# cd /home/pfleming/hercules/hercules
 python3 hercules_runscript.py hercules_input_000.yaml >> loghercules 2>&1  & # Start the controller center and pass in input file
 
-# Now go back to scratch folder and launch the job
-# cd /scratch/pfleming/c2c/example_sim_02
 mpirun -n 72 /home/pfleming/amr-wind/build/amr_wind amr_input.inp >> logamr 2>&1 
+

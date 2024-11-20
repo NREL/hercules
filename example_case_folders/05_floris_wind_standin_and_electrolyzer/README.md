@@ -9,9 +9,9 @@ This example demonstrates how to use the FLORIS as the wind standin model combin
 To run the example, execute the following command in the terminal:
 
 ```bash
-bash bash_script.sh
+source run_script.sh
 ```
 
-## Notes
+## Checking outputs
 
-Make sure hercules conda or venv is activated before running the example.
+#TODO: Add instructions on how to check the outputs

@@ -29,7 +29,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from SEAS.federate_agent import FederateAgent
+from hercules.seas_federate_agent import FederateAgent
 
 # Set up the logger
 # Useful for when running on eagle

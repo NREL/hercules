@@ -10,7 +10,7 @@ from hercules.floris_standin import (
     default_floris_dict,
     FlorisStandin,
 )
-from SEAS.federate_agent import FederateAgent
+from hercules.seas_federate_agent import FederateAgent
 
 AMR_INPUT = Path(__file__).resolve().parent / "test_inputs" / "amr_input_florisstandin.inp"
 AMR_EXTERNAL_DATA = Path(__file__).resolve().parent / "test_inputs" / "amr_standin_data.csv"

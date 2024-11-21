@@ -29,6 +29,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
 from hercules.seas_federate_agent import FederateAgent
 
 # Set up the logger

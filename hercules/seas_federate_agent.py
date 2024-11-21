@@ -1,3 +1,6 @@
+# This file contains code copied directly from SEAS, https://github.com/nreL/seas.
+# This is a temporary workaround until we can go back to importing SEAS directly.
+
 from abc import ABC
 import ast
 import helics

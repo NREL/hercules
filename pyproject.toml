@@ -30,6 +30,7 @@ dependencies = [
 "floris~=4.0",
 "nrel-pysam~=4.2",
 "netCDF4",
+"helics~=3.0",
 ]
 
 [project.optional-dependencies]

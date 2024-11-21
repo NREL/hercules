@@ -23,30 +23,37 @@ fi
 
 # Source the Conda initialization script
 source "$CONDA_PATH"
-
 conda activate hercules
 
 # Clean up existing outputs
 if [ -d outputs ]; then rm -r outputs; fi
-
-# Create the outputs folder
-mkdir outputs
+mkdir -p outputs
 
 # Set the helics port to use: 
+#make sure you use the same port number in the amr_input.inp and hercules_input_000.yaml files. 
 export HELICS_PORT=32000
 
-#make sure you use the same port number in the amr_input.inp and hercules_input_000.yaml files. 
-
-# Clear old log files for clarity
-rm loghercules logfloris
 
 # Set up the helics broker
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
 #helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT >> loghelics &
 
-# Need to set this to your hercules folder
 
 python3 hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules 2>&1 & # Start the controller center and pass in input file
-python3 floris_runscript.py amr_input.inp >> outputs/logfloris 2>&1
+python3 floris_runscript.py inputs/amr_input.inp >> outputs/logfloris 2>&1
 
+# Clean up helics output if there
+# Search for a file that begins with the current year
+# And ends with csv
+# If the file exists, move to outputs folder
+current_year=$(date +"%Y")
+for file in ${current_year}*.csv; do
+    if [ -f "$file" ]; then
+        mv "$file" outputs/
+    fi
+done
+
+# If everything is successful
+echo "Finished running hercules"
+exit 0
 

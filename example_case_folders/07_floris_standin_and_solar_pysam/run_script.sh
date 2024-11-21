@@ -26,10 +26,7 @@ source "$CONDA_PATH"
 conda activate hercules
 
 # Clean up existing outputs
-if [ -f hercules_output_control.csv ]; then rm hercules_output_control.csv; fi
 if [ -d outputs ]; then rm -r outputs; fi
-
-# Create the outputs folder
 mkdir -p outputs
 
 # Set the helics port to use: 
@@ -51,7 +48,6 @@ echo "Starting floris"
 python3 floris_runscript.py inputs/amr_input.inp >> outputs/logfloris.log 2>&1
 
 # Clean up helics output if there
-
 # Search for a file that begins with the current year
 # And ends with csv
 # If the file exists, move to outputs folder

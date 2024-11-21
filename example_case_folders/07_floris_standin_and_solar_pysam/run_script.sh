@@ -48,7 +48,19 @@ python3 hercules_runscript.py hercules_input_Flatirons.yaml >> outputs/loghercul
 
 # Start the floris standin
 echo "Starting floris"
-python3 floris_runscript.py amr_input.inp >> outputs/logfloris.log 2>&1
+python3 floris_runscript.py inputs/amr_input.inp >> outputs/logfloris.log 2>&1
+
+# Clean up helics output if there
+
+# Search for a file that begins with the current year
+# And ends with csv
+# If the file exists, move to outputs folder
+current_year=$(date +"%Y")
+for file in ${current_year}*.csv; do
+    if [ -f "$file" ]; then
+        mv "$file" outputs/
+    fi
+done
 
 # If everything is successful
 echo "Finished running hercules"

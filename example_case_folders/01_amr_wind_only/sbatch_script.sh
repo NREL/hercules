@@ -23,8 +23,6 @@ export HELICS_PORT=32000
 
 # Set up the helics broker
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
-
 python hercules_runscript.py hercules_input_000.yaml >> loghercules 2>&1  & # Start the controller center and pass in input file
-
 mpirun -n 72 /home/pfleming/amr-wind/build/amr_wind amr_input.inp >> logamr 2>&1 
 

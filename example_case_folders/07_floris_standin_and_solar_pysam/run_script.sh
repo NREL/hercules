@@ -39,13 +39,13 @@ helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT &
 
 # Start the controller center and pass in input file
 echo "Starting hercules"
-python3 hercules_runscript.py hercules_input_Flatirons.yaml >> outputs/loghercules.log 2>&1 &
-# python3 hercules_runscript.py hercules_controller_input_000.yaml >> outputs/loghercules.log 2>&1 &
-# python3 hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
+python hercules_runscript.py hercules_input_Flatirons.yaml >> outputs/loghercules.log 2>&1 &
+# python hercules_runscript.py hercules_controller_input_000.yaml >> outputs/loghercules.log 2>&1 &
+# python hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
 
 # Start the floris standin
 echo "Starting floris"
-python3 floris_runscript.py inputs/amr_input.inp >> outputs/logfloris.log 2>&1
+python floris_runscript.py inputs/amr_input.inp >> outputs/logfloris.log 2>&1
 
 # Clean up helics output if there
 # Search for a file that begins with the current year

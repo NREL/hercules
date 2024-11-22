@@ -35,8 +35,8 @@ export HELICS_PORT=32000
 
 # Wait for the open-loop control simulation to finish and then run the closed-loop simulation
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
-python3 hercules_runscript_CLcontrol.py hercules_input_000.yaml >> outputs/hercules.log 2>&1 &
-python3 floris_runscript.py inputs/amr_input.inp inputs/floris_standin_data.csv >> outputs/floris.log 2>&1
+python hercules_runscript_CLcontrol.py hercules_input_000.yaml >> outputs/hercules.log 2>&1 &
+python floris_runscript.py inputs/amr_input.inp inputs/floris_standin_data.csv >> outputs/floris.log 2>&1
 
 # Clean up helics output if there
 # Search for a file that begins with the current year

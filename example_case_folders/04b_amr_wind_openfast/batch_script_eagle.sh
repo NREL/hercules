@@ -30,7 +30,7 @@ helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT &
 
 # Need to set this to your hercules folder
 # cd /home/pfleming/hercules/hercules
-python3 hercules_runscript.py hercules_input_000.yaml >> loghercules 2>&1  & # Start the controller center and pass in input file
+python hercules_runscript.py hercules_input_000.yaml >> loghercules 2>&1  & # Start the controller center and pass in input file
 
 # Now go back to scratch folder and launch the job
 # cd /scratch/pfleming/c2c/example_sim_02

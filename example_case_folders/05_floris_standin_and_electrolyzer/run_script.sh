@@ -34,6 +34,9 @@ if [ -d outputs ]; then rm -r outputs; fi
 # Create the outputs folder
 mkdir outputs
 
+# Generate floris standin data
+python ../../hercules/tools/generate_amr_standin_data.py floris_standin_data.csv
+
 # Set the helics port to use: 
 export HELICS_PORT=32000
 

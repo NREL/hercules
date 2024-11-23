@@ -15,21 +15,21 @@ class ElectrolyzerPlant:
         self.n_stacks = self.elec_sys.n_stacks
 
         # Right now, the plant initialization power and the initial condition power are the same
-        # power_in is always in MW
-        power_in = input_dict["electrolyzer"]["initial_power_kW"] / 1e3
+        # power_in is always in kW
+        power_in = input_dict["electrolyzer"]["initial_power_kW"] 
         self.needed_inputs = {"available_power": power_in}
 
         # Run Electrolyzer two steps to get outputs
         for i in range(2):
             H2_produced, H2_mfr, power_left, power_curtailed = self.elec_sys.run_control(
-                power_in * 1e6
+                power_in * 1e3
             )
         # Initialize outputs for controller step
         self.stacks_on = sum([self.elec_sys.stacks[i].stack_on for i in range(self.n_stacks)])
         self.stacks_waiting = [False] * self.n_stacks
         # # TODO: How should these be initialized? - Should we do one electrolyzer step?
         #           will that make it out of step of with the other sources?
-        self.curtailed_power = power_curtailed / 1e6
+        self.curtailed_power = power_curtailed / 1e3
         self.H2_output = H2_produced
 
     def return_outputs(self):
@@ -42,13 +42,13 @@ class ElectrolyzerPlant:
         # Gather inputs
         power_in = inputs["py_sims"]["inputs"][
             "available_power"
-        ]  # TODO check what units this is in
+        ]  # TODO Update to have electrolyzer and battery able to run together and NOT use available power
         # Run electrolyzer forward one step
         ######## Electrolyzer needs input in Watts ########
         H2_produced, H2_mfr, power_left, power_curtailed = self.elec_sys.run_control(power_in * 1e3)
 
         # Collect outputs from electrolyzer step
-        self.curtailed_power = power_curtailed / 1e6
+        self.curtailed_power = power_curtailed / 1e3
         self.stacks_on = sum([self.elec_sys.stacks[i].stack_on for i in range(self.n_stacks)])
         self.stacks_waiting = [self.elec_sys.stacks[i].stack_waiting for i in range(self.n_stacks)]
         self.H2_output = H2_produced

@@ -5,7 +5,7 @@ name: example_000
 
 ###
 # Describe this emulator setup
-description: AMR Wind Only
+description: Wind stand-in and simple solar simulation
 
 dt: 0.5
 
@@ -33,7 +33,7 @@ hercules_comms:
         publication_interval: 1
         endpoint_interval: 1
         starttime: 0
-        stoptime: 36000
+        stoptime: 600
         Agent: ControlCenter
 
 py_sims:
@@ -41,12 +41,12 @@ py_sims:
   solar_farm_0: # The name of py_sim object 1
 
     py_sim_type: SimpleSolar
-    capacity: 50 # MW
+    capacity: 50000 # kW
     efficiency: 0.5 #Fraction
 
     initial_conditions:
 
-      power: 25 # MW
+      power: 25000 # kW
       irradiance: 1000
 
 controller:

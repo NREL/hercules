@@ -51,7 +51,7 @@ py_sims:
 
     initial_conditions:
 
-      power: 25 # MW
+      power: 25000 # kW
       dni: 1000
 
 controller:

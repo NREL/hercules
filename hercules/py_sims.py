@@ -75,6 +75,6 @@ class PySims:
                 main_dict
             )
             if "Solar" in self.py_sim_dict[py_sim_name]["py_sim_type"]:
-                py_sims_available_power += self.py_sim_dict[py_sim_name]["outputs"]["power_mw"]*1000
+                py_sims_available_power += self.py_sim_dict[py_sim_name]["outputs"]["power_kw"]
 
         self.py_sim_dict["inputs"]["available_power"] = py_sims_available_power

@@ -16,8 +16,8 @@ export PATH=$PREFIX/bin:$PATH
 export FI_PROVIDER_PATH=$PREFIX/lib/libfabric/prov
 export LD_LIBRARY_PATH=$PREFIX/lib/libfabric:$PREFIX/lib/release_mt:$LD_LIBRARY_PATH
 source activate hercules
-module load helics/helics-3.1.0_openmpi
-module load netcdf-c/4.7.3/gcc-mpi
+module load helics/3.4.0-gcc10.1.0-open-mpi  
+module load netcdf-c/4.9.2-openmpi-gcc
 
 export HELICS_PORT=32000
 

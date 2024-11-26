@@ -7,15 +7,15 @@
 # #SBATCH --qos=high  # Uncomment for higher prioirty
 
 # A lot of modules and conda stuff
-source /nopt/nrel/apps/anaconda/5.3/etc/profile.d/conda.sh
-module use /not/nrel/apps/modules/default/modulefiles
+# source /nopt/nrel/apps/anaconda/5.3/etc/profile.d/conda.sh
+# module use /not/nrel/apps/modules/default/modulefiles
 module purge
 module load conda
-export PREFIX=~/.conda-envs/hercules
-export PATH=$PREFIX/bin:$PATH
-export FI_PROVIDER_PATH=$PREFIX/lib/libfabric/prov
-export LD_LIBRARY_PATH=$PREFIX/lib/libfabric:$PREFIX/lib/release_mt:$LD_LIBRARY_PATH
-source activate hercules
+# export PREFIX=~/.conda-envs/hercules
+# export PATH=$PREFIX/bin:$PATH
+# export FI_PROVIDER_PATH=$PREFIX/lib/libfabric/prov
+# export LD_LIBRARY_PATH=$PREFIX/lib/libfabric:$PREFIX/lib/release_mt:$LD_LIBRARY_PATH
+conda activate hercules
 module load helics/3.4.0-gcc10.1.0-open-mpi  
 module load netcdf-c/4.9.2-openmpi-gcc
 

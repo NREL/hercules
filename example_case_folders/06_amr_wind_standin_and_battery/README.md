@@ -16,4 +16,8 @@ bash run_script.sh
 
 ## Checking outputs
 
-#TODO: Add instructions on how to check the outputs
+To check the outputs, execute the following command in the terminal:
+
+```bash
+python plot_outputs.py
+```

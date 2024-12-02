@@ -460,8 +460,8 @@ class SimpleBattery:
 
         # Update energy state
         # self.E += self.P_charge * self.dt
-        self.E = self.x[0,0] # TODO find a better way to make self.x 1-D
         self.step_SS(self.P_charge)
+        self.E = self.x[0,0] # TODO find a better way to make self.x 1-D
 
 
         self.current_batt_state = kJ2kWh(self.E)

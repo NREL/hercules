@@ -107,11 +107,13 @@ def test_SB_control_power_constraint(SB: SimpleBattery):
 
 def test_SB_control_energy_constraint(SB: SimpleBattery):
     SB.E = SB.E_min + 500
+    SB.x[0,0] = SB.E
     out = SB.step(step_inputs(P_avail=3e3, P_signal=-1.5e3))
     assert out["power"] == -500
     assert out["reject"] == -1000
 
     SB.E = SB.E_max - 500
+    SB.x[0,0] = SB.E
     out = SB.step(step_inputs(P_avail=3e3, P_signal=1.5e3))
     assert out["power"] == 500
     assert out["reject"] == 1000
@@ -120,12 +122,14 @@ def test_SB_control_energy_constraint(SB: SimpleBattery):
 def test_SB_step(SB: SimpleBattery):
     SB.step(step_inputs(P_avail=1e3, P_signal=1e3))
 
-    assert_almost_equal(SB.E, 29377000, decimal=0)
+    assert_almost_equal(SB.E, 29377000, decimal=6)
     assert_almost_equal(SB.current_batt_state, 8160.27, decimal=1)
     assert_almost_equal(SB.SOC, 0.102003472, decimal=8)
     assert SB.P_charge == 1e3
 
     SB.E = SB.E_min + 5e3
+    SB.x[0,0] = SB.E
+
 
     for i in range(4):
         SB.step(step_inputs(P_avail=1e3, P_signal=-2e3))

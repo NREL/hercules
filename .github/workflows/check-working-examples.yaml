@@ -24,7 +24,6 @@ jobs:
         pip install -e ".[develop]"
         pip install git+https://github.com/NREL/electrolyzer.git
         pip install https://github.com/NREL/SEAS/blob/main/SEAS.tar.gz?raw=true
-        pip install git+https://github.com/NREL/floris.git@v4
     - name: Run example 06_amr_wind_standin_and_battery
       # Run all examples and test that they finish successfully. Do not evaluate the results.
       # Copy the examples to a new directory outside of the repo to ensure that there is no

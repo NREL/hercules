@@ -5,6 +5,16 @@ from hercules.python_simulators.battery import LIB, SimpleBattery
 
 PRINT_VALUES = True
 
+test_input_dict = {
+    "size": 20,
+    "energy_capacity": 80,
+    "charge_rate": 20,
+    "discharge_rate": 20,
+    "max_SOC": 0.9,
+    "min_SOC": 0.1,
+    "initial_conditions": {"SOC": 0.5},
+}
+
 np.random.seed(0)
 powers_requested = np.concatenate(
     (
@@ -112,18 +122,9 @@ soc_base_lib = np.array(
 
 def test_SimpleBattery_regression_():
 
-    input_dict = {
-        "size": 20,
-        "energy_capacity": 80,
-        "charge_rate": 20,
-        "discharge_rate": 20,
-        "max_SOC": 0.9,
-        "min_SOC": 0.1,
-        "initial_conditions": {"SOC": 0.5},
-    }
     dt = 0.5
 
-    battery = SimpleBattery(input_dict, dt)
+    battery = SimpleBattery(test_input_dict, dt)
 
     times_test = np.arange(0, 5.5, dt)
     powers_test = np.zeros_like(times_test)
@@ -155,18 +156,10 @@ def test_SimpleBattery_regression_():
 
 def test_LIB_regression_():
 
-    input_dict = {
-        "size": 20,
-        "energy_capacity": 80,
-        "charge_rate": 20,
-        "discharge_rate": 20,
-        "max_SOC": 0.9,
-        "min_SOC": 0.1,
-        "initial_conditions": {"SOC": 0.5},
-    }
+
     dt = 0.5
 
-    battery = LIB(input_dict, dt)
+    battery = LIB(test_input_dict, dt)
 
     times_test = np.arange(0, 5.5, dt)
     powers_test = np.zeros_like(times_test)

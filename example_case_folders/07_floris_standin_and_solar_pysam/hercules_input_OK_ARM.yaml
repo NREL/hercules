@@ -7,7 +7,7 @@ name: OK_ARM_precursor
 # Describe this emulator setup
 description: Floris and Solar PV
 
-dt: 60.0 # 1.0 #0.5 
+dt: 1.0 # 1.0 #0.5 
 
 hercules_comms:
 
@@ -33,7 +33,7 @@ hercules_comms:
         publication_interval: 1
         endpoint_interval: 1
         starttime: 0
-        stoptime: 300 # 26000 # 100
+        stoptime: 20 # 26000 # 100
         Agent: ControlCenter
 
 py_sims:
@@ -42,8 +42,8 @@ py_sims:
 
     py_sim_type: SolarPySAM
     verbose: True # flag to print debugging statements
-    weather_file_name: ARM_solar_data_precursor.csv
-    system_info_file_name: 100MW_matt.json
+    weather_file_name: ARM_solar_data_precursor_1sec.csv
+    system_info_file_name: 210MW_1axis_pvsamv1_mp.json
     lat: 36.605
     lon: -97.485
     elev: 318.0

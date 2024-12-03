@@ -1,11 +1,11 @@
 # Input YAML for emy_python
 
 # Name
-name: example_000
+name: example_010
 
 ###
 # Describe this emulator setup
-description: Just a solar plant
+description: Floris example using heterogeneous inflow
 
 dt: 0.5
 

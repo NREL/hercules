@@ -1,11 +1,11 @@
 # Input YAML for emy_python
 
 # Name
-name: example_000
+name: example_007
 
 ###
 # Describe this emulator setup
-description: AMR-wind (Standin) Only
+description: Floris Only
 
 dt: 0.5
 

@@ -55,19 +55,34 @@ test_input_dict = {
     }
 }
 
+np.random.seed(0)
 available_power_test = np.concatenate(
     (
-        np.linspace(0, 1000, 3), # Ramp up
-        np.linspace(1000, -500, 6), # Ramp down
-        np.random.normal(-500, 100, 3) # Random fluctuations
+        np.linspace(500, 1000, 3), # Ramp up
+        np.linspace(1000, 200, 3), # Ramp down
+        np.ones(3) * 200, # Constant
+        np.random.normal(500, 100, 3) # Random fluctuations
     )
 )
 
-# TODO: currently, this produces zero output.
-# available_power_test should be made into a reasonable test input.
-H2_output_base = np.zeros(11)
+H2_output_base = np.array(
+    [
+        0.00071706,
+        0.00073655,
+        0.00079499,
+        0.00088781,
+        0.0009718 ,
+        0.00098348,
+        0.00092732,
+        0.00087651,
+        0.00083054,
+        0.00078894,
+        0.00083047,
+        0.00084576,
+    ]
+)
 
-stacks_on_base = np.zeros(11)
+stacks_on_base = np.array([7., 7., 7., 7., 7., 7., 7., 7., 7., 7., 7., 7.])
 
 def test_ElectrolyzerPlant_regression_():
 
@@ -75,7 +90,7 @@ def test_ElectrolyzerPlant_regression_():
 
     electrolyzer = ElectrolyzerPlant(test_input_dict, dt)
 
-    times_test = np.arange(0, 5.5, dt)
+    times_test = np.arange(0, 6.0, dt)
     H2_output_test = np.zeros_like(times_test)
     stacks_on_test = np.zeros_like(times_test)
 
@@ -90,6 +105,8 @@ def test_ElectrolyzerPlant_regression_():
         })
         H2_output_test[i] = out["H2_output"]
         stacks_on_test[i] = out["stacks_on"]
+
+        #print(out["H2_output"])
 
     if PRINT_VALUES:
         print("H2 output: ", H2_output_test)

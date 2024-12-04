@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Kill any active helics jobs
+source ../find_and_kill_helics
+
 # Determine the base path for Conda initialization
 if [ -f "/home/$USER/anaconda3/etc/profile.d/conda.sh" ]; then
     # Common path for Anaconda on Linux

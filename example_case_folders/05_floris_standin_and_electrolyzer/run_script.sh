@@ -39,8 +39,8 @@ python ../../hercules/tools/generate_amr_standin_data.py floris_standin_data.csv
 export HELICS_PORT=32000
 
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
-python hercules_runscript_CLcontrol.py hercules_input_000.yaml >> outputs/loghercules_cl 2>&1 &
-python floris_runscript.py amr_input.inp floris_standin_data.csv >> outputs/logfloris_cl 2>&1
+python hercules_runscript_CLcontrol.py hercules_input_000.yaml >> outputs/loghercules_cl.log 2>&1 &
+python floris_runscript.py amr_input.inp floris_standin_data.csv >> outputs/logfloris_cl.log 2>&1
 
 # Clean up helics output if there
 # Search for a file that begins with the current year

@@ -37,9 +37,9 @@ python ../../hercules/tools/generate_amr_standin_data.py amr_standin_data.csv
 
 export HELICS_PORT=32000 
 
-helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT >> outputs/loghelics &
-python hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules 2>&1 &
-python hercules_runscript_amr_standin.py amr_input.inp amr_standin_data.csv >> outputs/logstandin 2>&1 
+helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT >> outputs/loghelics.log &
+python hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
+python hercules_runscript_amr_standin.py amr_input.inp amr_standin_data.csv >> outputs/logstandin.log 2>&1 
 
 
 # Clean up helics output if there

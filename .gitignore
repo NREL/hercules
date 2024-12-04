@@ -50,3 +50,7 @@ logfloris*
 *out-example.json
 
 .vscode/*
+
+# Doc builds
+docs/_build
+docs/examples

@@ -38,6 +38,7 @@ hercules/local_amr_wind_demo/sample_copy.nc
 !example_case_folders/10_heterogeneous_wind/inputs/floris_standin_data.csv
 !example_case_folders/10_heterogeneous_wind/inputs/wind_power_reference_data.csv
 !example_case_folders/07_floris_standin_and_solar_pysam/inputs/Flatirons_solar_data_precursor-tztest.csv
+!example_case_folders/07_floris_standin_and_solar_pysam/inputs/Flatirons_solar_data_highDNI.csv
 
 # Some output files to ignore
 t_00*

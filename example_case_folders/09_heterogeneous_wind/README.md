@@ -1,4 +1,4 @@
-# Example 10: Heterogeneous Wind
+# Example 09: Heterogeneous Wind
 
 ## Description
 

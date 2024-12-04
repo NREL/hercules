@@ -31,7 +31,7 @@ mkdir -p outputs
 
 # Set the helics port to use: 
 #make sure you use the same port number in the amr_input.inp and hercules_input_000.yaml files. 
-export HELICS_PORT=32000
+export HELICS_PORT=32010
 
 # Wait for the open-loop control simulation to finish and then run the closed-loop simulation
 helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 

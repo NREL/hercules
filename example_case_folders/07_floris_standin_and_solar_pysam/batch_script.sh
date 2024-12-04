@@ -27,11 +27,11 @@ echo "Starting hercules"
 # python3 hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
 # python3 hercules_runscript.py hercules_controller_input_000.yaml >> outputs/loghercules.log 2>&1 &
 # python3 hercules_runscript.py hercules_input_OK_ARM.yaml >> outputs/loghercules.log 2>&1 &
-python3 hercules_runscript.py hercules_input_Flatirons.yaml >> outputs/loghercules.log 2>&1 &
+python hercules_runscript.py hercules_controller_input_000.yaml >> outputs/loghercules.log 2>&1 &
 
 # Start the floris standin
 echo "Starting floris"
-python3 floris_runscript.py amr_input.inp >> outputs/logfloris.log 2>&1
+python floris_runscript.py amr_input.inp >> outputs/logfloris.log 2>&1
 
 # If everything is successful
 echo "Finished running hercules"

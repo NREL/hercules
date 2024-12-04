@@ -30,7 +30,7 @@ solar_dict = {
     "lat": 39.7442, 
     "lon": -105.1778, 
     "elev": 1829,
-    "initial_conditions": {"power": 25, "dni": 1000},
+    "initial_conditions": {"power": 25000, "dni": 1000},
 }
 
 dt = 0.5  # s - input file has a dt of 1 min
@@ -62,8 +62,8 @@ def simulate(SPS, time):
     for i in range(len(time)):
         inputs["time"] = time[i]
         outputs = SPS.step(inputs)
-        power[i] = outputs["power_mw"]
-        # dc_power[i] = outputs["dc_power_mw"]
+        power[i] = outputs["power_kw"]
+        # dc_power[i] = outputs["dc_power_kw"]
         aoi[i] = outputs["aoi"]
         irradiance[i] = outputs["dni"]
 

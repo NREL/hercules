@@ -72,20 +72,20 @@ class SolarPySAM:
         self.dt = dt
 
         # Save the initial condition
-        self.power_mw = input_dict["initial_conditions"]["power"]
-        self.dc_power_mw = input_dict["initial_conditions"]["power"]
+        self.power_kw = input_dict["initial_conditions"]["power"]
+        self.dc_power_kw = input_dict["initial_conditions"]["power"]
         self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
 
     def return_outputs(self):
         return {
-            "power_mw": self.power_mw,
+            "power_kw": self.power_kw,
             # "dc_power_mw": self.dc_power_mw,
             "dni": self.dni,
             "aoi": self.aoi,
         }
 
-    def control(self, power_setpoint_mw=None):
+    def control(self, power_setpoint_kw=None):
         """
         Low-level controller to enforce PV plant power setpoints
         Notes:
@@ -93,18 +93,18 @@ class SolarPySAM:
         - DC power output is not controlled because it is not used elsewhere in the code
 
         Inputs
-        - power_setpoint_mw: [MW] the desired total PV plant output
+        - power_setpoint_kw: [kW] the desired total PV plant output
         """
         # modify power output based on setpoint
-        if power_setpoint_mw is not None:
+        if power_setpoint_kw is not None:
             if self.verbose:
-                print("power_setpoint = ", power_setpoint_mw)
-            if self.power_mw > power_setpoint_mw:
-                self.power_mw = power_setpoint_mw
+                print("power_setpoint = ", power_setpoint_kw)
+            if self.power_kw > power_setpoint_kw:
+                self.power_kw = power_setpoint_kw
                 # Keep track of power that could go to charging battery
-                self.excess_power = self.power_mw - power_setpoint_mw
+                self.excess_power = self.power_kw - power_setpoint_kw
             if self.verbose:
-                print("self.power_mw after control = ", self.power_mw)
+                print("self.power_kw after control = ", self.power_kw)
 
     def step(self, inputs):
         # print('-------------------')
@@ -182,28 +182,28 @@ class SolarPySAM:
         system_model.execute()
         out = system_model.Outputs.export()
 
-        ac = np.array(out["gen"]) / 1000  # in MW
+        ac = np.array(out["gen"])   # in kW
         # dc = np.array(out["dc_net"]) / 1000
 
-        self.power_mw = ac[0]  # calculating one timestep at a time
+        self.power_kw = ac[0]  # calculating one timestep at a time
         # self.dc_power_mw = dc[0]
         if self.verbose:
-            print("self.power_mw = ", self.power_mw)
+            print("self.power_kw = ", self.power_kw)
 
         # Apply control, if setpoint is provided
-        if "py_sims" in inputs and "solar_setpoint_mw" in inputs["py_sims"]["inputs"]:
-            P_setpoint = inputs["py_sims"]["inputs"]["solar_setpoint_mw"]
+        if "py_sims" in inputs and "solar_setpoint_kw" in inputs["py_sims"]["inputs"]:
+            P_setpoint = inputs["py_sims"]["inputs"]["solar_setpoint_kw"]
         elif "external_signals" in inputs.keys():
-            if "solar_power_reference_mw" in inputs["external_signals"].keys():
-                P_setpoint = inputs["external_signals"]["solar_power_reference_mw"]
+            if "solar_power_reference_kw" in inputs["external_signals"].keys():
+                P_setpoint = inputs["external_signals"]["solar_power_reference_kw"]
             else:
                 P_setpoint = None
         else:
             P_setpoint = None
         self.control(P_setpoint)
 
-        if self.power_mw < 0.0:
-            self.power_mw = 0.0
+        if self.power_kw < 0.0:
+            self.power_kw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
         self.dni = out["dn"][0]  # direct normal irradiance

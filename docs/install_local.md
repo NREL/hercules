@@ -2,11 +2,16 @@
 
 
 # Installation
+
+## Conda environment
+
 Create a new conda environment for hercules:
 ```
 conda create --name hercules python=3.11
 conda activate hercules
 ```
+
+## Hercules
 
 If you haven't already cloned hercules:
 ```
@@ -19,11 +24,14 @@ pip install -e hercules
 Possibly, `cd` into hercules and switch to the 
 develop branch.
 
+## SEAS, Electrolyzer, PySAM, and WHOC
+
+### SEAS
 
 SEAS is also required for hercules. To install 
 SEAS, use
 
-``` pip install https://github.com/NREL/SEAS/blob/main/SEAS.tar.gz?raw=true ```
+``` pip install https://github.com/NREL/SEAS/blob/v1/SEAS.tar.gz?raw=true ```
 
 If this fails, the following may work instead (but you need permissions):
 
@@ -44,6 +52,8 @@ cd ..
 pip install -e SEAS
 ```
 
+### Electrolyzer
+
 A python electrolyzer model is also required for hercules. To install 
 the electrolyzer, use
 
@@ -62,16 +72,14 @@ Then,
 cd ..
 pip install -e electrolyzer
 ```
-
-NREL's PySAM software is also required for hercules. To install, use 
-```
-pip install nrel-pysam==4.2.0
-```
+### PyYAML
 
 If you run hercules and get an error that `pyyaml` is missing, you may also need to install it using
 ```
 conda install -c conda-forge pyyaml
 ```
+
+### WHOC
 
 NREL's Wind Hybrid Open Controller (WHOC) software is used to implement controllers in the Hercules platform. This package is not essential to run Hercules by itself, but is needed to implement any controls in the platform. Example 06 has an example of how this is used to control a battery based on wind farm power output.
 
@@ -85,22 +93,20 @@ git fetch --all
 pip install -e .
 ```
 Note: if you want the newest updates to the WHOC repository, you can checkout the develop branch instead of the main branch.
-<!--
-# Other steps for era 5
-Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account
 
-The instructions said to place it in the folder
-OpenOA/operational_analysis/toolkits
-
-But I found I also had to copy it down to here:
-/Users/pfleming/opt/anaconda3/envs/hercules/lib/python3.8/site-packages/operational_analysis/toolkits/
-
-Col
--->
 
 # Running [Local]
 
-To run locally using a standin for AMR-Wind, launch 3 separate 
+## Using the run scripts
+
+The simplest way to run hercules is to use the provided run scripts via:
+```
+bash run_script.sh
+```
+
+## Running manually
+
+To run locally without the included runscript using a standin for AMR-Wind, launch 3 separate 
 terminals. In each, `conda activate` your hercules environment (`conda 
 activate hercules`). 
 
@@ -128,10 +134,6 @@ run the co-simulation. You should see printout from both the dummy AMR-wind
 process and the hercules emulator printed to your screen.
 
 
-Alternatively, the bash files in each example are set up to be run from the terminal using 
-```
-./bash_script.sh
-```
 However, if the simulation hangs, be sure to check if there are multiple processes running with 
 ```
 ps
@@ -141,15 +143,6 @@ which will tell you all of the processes currently working.  You can kill proces
 kill <PID>
 ```
 
-<!--
-In 4 different terminals with location set to hercules/, type the following commands
-(This is more and more out of date)
-
-- Terminal 1: `python control_center.py`
-- Terminal 2: `python testclient.py`
-- Terminal 3: `python vis_client.py`
-- Terminal 4: `python front_end_dash.py`
--->
 
 # Running [Kestrel]
 

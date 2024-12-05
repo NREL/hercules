@@ -19,13 +19,9 @@ source $SCRIPTS_DIR/get_helics_port.sh
 if [ -d outputs ]; then rm -r outputs; fi
 mkdir -p outputs
 
-# # Set the helics port to use: 
-# #make sure you use the same port number in the amr_input.inp and hercules_input_000.yaml files. 
-# export HELICS_PORT=32010
-
 # # Wait for the open-loop control simulation to finish and then run the closed-loop simulation
-# helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
-# python hercules_runscript_CLcontrol.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
+helics_broker -t zmq  -f 2 --loglevel="debug" --local_port=$HELICS_PORT & 
+python hercules_runscript_CLcontrol.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
 # python floris_runscript.py inputs/amr_input.inp inputs/floris_standin_data.csv >> outputs/logfloris.log 2>&1
 
 # # Clean up helics output if there

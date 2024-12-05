@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hercules"
 version = "1.1"
-description = "Python front-end to the emulator."
+description = "Hybrid plant emulation tool."
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [

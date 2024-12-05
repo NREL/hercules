@@ -2,6 +2,8 @@
 
 # Find and kill processes with 'helics' in the name
 
+echo "Searching for processes with 'helics' in the name..."
+
 # Get the process IDs (PIDs) of processes containing 'helics'
 processes=$(ps aux | grep -i 'helics' | grep -v grep | awk '{print $2}')
 

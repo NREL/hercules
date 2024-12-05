@@ -35,8 +35,10 @@ hercules/local_amr_wind_demo/sample_copy.nc
 #Ignore csv files
 *.csv
 !tests/test_inputs/*.csv
-!example_case_folders/10_heterogeneous_wind/floris_standin_data.csv
-!example_case_folders/10_heterogeneous_wind/wind_power_reference_data.csv
+!example_case_folders/10_heterogeneous_wind/inputs/floris_standin_data.csv
+!example_case_folders/10_heterogeneous_wind/inputs/wind_power_reference_data.csv
+!example_case_folders/07_floris_standin_and_solar_pysam/inputs/Flatirons_solar_data_precursor-tztest.csv
+!example_case_folders/07_floris_standin_and_solar_pysam/inputs/Flatirons_solar_data_highDNI.csv
 
 # Some output files to ignore
 t_00*
@@ -49,3 +51,7 @@ logfloris*
 *out-example.json
 
 .vscode/*
+
+# Doc builds
+docs/_build
+docs/examples

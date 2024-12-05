@@ -1,4 +1,4 @@
-# Example 08: FLORIS Only
+# Example 08: FLORIS Standin Only
 
 ## Description
 
@@ -9,9 +9,12 @@ This example demonstrates how to use the FLORIS as the AMR Wind Standin model. T
 To run the example, execute the following command in the terminal:
 
 ```bash
-bash sbash_script.sh
+bash run_script.sh
 ```
+## Outputs
 
-## Notes
+To plot the outputs run the following command in the terminal:
 
-Make sure hercules conda or venv is activated before running the example.
+```bash
+python plot_outputs.py
+```

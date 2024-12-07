@@ -9,7 +9,7 @@ is_port_in_use() {
 
 # Find 10 consecutive empty ports
 find_consecutive_empty_ports() {
-    local start_port=${1:-8000}  # Default start port if not specified
+    local start_port=${1:-10000}  # Default start port if not specified
     local max_port=${2:-65535}   # Maximum port to check
     local consecutive_count=10   # Number of consecutive empty ports to find
 

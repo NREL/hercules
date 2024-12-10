@@ -359,12 +359,10 @@ def launch_floris(amr_input_file, amr_standin_data_file=None, helics_port=None):
             raise ValueError("amr_standin_data_file must be a string or path.")
         
     # Check that helics_port is an integer
+    # If helics_port provided update with value
     if helics_port is not None:
         if not isinstance(helics_port, int):
             raise ValueError("helics_port must be an integer.")
-
-    # If helics_port provided update with value
-    if helics_port is not None:
         temp["helics_port"] = helics_port
 
     config = {

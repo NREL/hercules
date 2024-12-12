@@ -350,8 +350,20 @@ class FlorisStandin(AMRWindStandin):
         }
 
 
-def launch_floris(amr_input_file, amr_standin_data_file=None):
+def launch_floris(amr_input_file, amr_standin_data_file=None, helics_port=None):
     temp = read_amr_wind_input(amr_input_file)
+
+    # Check amr_standin_data_file is not a number
+    if amr_standin_data_file is not None:
+        if isinstance(amr_standin_data_file, (int, float)):
+            raise ValueError("amr_standin_data_file must be a string or path.")
+        
+    # Check that helics_port is an integer
+    # If helics_port provided update with value
+    if helics_port is not None:
+        if not isinstance(helics_port, int):
+            raise ValueError("helics_port must be an integer.")
+        temp["helics_port"] = helics_port
 
     config = {
         "name": "floris_standin",

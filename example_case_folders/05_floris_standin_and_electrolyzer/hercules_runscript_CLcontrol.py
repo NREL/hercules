@@ -6,8 +6,18 @@ from hercules.utilities import load_yaml
 from whoc.controllers.wind_farm_power_tracking_controller import WindFarmPowerTrackingController
 from whoc.interfaces.hercules_actuator_disk_interface import HerculesADInterface
 
+# Check that command line arguments are provided
+if len(sys.argv) != 3:
+    raise Exception("Usage: python hercules_runscript.py <hercules_input_file> <helics_port>")
+
 input_dict = load_yaml(sys.argv[1])
 input_dict["output_file"] = "hercules_output_control.csv"
+
+# Set the helics port
+helics_port = int(sys.argv[2])
+input_dict["hercules_comms"]["helics"]["config"]["helics"]["helicsport"] = helics_port
+print(f"Running Hercules with helics_port {helics_port}")
+
 
 interface = HerculesADInterface(input_dict)
 

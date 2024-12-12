@@ -102,7 +102,7 @@ def read_amr_wind_input(amr_wind_input):
 
 
 class AMRWindStandin(FederateAgent):
-    def __init__(self, config_dict, amr_wind_input, amr_standin_data_file=None):
+    def __init__(self, config_dict, amr_wind_input, amr_standin_data_file=None, helics_port=None):
 
         super(AMRWindStandin, self).__init__(
             name=config_dict["name"],
@@ -322,8 +322,16 @@ class AMRWindStandin(FederateAgent):
         pass
 
 
-def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None):
+def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None, helics_port=None):
     temp = read_amr_wind_input(amr_input_file)
+
+    # Check that helics_port is an integer
+    # If helics_port provided update with value
+    if helics_port is not None:
+        if not isinstance(helics_port, int):
+            raise ValueError("helics_port must be an integer.")
+        temp["helics_port"] = helics_port
+
 
     config = {
         "name": "amr_wind_standin",

@@ -8,6 +8,8 @@ name: example_010
 description: Long run Only
 
 dt: 1.0
+starttime: 0.0
+endtime: 10.0
 
 
 py_sims:

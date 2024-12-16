@@ -19,10 +19,8 @@ py_sims:
     verbose: True
     floris_input_file: inputs/floris_input.yaml
     weather_file_name: inputs/wd_ws.csv
-    turbine_file_name: inputs/turbine.yaml
+    turbine_file_name: inputs/turbine_filter_model.yaml
 
-  initial_conditions:
-    rotor_speed_rpm: 10
 
 controller:
 

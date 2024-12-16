@@ -33,6 +33,12 @@ class EmulatorNoHelics():
         # Save time step
         self.dt = input_dict["dt"]
 
+        # Save time step, start time and end time
+        self.dt = input_dict["dt"]
+        self.starttime = input_dict["starttime"]
+        self.endtime = input_dict["endtime"]
+        self.time = self.starttime
+
         # Initialize components
         self.controller = controller
         self.py_sims = py_sims
@@ -44,8 +50,6 @@ class EmulatorNoHelics():
         if self.main_dict["py_sims"]:
             self.main_dict["py_sims"]["inputs"]["sim_time_s"] = 0.0
 
-
-
         # Read in any external data
         self.external_data_all = {}
         if "external_data_file" in input_dict:
@@ -53,39 +57,37 @@ class EmulatorNoHelics():
             self.external_signals = {}
             self.main_dict["external_signals"] = {}
 
-        # Write the time step into helics config dict
-        self.helics_config_dict["helics"]["deltat"] = self.dt
 
 
+        # TODO: NOT SURE WHETHER ANY OF THIS STUFF NEEDS TO BE BROUGHT IN
+        # # TODO For now, need to assume for simplicity there is one and only
+        # # one AMR_Wind simulation
+        # self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]]["num_turbines"]
+        # self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]]["rotor_diameter"]
+        # self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_locations"]
+        # self.turbine_labels = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_labels"]
 
-        # TODO For now, need to assume for simplicity there is one and only
-        # one AMR_Wind simulation
-        self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]]["num_turbines"]
-        self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]]["rotor_diameter"]
-        self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_locations"]
-        self.turbine_labels = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_labels"]
+        # # TODO In fugure could cover multiple farms
+        # # Initialize the turbine power array
+        # self.turbine_power_array = np.zeros(self.num_turbines)
+        # self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = np.zeros(self.num_turbines)
+        # self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = [
+        #     0.0
+        # ] * self.num_turbines
+        # # Write to hercules_comms so that controller can access
+        # self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]["turbine_powers"] = [
+        #     0.0
+        # ] * self.num_turbines
+        # self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+        #     "turbine_wind_directions"
+        # ] = [0.0] * self.num_turbines
+        # self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]["wind_direction"] = 0
+        # self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+        #     "sim_time_s_amr_wind"
+        # ] = 0
 
-        # TODO In fugure could cover multiple farms
-        # Initialize the turbine power array
-        self.turbine_power_array = np.zeros(self.num_turbines)
-        self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = np.zeros(self.num_turbines)
-        self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = [
-            0.0
-        ] * self.num_turbines
-        # Write to hercules_comms so that controller can access
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]["turbine_powers"] = [
-            0.0
-        ] * self.num_turbines
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "turbine_wind_directions"
-        ] = [0.0] * self.num_turbines
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]["wind_direction"] = 0
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "sim_time_s_amr_wind"
-        ] = 0
-
-        self.wind_speed = 0
-        self.wind_direction = 0
+        # self.wind_speed = 0
+        # self.wind_direction = 0
 
 
     def _read_external_data_file(self, filename):
@@ -114,21 +116,17 @@ class EmulatorNoHelics():
 
         # Run simulation till  endtime
         # while self.absolute_helics_time < self.endtime:
-        while self.absolute_helics_time < (self.endtime - self.starttime + 1):
-            print(self.absolute_helics_time)
-            # Loop till we reach simulation startime.
-            # if self.absolute_helics_time < self.starttime:
-            #     continue
-            # Get any external data
-            # print('self.external_data_all = ',self.external_data_all)
+        while self.time < (self.endtime):
+            print(self.time)
+
             for k in self.external_data_all:
                 self.main_dict["external_signals"][k] = self.external_data_all[k][
-                    self.external_data_all["time"] == self.absolute_helics_time
+                    self.external_data_all["time"] == self.time
                 ][0]
 
             # Update controller and py sims
             # TODO: Update this when I've figured out time
-            self.main_dict["time"] = self.absolute_helics_time
+            self.main_dict["time"] = self.time
             self.main_dict = self.controller.step(self.main_dict)
             if self.main_dict["py_sims"]:
                 self.py_sims.step(self.main_dict)
@@ -145,98 +143,100 @@ class EmulatorNoHelics():
                 self.save_main_dict_as_text()
                 self.first_iteration = False
 
-            # TODO: NEED TO UPDATE TIME NOW THAT NOW HELICS
+            # Update the time
+            self.time = self.time + self.dt
 
-    def receive_amrwind_data(self):
-        # Subscribe to helics messages:
-        incoming_messages = self.helics_connector.get_all_waiting_messages()
-        if incoming_messages != {}:
-            subscription_value = self.process_subscription_messages(incoming_messages)
-            # print("What did we receive ", subscription_value)
-        else:
-            print("Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
-            subscription_value = (
-                [0, 0, 0]
-                + [0 for t in range(self.num_turbines)]
-                + [0 for t in range(self.num_turbines)]
-            )
+    #TODO: Don't think this is needed but not quite ready to delete
+    # def receive_amrwind_data(self):
+    #     # Subscribe to helics messages:
+    #     incoming_messages = self.helics_connector.get_all_waiting_messages()
+    #     if incoming_messages != {}:
+    #         subscription_value = self.process_subscription_messages(incoming_messages)
+    #         # print("What did we receive ", subscription_value)
+    #     else:
+    #         print("Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
+    #         subscription_value = (
+    #             [0, 0, 0]
+    #             + [0 for t in range(self.num_turbines)]
+    #             + [0 for t in range(self.num_turbines)]
+    #         )
 
-        # TODO Parse returns from AMRWind
-        (
-            sim_time_s_amr_wind,
-            wind_speed_amr_wind,
-            wind_direction_amr_wind,
-        ) = subscription_value[:3]
-        turbine_power_array = subscription_value[3 : 3 + self.num_turbines]
-        turbine_wd_array = subscription_value[3 + self.num_turbines :]
-        self.wind_speed = wind_speed_amr_wind
-        self.wind_direction = wind_direction_amr_wind
-        wind_farm_power = sum(turbine_power_array)
+    #     # TODO Parse returns from AMRWind
+    #     (
+    #         sim_time_s_amr_wind,
+    #         wind_speed_amr_wind,
+    #         wind_direction_amr_wind,
+    #     ) = subscription_value[:3]
+    #     turbine_power_array = subscription_value[3 : 3 + self.num_turbines]
+    #     turbine_wd_array = subscription_value[3 + self.num_turbines :]
+    #     self.wind_speed = wind_speed_amr_wind
+    #     self.wind_direction = wind_direction_amr_wind
+    #     wind_farm_power = sum(turbine_power_array)
 
-        # Assign Py_sim outputs
-        if self.main_dict["py_sims"]:
-            self.main_dict["py_sims"]["inputs"]["available_power"] += wind_farm_power
-            # print("sim_time_s_amr_wind = ", sim_time_s_amr_wind)
-            self.main_dict["py_sims"]["inputs"]["sim_time_s"] = sim_time_s_amr_wind
-            # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ',
-            #           self.main_dict['py_sims']['inputs']['sim_time_s'])
+    #     # Assign Py_sim outputs
+    #     if self.main_dict["py_sims"]:
+    #         self.main_dict["py_sims"]["inputs"]["available_power"] += wind_farm_power
+    #         # print("sim_time_s_amr_wind = ", sim_time_s_amr_wind)
+    #         self.main_dict["py_sims"]["inputs"]["sim_time_s"] = sim_time_s_amr_wind
+    #         # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ',
+    #         #           self.main_dict['py_sims']['inputs']['sim_time_s'])
 
-        ## TODO add other parameters that need to be logged to csv here.
-        # Write turbine power and turbine wind direction to csv logfile.
-        aa = [str(xx) for xx in turbine_power_array]
-        xyz = ",".join(aa)
-        bb = [str(xx) for xx in turbine_wd_array]
-        zyx = ",".join(bb)
-        with open(f"{LOGFILE}.csv", "a") as filex:
-            filex.write(
-                str(self.absolute_helics_time)
-                + ","
-                + str(sim_time_s_amr_wind)
-                + ","
-                + str(wind_speed_amr_wind)
-                + ","
-                + str(wind_direction_amr_wind)
-                + ","
-                + xyz
-                + ","
-                + zyx
-                + os.linesep
-            )
+    #     ## TODO add other parameters that need to be logged to csv here.
+    #     # Write turbine power and turbine wind direction to csv logfile.
+    #     aa = [str(xx) for xx in turbine_power_array]
+    #     xyz = ",".join(aa)
+    #     bb = [str(xx) for xx in turbine_wd_array]
+    #     zyx = ",".join(bb)
+    #     with open(f"{LOGFILE}.csv", "a") as filex:
+    #         filex.write(
+    #             str(self.absolute_helics_time)
+    #             + ","
+    #             + str(sim_time_s_amr_wind)
+    #             + ","
+    #             + str(wind_speed_amr_wind)
+    #             + ","
+    #             + str(wind_direction_amr_wind)
+    #             + ","
+    #             + xyz
+    #             + ","
+    #             + zyx
+    #             + os.linesep
+    #         )
 
-        # TODO F-Strings
-        print("=======================================")
-        print("AMRWindTime:", sim_time_s_amr_wind)
-        print("AMRWindSpeed:", wind_speed_amr_wind)
-        print("AMRWindDirection:", wind_direction_amr_wind)
-        print("AMRWindTurbinePowers:", turbine_power_array)
-        print("AMRWindTurbineWD:", turbine_wd_array)
-        print("=======================================")
+    #     # TODO F-Strings
+    #     print("=======================================")
+    #     print("AMRWindTime:", sim_time_s_amr_wind)
+    #     print("AMRWindSpeed:", wind_speed_amr_wind)
+    #     print("AMRWindDirection:", wind_direction_amr_wind)
+    #     print("AMRWindTurbinePowers:", turbine_power_array)
+    #     print("AMRWindTurbineWD:", turbine_wd_array)
+    #     print("=======================================")
 
-        # Store turbine powers back to the dict
-        # TODO hard-coded for now assuming only one AMR-WIND
-        self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = turbine_power_array
-        self.amr_wind_dict[self.amr_wind_names[0]]["wind_farm_power"] = wind_farm_power
-        self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = turbine_wd_array
-        self.turbine_power_array = turbine_power_array
-        self.amr_wind_dict[self.amr_wind_names[0]]["sim_time_s_amr_wind"] = sim_time_s_amr_wind
-        # TODO: write these to the hercules_comms object, too?
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "turbine_powers"
-        ] = turbine_power_array
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "turbine_wind_directions"
-        ] = turbine_wd_array
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "wind_direction"
-        ] = wind_direction_amr_wind
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "wind_speed"
-        ] = wind_speed_amr_wind
-        self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-            "wind_farm_power"
-        ] = wind_farm_power
+    #     # Store turbine powers back to the dict
+    #     # TODO hard-coded for now assuming only one AMR-WIND
+    #     self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = turbine_power_array
+    #     self.amr_wind_dict[self.amr_wind_names[0]]["wind_farm_power"] = wind_farm_power
+    #     self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = turbine_wd_array
+    #     self.turbine_power_array = turbine_power_array
+    #     self.amr_wind_dict[self.amr_wind_names[0]]["sim_time_s_amr_wind"] = sim_time_s_amr_wind
+    #     # TODO: write these to the hercules_comms object, too?
+    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+    #         "turbine_powers"
+    #     ] = turbine_power_array
+    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+    #         "turbine_wind_directions"
+    #     ] = turbine_wd_array
+    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+    #         "wind_direction"
+    #     ] = wind_direction_amr_wind
+    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+    #         "wind_speed"
+    #     ] = wind_speed_amr_wind
+    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
+    #         "wind_farm_power"
+    #     ] = wind_farm_power
 
-        return None
+    #     return None
 
     def recursive_flatten_main_dict(self, nested_dict, prefix=""):
         # Recursively flatten the input dict

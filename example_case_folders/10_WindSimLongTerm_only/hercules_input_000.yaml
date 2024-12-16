@@ -1,4 +1,4 @@
-# Input YAML for emy_python
+# Input YAML for hercules
 
 # Name
 name: example_010
@@ -7,37 +7,20 @@ name: example_010
 # Describe this emulator setup
 description: Long run Only
 
-dt: 0.5
+dt: 1.0
 
-hercules_comms:
-
-  long_run:
-
-    wind_farm_0:
-      type: long_run #options are amr_wind or amr_wind_local
-      amr_wind_input_file: inputs/long_run.inp
-
-  helics:
-
-    config:
-        name: hercules # What is the purpose of this name
-        use_dash_frontend: False
-        KAFKA: False
-        KAFKA_topics: EMUV1py
-        helics: 
-            # deltat: 1 # This will be assigned in software
-            subscription_topics: [status]
-            publication_topics: [control]
-            endpoints: []
-            # helicsport : 32010 # This will be set by the hercules_runscript
-        publication_interval: 1
-        endpoint_interval: 1
-        starttime: 0
-        stoptime: 100
-        
-        Agent: ControlCenter
 
 py_sims:
+
+  wind_farm_0: # The name of the WindSimLongTerm wind farm
+    py_sim_type: WindSimLongTerm
+    verbose: True
+    floris_input_file: inputs/floris_input.yaml
+    weather_file_name: inputs/wd_ws.csv
+    turbine_file_name: inputs/turbine.yaml
+
+  initial_conditions:
+    rotor_speed_rpm: 10
 
 controller:
 

@@ -20,7 +20,11 @@ class ControllerStandinNoHelics:
 
     @abstractmethod
     def step(self, main_dict):
-        # num_turbines = main_dict["py_sims"][self.wf_name]["num_turbines"]
+        num_turbines = main_dict["py_sims"][self.wf_name]["num_turbines"]
+
+        # Set deratings very high for now
+        for t_idx in range(num_turbines):
+            main_dict["py_sims"]['inputs'][f"derating_kw_{t_idx}"] = 4000
 
         # # Set turbine yaw angles based on current AMR-Wind wind direction
         # wd = main_dict["hercules_comms"]["amr_wind"][self.wf_name]["wind_direction"]

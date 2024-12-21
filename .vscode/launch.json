@@ -14,6 +14,15 @@
             // "cwd": "${workspaceFolder}\\example_case_folders\\07_amr_wind_dummy_and_solar_pysam",
             "cwd": "${fileDirname}",
             "program": "standalone-solar-pysam-example.py",
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/${relativeFileDirname}",
+            "justMyCode": true
         }
     ]
 }

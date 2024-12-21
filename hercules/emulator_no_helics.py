@@ -37,7 +37,7 @@ class EmulatorNoHelics():
         self.dt = input_dict["dt"]
         self.starttime = input_dict["starttime"]
         self.endtime = input_dict["endtime"]
-        self.time = self.starttime
+        self.time = 0.0
 
         # Initialize components
         self.controller = controller
@@ -108,6 +108,10 @@ class EmulatorNoHelics():
             if c != "time":
                 self.external_data_all[c] = np.interp(times, df_ext.time, df_ext[c])
 
+    def enter_execution(self, function_targets=[], function_arguments=[[]]):
+        # Run the main loop
+        self.run()
+
     def run(self):
 
         print(" #### Entering main loop #### ")
@@ -146,97 +150,6 @@ class EmulatorNoHelics():
             # Update the time
             self.time = self.time + self.dt
 
-    #TODO: Don't think this is needed but not quite ready to delete
-    # def receive_amrwind_data(self):
-    #     # Subscribe to helics messages:
-    #     incoming_messages = self.helics_connector.get_all_waiting_messages()
-    #     if incoming_messages != {}:
-    #         subscription_value = self.process_subscription_messages(incoming_messages)
-    #         # print("What did we receive ", subscription_value)
-    #     else:
-    #         print("Emulator: Did not receive subscription from AMRWind, setting everyhthing to 0.")
-    #         subscription_value = (
-    #             [0, 0, 0]
-    #             + [0 for t in range(self.num_turbines)]
-    #             + [0 for t in range(self.num_turbines)]
-    #         )
-
-    #     # TODO Parse returns from AMRWind
-    #     (
-    #         sim_time_s_amr_wind,
-    #         wind_speed_amr_wind,
-    #         wind_direction_amr_wind,
-    #     ) = subscription_value[:3]
-    #     turbine_power_array = subscription_value[3 : 3 + self.num_turbines]
-    #     turbine_wd_array = subscription_value[3 + self.num_turbines :]
-    #     self.wind_speed = wind_speed_amr_wind
-    #     self.wind_direction = wind_direction_amr_wind
-    #     wind_farm_power = sum(turbine_power_array)
-
-    #     # Assign Py_sim outputs
-    #     if self.main_dict["py_sims"]:
-    #         self.main_dict["py_sims"]["inputs"]["available_power"] += wind_farm_power
-    #         # print("sim_time_s_amr_wind = ", sim_time_s_amr_wind)
-    #         self.main_dict["py_sims"]["inputs"]["sim_time_s"] = sim_time_s_amr_wind
-    #         # print('self.main_dict[''py_sims''][''inputs''][''sim_time_s''] = ',
-    #         #           self.main_dict['py_sims']['inputs']['sim_time_s'])
-
-    #     ## TODO add other parameters that need to be logged to csv here.
-    #     # Write turbine power and turbine wind direction to csv logfile.
-    #     aa = [str(xx) for xx in turbine_power_array]
-    #     xyz = ",".join(aa)
-    #     bb = [str(xx) for xx in turbine_wd_array]
-    #     zyx = ",".join(bb)
-    #     with open(f"{LOGFILE}.csv", "a") as filex:
-    #         filex.write(
-    #             str(self.absolute_helics_time)
-    #             + ","
-    #             + str(sim_time_s_amr_wind)
-    #             + ","
-    #             + str(wind_speed_amr_wind)
-    #             + ","
-    #             + str(wind_direction_amr_wind)
-    #             + ","
-    #             + xyz
-    #             + ","
-    #             + zyx
-    #             + os.linesep
-    #         )
-
-    #     # TODO F-Strings
-    #     print("=======================================")
-    #     print("AMRWindTime:", sim_time_s_amr_wind)
-    #     print("AMRWindSpeed:", wind_speed_amr_wind)
-    #     print("AMRWindDirection:", wind_direction_amr_wind)
-    #     print("AMRWindTurbinePowers:", turbine_power_array)
-    #     print("AMRWindTurbineWD:", turbine_wd_array)
-    #     print("=======================================")
-
-    #     # Store turbine powers back to the dict
-    #     # TODO hard-coded for now assuming only one AMR-WIND
-    #     self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = turbine_power_array
-    #     self.amr_wind_dict[self.amr_wind_names[0]]["wind_farm_power"] = wind_farm_power
-    #     self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = turbine_wd_array
-    #     self.turbine_power_array = turbine_power_array
-    #     self.amr_wind_dict[self.amr_wind_names[0]]["sim_time_s_amr_wind"] = sim_time_s_amr_wind
-    #     # TODO: write these to the hercules_comms object, too?
-    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-    #         "turbine_powers"
-    #     ] = turbine_power_array
-    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-    #         "turbine_wind_directions"
-    #     ] = turbine_wd_array
-    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-    #         "wind_direction"
-    #     ] = wind_direction_amr_wind
-    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-    #         "wind_speed"
-    #     ] = wind_speed_amr_wind
-    #     self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-    #         "wind_farm_power"
-    #     ] = wind_farm_power
-
-    #     return None
 
     def recursive_flatten_main_dict(self, nested_dict, prefix=""):
         # Recursively flatten the input dict
@@ -297,126 +210,3 @@ class EmulatorNoHelics():
     def parse_input_yaml(self, filename):
         pass
 
-
-
-    def process_periodic_publication(self):
-        # Periodically publish data to the surrogate
-
-        # Hard coded to single wind farm for the moment
-        if (
-            "turbine_yaw_angles"
-            in self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]
-        ):
-            yaw_angles = self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-                "turbine_yaw_angles"
-            ]
-        else:  # set yaw_angles based on self.wind_direction
-            yaw_angles = [self.wind_direction] * self.num_turbines
-
-        if (
-            "turbine_power_setpoints"
-            in self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]
-        ):
-            power_setpoints = self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-                "turbine_power_setpoints"
-            ]
-        else:  # pass no power setpoints
-            power_setpoints = [] * self.num_turbines
-
-        # Send timing and yaw information to AMRWind via helics
-        # publish on topic: control
-        tmp = np.array(
-            [self.absolute_helics_time, self.wind_speed, self.wind_direction]
-            + yaw_angles
-            + power_setpoints
-        ).tolist()
-
-        self.send_via_helics("control", str(tmp))
-
-    def read_amr_wind_input(self, amr_wind_input):
-        # TODO this function is ugly and uncommented
-        # print("How many times does this get called ", amr_wind_input)
-
-        # TODO Initialize to empty in case doesn't run
-        # Probably want a file not found error instead
-        return_dict = {}
-
-        with open(amr_wind_input) as fp:
-            Lines = fp.readlines()
-
-            # Find the actuators
-            for line in Lines:
-                if "Actuator.labels" in line:
-                    turbine_labels = line.split()[2:]
-                    num_turbines = len(turbine_labels)
-            for line in Lines:
-                if "Actuator.type" in line:
-                    actuator_type = line.split()[-1]
-
-            self.num_turbines = num_turbines
-            print("Number of turbines in amrwind: ", num_turbines)
-
-            aa = [f"power_{i}" for i in range(num_turbines)]
-            xyz = ",".join(aa)
-            bb = [f"turbine_wd_direction_{i}" for i in range(num_turbines)]
-            zyx = ",".join(bb)
-            with open(f"{LOGFILE}.csv", "a") as filex:
-                filex.write(
-                    "helics_time"
-                    + ","
-                    + "AMRwind_time"
-                    + ","
-                    + "AMRWind_speed"
-                    + ","
-                    + "AMRWind_direction"
-                    + ","
-                    + xyz
-                    + ","
-                    + zyx
-                    + os.linesep
-                )
-
-            # Find the diameter
-            for line in Lines:
-                if "Actuator.%s.rotor_diameter" % actuator_type in line:
-                    D = float(line.split()[-1])
-
-            # Get the turbine locations
-            turbine_locations = []
-            for label in turbine_labels:
-                for line in Lines:
-                    if "Actuator.%s.base_position" % label in line:
-                        locations = tuple([float(f) for f in line.split()[-3:-1]])
-                        turbine_locations.append(locations)
-
-            return_dict = {
-                "num_turbines": num_turbines,
-                "turbine_labels": turbine_labels,
-                "rotor_diameter": D,
-                "turbine_locations": turbine_locations,
-            }
-
-            print(return_dict)
-
-            # Write header for logfile:
-            aa = [f"power_{i}" for i in range(self.num_turbines)]
-            xyz = ",".join(aa)
-            bb = [f"turbine_wd_direction_{i}" for i in range(self.num_turbines)]
-            zyx = ",".join(bb)
-            with open(f"{LOGFILE}.csv", "a") as filex:
-                filex.write(
-                    "helics_time"
-                    + ","
-                    + "AMRwind_time"
-                    + ","
-                    + "AMRWind_speed"
-                    + ","
-                    + "AMRWind_direction"
-                    + ","
-                    + xyz
-                    + ","
-                    + zyx
-                    + os.linesep
-                )
-
-        return return_dict

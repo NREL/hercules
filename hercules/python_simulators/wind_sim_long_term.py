@@ -5,6 +5,11 @@ from floris import FlorisModel
 from hercules.utilities import load_yaml
 from scipy.interpolate import interp1d
 
+# Note time in this non-helics framework will take some thinking but thinking that it will be something like this:
+# 1. The weather data will provide Timestamps per row with some actual date time
+# 2. Solar data should be similar
+# 3. Market data should be similar
+# 4. The starttime and endtime in the hercules input file will be in seconds and relative to the start of the weather data
 
 class WindSimLongTerm:
     def __init__(self, input_dict, dt):
@@ -35,32 +40,43 @@ class WindSimLongTerm:
         self.n_turbines = self.fmodel.n_turbines
 
         # Read in the weather file data
-        self.df_wd_ws = pd.read_csv(self.weather_file_name)
+        df_wd_ws = pd.read_csv(self.weather_file_name)
 
         # Like solar_pysam, make time a datetimeindex
-        self.df_wd_ws["Timestamp"] = pd.DatetimeIndex(pd.to_datetime(self.df_wd_ws["Timestamp"], format="ISO8601"))
-        self.df_wd_ws = self.df_wd_ws.set_index("Timestamp")
+        df_wd_ws["Timestamp"] = pd.DatetimeIndex(pd.to_datetime(df_wd_ws["Timestamp"], format="ISO8601"))
+        df_wd_ws = df_wd_ws.set_index("Timestamp")
 
-        # Determine the df implied by the weather file
-        self.dt_wd_wd = self.df_wd_ws.index[1] - self.df_wd_ws.index[0]
+        # Determine the dt implied by the weather file
+        self.dt_wd_ws = df_wd_ws.index[1] - df_wd_ws.index[0]
+
+        # Convert the dt to seconds
+        self.dt_wd_ws = self.dt_wd_ws.total_seconds()
+
+        # The time step within the weather file must be an integer multiple of the dt
+        if self.dt % self.dt_wd_ws != 0:
+            raise ValueError(f"dt ({self.dt}) must be an integer multiple of dt_wd_ws ({self.dt_wd_ws})")
+        
+        # Determine the start index for wd_ws and the stride
+        self.start_idx = int(self.dt / self.dt_wd_ws)
+        self.stride = int(self.dt / self.dt_wd_ws)
 
         # Convert the wind directions and wins speeds to simply numpy matrices
-        self.ws_mat = self.df_wd_ws[[f"ws_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
-        self.wd_mat = self.df_wd_ws[[f"wd_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
+        self.ws_mat = df_wd_ws[[f"ws_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
+        self.wd_mat = df_wd_ws[[f"wd_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
 
         # Remove all columns from self.df_wd_ws, keeping just the index
-        self.df_wd_ws = self.df_wd_ws[[]]
+        # self.df_wd_ws = self.df_wd_ws[[]]
 
         # Get the initial wind speeds and directions per turbine
         self.initial_wind_speeds = np.zeros(self.n_turbines)
         self.initial_wind_directions = np.zeros(self.n_turbines)
         for t_idx in range(self.n_turbines):
-            self.initial_wind_speeds[t_idx] = self.ws_mat[0, t_idx]
-            self.initial_wind_directions[t_idx] = self.wd_mat[0, t_idx]
+            self.initial_wind_speeds[t_idx] = self.ws_mat[self.start_idx, t_idx]
+            self.initial_wind_directions[t_idx] = self.wd_mat[self.start_idx, t_idx]
 
-        # Get the number of time steps and final time
-        self.n_time_steps = len(self.df_wd_ws)
-        self.final_time = self.n_time_steps * self.dt
+        # # Get the number of time steps and final time
+        # self.n_time_steps = len(self.df_wd_ws)
+        # self.final_time = self.n_time_steps * self.dt
 
         # Get the turbine information
         self.turbine_dict = load_yaml(self.turbine_file_name)
@@ -74,7 +90,7 @@ class WindSimLongTerm:
         self.power_mw = np.array([self.turbine_array[t_idx].prev_power/1000.0 for t_idx in range(self.n_turbines)])
 
         # Update the user
-        print(f"Initialized WindSimLongTerm with {self.n_turbines} turbines and {self.n_time_steps} time steps")
+        print(f"Initialized WindSimLongTerm with {self.n_turbines} turbines")# and {self.n_time_steps} time steps")
 
 
 
@@ -90,18 +106,20 @@ class WindSimLongTerm:
             print("sim_time_s = ", sim_time_s)
 
         # select appropriate row based on current time
-        time_index = self.df_wd_ws.index[0] + pd.Timedelta(seconds=sim_time_s)
+        time_index = self.start_idx + int(sim_time_s * self.stride)
         if self.verbose:
             print("time_index = ", time_index)
 
         # Update the turbine powers given the input wind speeds and derating
         self.power_mw = np.array([
             self.turbine_array[t_idx].step(
-                self.wd_mat[time_index, t_idx],
-                derating_kw=inputs[f"derating_kw_{t_idx}"]
+                self.ws_mat[time_index, t_idx],
+                derating_kw=inputs["py_sims"]['inputs'][f"derating_kw_{t_idx}"] 
             ) / 1000.0
             for t_idx in range(self.n_turbines)
         ])
+
+        return self.return_outputs()
 
 
 class TurbineFilterModel:

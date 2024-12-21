@@ -5,14 +5,14 @@ from hercules.emulator_no_helics import EmulatorNoHelics
 from hercules.py_sims import PySims
 from hercules.utilities import load_yaml
 
-# # Check that command line arguments are provided
-# if len(sys.argv) != 2:
-#     raise Exception("Usage: python hercules_runscript.py <hercules_input_file>")
+# Check that command line arguments are provided
+if len(sys.argv) != 2:
+    raise Exception("Usage: python hercules_runscript.py <hercules_input_file>")
 
-# input_dict = load_yaml(sys.argv[1])
+input_dict = load_yaml(sys.argv[1])
 
 # For debugging
-input_dict = load_yaml("hercules_input_000.yaml")
+# input_dict = load_yaml("hercules_input_000.yaml")
 
 
 

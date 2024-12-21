@@ -4,6 +4,7 @@ from hercules.python_simulators.battery import Battery
 from hercules.python_simulators.electrolyzer_plant import ElectrolyzerPlant
 from hercules.python_simulators.simple_solar import SimpleSolar
 from hercules.python_simulators.solar_pysam import SolarPySAM
+from hercules.python_simulators.wind_sim_long_term import WindSimLongTerm
 
 
 class PySims:
@@ -58,6 +59,11 @@ class PySims:
 
         if py_sim_obj_dict["py_sim_type"] == "ElectrolyzerPlant":
             return ElectrolyzerPlant(py_sim_obj_dict, self.dt)
+        
+        if py_sim_obj_dict["py_sim_type"] == 'WindSimLongTerm':
+            return WindSimLongTerm(py_sim_obj_dict, self.dt)
+
+        raise Exception("Unknown py_sim_type: ", py_sim_obj_dict["py_sim_type"])
 
     def get_py_sim_dict(self):
         return self.py_sim_dict

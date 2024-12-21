@@ -9,7 +9,7 @@ description: Long run Only
 
 dt: 1.0
 starttime: 0.0
-endtime: 10.0
+endtime: 60.0
 
 
 py_sims:
@@ -17,7 +17,7 @@ py_sims:
   # NOTE FOR PRESENT MOMENT WindSimLongTerm Must be first entry in py_sims
   wind_farm_0: # The name of the WindSimLongTerm wind farm
     py_sim_type: WindSimLongTerm
-    # num_turbines: 3 #Not sure if needed
+    num_turbines: 3 #Not sure if needed
     verbose: True
     floris_input_file: inputs/floris_input.yaml
     weather_file_name: inputs/wd_ws.csv

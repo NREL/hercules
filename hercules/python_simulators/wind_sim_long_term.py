@@ -110,6 +110,11 @@ class WindSimLongTerm:
         if self.verbose:
             print("time_index = ", time_index)
 
+        #TODO THIS IS MISSING A STEP SHOULD BE SOMETHING MORE LIKE
+        # 1) GET FLORIS WS/WD
+        # 2) RUN FLORIS AND GET WAKE REDUCTIONS IN WIND SPEED AT EACH TURBINE
+        # 3) NOW PASS THAT WAKE REDUCED WIND SPEED TO THE FUNCTION BELOW
+
         # Update the turbine powers given the input wind speeds and derating
         self.power_mw = np.array([
             self.turbine_array[t_idx].step(

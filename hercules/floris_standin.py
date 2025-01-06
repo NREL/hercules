@@ -1,15 +1,3 @@
-# Copyright 2022 NREL
-
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
 # This script implements a test client to test out the server against
 # It is based on code from
 # https://github.com/TUDelft-DataDrivenControl/SOWFA/blob/master/exampleCases/example.12.piso.NREL5MW.ADM.zmqSSC.python/ssc/testclient.py
@@ -362,8 +350,20 @@ class FlorisStandin(AMRWindStandin):
         }
 
 
-def launch_floris(amr_input_file, amr_standin_data_file=None):
+def launch_floris(amr_input_file, amr_standin_data_file=None, helics_port=None):
     temp = read_amr_wind_input(amr_input_file)
+
+    # Check amr_standin_data_file is not a number
+    if amr_standin_data_file is not None:
+        if isinstance(amr_standin_data_file, (int, float)):
+            raise ValueError("amr_standin_data_file must be a string or path.")
+        
+    # Check that helics_port is an integer
+    # If helics_port provided update with value
+    if helics_port is not None:
+        if not isinstance(helics_port, int):
+            raise ValueError("helics_port must be an integer.")
+        temp["helics_port"] = helics_port
 
     config = {
         "name": "floris_standin",

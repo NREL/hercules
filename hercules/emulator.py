@@ -188,8 +188,9 @@ class Emulator(FederateAgent):
             # helics time? Why aren't they the same?
             self.main_dict["time"] = self.absolute_helics_time
             self.main_dict = self.controller.step(self.main_dict)
-            self.py_sims.step(self.main_dict)
-            self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
+            if self.main_dict["py_sims"]:
+                self.py_sims.step(self.main_dict)
+                self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 
             # Send inputs (initiates the AMRWind step)
             self.send_data_to_amrwind()

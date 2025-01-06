@@ -7,6 +7,7 @@ TODO:
 """
 
 import os
+import sys
 
 import matplotlib.pyplot as plt
 import netCDF4 as ncdf
@@ -24,6 +25,7 @@ class StandinData:
         amr_out_path=None,
         herc_inp_path=None,
         save_path=None,
+        save_name="amr_standin_data.csv"
     ):
         self.method = method
 
@@ -34,6 +36,7 @@ class StandinData:
         self.amr_data_path = amr_out_path  # optional if self.method is "user"
         self.hercules_input_path = herc_inp_path
         self.standin_data_save_path = save_path
+        self.standin_data_save_name = save_name
 
         self.parse_hercules_input(self.hercules_input_path)
         self.parse_amr_input(self.amr_input_path)
@@ -153,7 +156,7 @@ class StandinData:
             df_dict.update({f"turbine_power_{i}": self.turbine_powers[:, i]})
 
         df = pd.DataFrame(df_dict)
-        df.to_csv(os.path.join(self.standin_data_save_path, "amr_standin_data.csv"))
+        df.to_csv(os.path.join(self.standin_data_save_path, self.standin_data_save_name))
 
     def plot(self):
         fig, ax = plt.subplots(3, 1, sharex="col")
@@ -182,38 +185,33 @@ class StandinData:
 
 # Example usage
 if __name__ == "__main__":
-    # # generate standin data file from amr-wind outputs
-    # fpaths = {
-    #   "amr_inp_path":
-    #        "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
-    #   "amr_out_path":
-    #        "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
-    #   "herc_inp_path":
-    #        "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
-    #   "save_path":
-    #        "example_case_folders/06_amr_wind_standin_and_battery",
-    # }
+ 
+    args = sys.argv
+    if len(args) > 1:
+        # Assume this file is being run from an example script
+        save_name = args[1]
 
-    # SD = StandinData(method="amr_actuator", **fpaths)
-    # SD.generate_standin_data()
-    # SD.save()
-    # SD.plot()
-
-    # generate standin data file from user-defined timeseries
-    fpaths = {
-        "amr_inp_path": 
+        fpaths = {
+            "amr_inp_path": "amr_input.inp",
+            "herc_inp_path": "hercules_input_000.yaml",
+            "save_path": "",
+            "save_name": save_name
+        }
+    else:
+        # generate standin data file from amr-wind outputs
+        fpaths = {
+        "amr_inp_path":
             "example_case_folders/06_amr_wind_standin_and_battery/amr_input.inp",
-        # "amr_out_path":
-        #       "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
+        "amr_out_path":
+            "/Users/ztully/Documents/HERCULES/hercules_project/amr_wind_runs/2023_10_20",
         "herc_inp_path":
             "example_case_folders/06_amr_wind_standin_and_battery/hercules_input_000.yaml",
-        "save_path": 
+        "save_path":
             "example_case_folders/06_amr_wind_standin_and_battery",
-    }
+        }
+
     SD = StandinData(method="user", **fpaths)
-
     # generate user inputs
-
     num_turbines = 2
     time_start = 0
     time_stop = 900

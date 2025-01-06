@@ -1,1 +1,0 @@
-This example runs FLORIS instead of AMR-Wind

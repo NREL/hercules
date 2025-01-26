@@ -76,7 +76,7 @@ ABL.stats_output_format = netcdf
 
 # Whether to use helics
 helics.activated        =   true
-helics.broker_port = 32000
+helics.broker_port = 32010
 
 #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
 #        ADAPTIVE MESH REFINEMENT       #
@@ -157,10 +157,7 @@ Actuator.UniformCtDisk.diameters_to_sample = 1.0
 Actuator.UniformCtDisk.num_points_r = 20
 Actuator.UniformCtDisk.num_points_t = 5
 
-#Actuator.UniformCtDisk.yaw = 240.0
 
-Actuator.labels                            = T00 T01            
-
-
+Actuator.labels = T00 T01 
 Actuator.T00.base_position = 0.0 0.0 0.0
 Actuator.T01.base_position = 1000.0 0.0 0.0

@@ -1,4 +1,4 @@
-# Example 05: FLORIS Wind Standin and Electrolyzer
+# Example 05: FLORIS Standin and Electrolyzer
 
 ## Description
 

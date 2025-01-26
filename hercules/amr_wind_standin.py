@@ -1,15 +1,3 @@
-# Copyright 2022 NREL
-
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
 # This script implements a test client to test out the server against
 # It is based on code from
 # https://github.com/TUDelft-DataDrivenControl/SOWFA/blob/master/exampleCases/example.12.piso.NREL5MW.ADM.zmqSSC.python/ssc/testclient.py
@@ -114,7 +102,7 @@ def read_amr_wind_input(amr_wind_input):
 
 
 class AMRWindStandin(FederateAgent):
-    def __init__(self, config_dict, amr_wind_input, amr_standin_data_file=None):
+    def __init__(self, config_dict, amr_wind_input, amr_standin_data_file=None, helics_port=None):
 
         super(AMRWindStandin, self).__init__(
             name=config_dict["name"],
@@ -228,6 +216,9 @@ class AMRWindStandin(FederateAgent):
                 + turbine_wind_directions
             )
 
+            # Cast all elements as native python float so they can be read in emulator
+            message_from_client_array = [float(num) for num in message_from_client_array]
+
             # Send helics message to Control Center
             # publish on topic: status
 
@@ -334,8 +325,16 @@ class AMRWindStandin(FederateAgent):
         pass
 
 
-def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None):
+def launch_amr_wind_standin(amr_input_file, amr_standin_data_file=None, helics_port=None):
     temp = read_amr_wind_input(amr_input_file)
+
+    # Check that helics_port is an integer
+    # If helics_port provided update with value
+    if helics_port is not None:
+        if not isinstance(helics_port, int):
+            raise ValueError("helics_port must be an integer.")
+        temp["helics_port"] = helics_port
+
 
     config = {
         "name": "amr_wind_standin",

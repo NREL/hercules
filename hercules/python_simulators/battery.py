@@ -398,7 +398,7 @@ class SimpleBattery:
         self.total_degradation = 0
         self.step_counter = 0
         self.degradation_calc_interval = 100
-        # TODO there should be a better way to dynamically store these than to append a list every time
+        # TODO there should be a better way to dynamically store these than to append a list
 
         self.build_SS()
         self.x = np.array([[inititial_conditions["SOC"] * self.energy_capacity * 3600]])
@@ -544,91 +544,7 @@ class SimpleBattery:
         self.apply_degradation(this_period_degradation)
 
     def apply_degradation(self, degradation):
-
-        # Make it so degradation reduces the battery capacity
-        self.E_max -= 1e-4 * degradation
-
-        # Make it so degradation reduces the battery charge
-        # self.P_max -= 5e-7 * degradation
-        # self.P_min += 5e-7 * degradation
-
-        
+        pass
 
     def return_outputs(self):
         return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC}
-
-
-if __name__ == "__main__":
-
-    class SimpleBattery2(SimpleBattery):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-
-        def SS_input_function(self, P_charge):
-            P_in = 1e-6 * P_charge**3
-            return P_in
-
-        def SS_input_function_inverse(self, P_in):
-            P_charge = np.cbrt(1e6 * P_in)
-            return P_charge
-
-    battery_dict = {
-        "py_sim_type": SimpleBattery,
-        "size": 20,  # MW size of the battery
-        "energy_capacity": 0.5,  # total capcity of the battery in MWh (4-hour 20 MW battery)
-        "charge_rate": 2,  # charge rate of the battery in MW
-        "discharge_rate": 2,  # discharge rate of the battery in MW
-        "max_SOC": 0.9,  # upper boundary on battery SOC
-        "min_SOC": 0.1,  # lower boundary on battery SOC
-        "initial_conditions": {"SOC": 0.5},
-        "roundtrip_efficiency": 1,
-        # "self_discharge_time_constant": 100000
-    }
-
-    SB = SimpleBattery(battery_dict, dt=1)
-
-    # Simulation
-
-    dt = 1
-    t = np.arange(0, 24 * 3600, dt)
-
-    # x = np.array([[0]]) # initial condition
-
-    u = 1000 * np.sin((t / 1000) * 2 * np.pi) + 0 
-
-    u_store = np.zeros((len(t), 1))
-    x_store = np.zeros((len(t), 1))
-    y_store = np.zeros((len(t), 2))
-
-    for k in range(len(t)):
-
-        uk = u[k]
-
-        inputs = {"py_sims": {"inputs": {"battery_signal": uk, "available_power": uk}}}
-
-        SB.step(inputs)
-        outputs = SB.return_outputs()
-
-        power = outputs["power"]
-        reject = outputs["reject"]
-        soc = outputs["soc"]
-
-        u_store[k, :] = power
-        x_store[k, :] = SB.x
-        y_store[k, :] = SB.y.T
-
-        # x = integrate(xd, x)
-
-    import matplotlib.pyplot as plt
-
-    fig, ax = plt.subplots(3, 1, sharex="col", layout="constrained")
-    ax[0].plot(t, u_store)
-    ax[0].plot(t, u)
-    ax[1].plot(t, x_store)
-    ax[2].plot(t, y_store[:, 1])
-
-    ax[0].set_ylabel("input")
-    ax[1].set_ylabel("state")
-    ax[2].set_ylabel("output")
-
-    []

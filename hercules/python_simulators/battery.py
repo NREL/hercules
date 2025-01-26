@@ -11,6 +11,7 @@ Nov. 2021, doi: 10.1016/j.est.2021.103252.
 """
 
 import numpy as np
+import rainflow
 
 
 def kJ2kWh(kWh):
@@ -357,9 +358,7 @@ class SimpleBattery:
 
         # size = input_dict["size"]
         self.energy_capacity = input_dict["energy_capacity"] * 1e3  # [kWh]
-
         inititial_conditions = input_dict["initial_conditions"]
-
         self.SOC = inititial_conditions["SOC"]  # [fraction]
 
         self.SOC_max = input_dict["max_SOC"]
@@ -393,6 +392,14 @@ class SimpleBattery:
         else:
             self.tau_self_discharge = np.inf
 
+        # Degradation and state storage
+        self.P_charge_storage = []
+        self.E_store = []
+        self.total_degradation = 0
+        self.step_counter = 0
+        self.degradation_calc_interval = 100
+        # TODO there should be a better way to dynamically store these than to append a list every time
+
         self.build_SS()
         self.x = np.array([[inititial_conditions["SOC"] * self.energy_capacity * 3600]])
         self.y = None
@@ -407,67 +414,34 @@ class SimpleBattery:
 
         self.needed_inputs = {"battery_signal": 0.0}
 
-    def build_SS(self):
-        self.A = np.array([[-1 / self.tau_self_discharge]])
-        # B  function
-        self.C = np.array([[1, 0]]).T
-        self.D = np.array([[0, 1]]).T
-
-    def calc_charging_power(self, P_in):
-        # if len(P_in) > 1:
-        #     # In case an array is passed 
-        #     P_chg = np.zeros(len(P_in))
-
-        #     P_chg[P_in >= 0] = self.eta_charge * P_in[P_in >=0]
-        #     P_chg[P_in < 0] = P_in[P_in <0] / self.eta_discharge
-        #     return P_chg
-        if False:
-            pass
-        else:   
-            if P_in >= 0:
-                return self.eta_charge * P_in
-            else:
-                return P_in / self.eta_discharge
-            
-    def calc_input_power(self, P_charge):
-        # inverse of calc_charging_power
-        if P_charge >= 0:
-            return np.atleast_2d(P_charge / self.eta_charge)
-        else: 
-            return np.atleast_2d(P_charge * self.eta_discharge)
-
-    def integrate(self, x, xd):
-        # better integration -> use the closed form step response solution?
-        return x + xd * self.dt  # Euler integration
-
-    def step_SS(self, u):
-        xd = self.A * self.x + self.calc_charging_power(u)
-        y = self.C * self.x + self.D * u
-
-        self.x = self.integrate(self.x, xd)
-        self.y = y
-
-    def return_outputs(self):
-        return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC}
-
     def step(self, inputs):
+
+        self.step_counter += 1
+
         # power available for the battery to use for charging (should be >=0)
         P_signal = inputs["py_sims"]["inputs"]["battery_signal"]
         # power signal desired by the controller
         P_avail = inputs["py_sims"]["inputs"]["available_power"]
 
-        self.control(P_avail, P_signal)
+        P_charge, P_reject = self.control(P_avail, P_signal)
 
         # Update energy state
         # self.E += self.P_charge * self.dt
-        self.step_SS(self.P_charge)
-        self.E = self.x[0,0] # TODO find a better way to make self.x 1-D
-
+        self.step_SS(P_charge)
+        self.E = self.x[0, 0]  # TODO find a better way to make self.x 1-D
 
         self.current_batt_state = kJ2kWh(self.E)
 
-        self.power_mw = self.P_charge
+        self.power_mw = P_charge
         self.SOC = self.current_batt_state / self.energy_capacity
+
+        self.P_charge_storage.append(P_charge)
+        self.E_store.append(self.E)
+
+        if self.step_counter >= self.degradation_calc_interval:
+            # reset step_counter
+            self.step_counter = 0
+            self.calc_degradation()
 
         return self.return_outputs()
 
@@ -487,39 +461,117 @@ class SimpleBattery:
                     constraints (negative)
         """
 
+        # TODO remove ramp rate constraints because they are never used?
+
         # Upper constraints [kW]
         # c_hi1 = (self.E_max - self.E) / self.dt  # energy
-        c_hi1 = self.calc_charging_power((self.E_max - self.x[0,0]) / self.dt)
+        c_hi1 = self.SS_input_function_inverse((self.E_max - self.x[0, 0]) / self.dt)
         c_hi2 = self.P_max  # power
         c_hi3 = self.R_max * self.dt + self.P_charge  # ramp rate
+        c_hi4 = P_avail
 
         # Lower constraints [kW]
         # c_lo1 = (self.E_min - self.E) / self.dt  # energy
-        c_lo1 = self.calc_charging_power((self.E_min - self.x[0,0]) / self.dt)
+        c_lo1 = self.SS_input_function_inverse((self.E_min - self.x[0, 0]) / self.dt)
         c_lo2 = self.P_min  # power
         c_lo3 = self.R_min * self.dt + self.P_charge  # ramp rate
 
         # High constraint is the most restrictive of the high constraints
-        c_hi = np.min([c_hi1, c_hi2, c_hi3, P_avail])
+        c_hi = np.min([c_hi1, c_hi2, c_hi3, c_hi4])
+        c_hi = np.max([c_hi, 0])
 
         # Low constraint is the most restrictive of the low constraints
         c_lo = np.max([c_lo1, c_lo2, c_lo3])
+        c_lo = np.min([c_lo, 0])
+
         # TODO: force low constraint to be no higher than lowest high constraint
-
         if (P_signal >= c_lo) & (P_signal <= c_hi):
-            self.P_charge = P_signal
-            self.P_reject = 0
+            P_charge = P_signal
+            P_reject = 0
         elif P_signal < c_lo:
-            self.P_charge = c_lo
-            self.P_reject = P_signal - self.P_charge
+            P_charge = c_lo
+            P_reject = P_signal - P_charge
         elif P_signal > c_hi:
-            self.P_charge = c_hi
-            self.P_reject = P_signal - self.P_charge
+            P_charge = c_hi
+            P_reject = P_signal - P_charge
 
-  
+        self.P_charge = P_charge
+        self.P_reject = P_reject
+
+        return P_charge, P_reject
+
+    def build_SS(self):
+        self.A = np.array([[-1 / self.tau_self_discharge]])
+        # B is the function in
+        self.C = np.array([[1, 0]]).T
+        self.D = np.array([[0, 1]]).T
+
+    def SS_input_function(self, P_charge):
+
+        # P_in is the amount of power that actually gets stored in the state E
+        # P_charge is the amount of power given to the charging physics
+
+        if P_charge >= 0:
+            P_in = self.eta_charge * P_charge
+        else:
+            P_in = P_charge / self.eta_discharge
+        return P_in
+
+    def SS_input_function_inverse(self, P_in):
+        if P_in >= 0:
+            P_charge = P_in / self.eta_charge
+        else:
+            P_charge = P_in * self.eta_discharge
+        return P_charge
+
+    def step_SS(self, u):
+        # Advance the state-space loop
+        xd = self.A * self.x + self.SS_input_function(u)
+        y = self.C * self.x + self.D * u
+
+        self.x = self.integrate(self.x, xd)
+        self.y = y
+
+    def integrate(self, x, xd):
+        # better integration -> use the closed form step response solution?
+        return x + xd * self.dt  # Euler integration
+
+    def calc_degradation(self):
+        # Count rainflow cycles
+        cycles = rainflow.count_cycles(self.E_store)
+        this_period_degradation = np.sum([cycle[0] * cycle[1] for cycle in cycles])
+        self.total_degradation += this_period_degradation
+        self.apply_degradation(this_period_degradation)
+
+    def apply_degradation(self, degradation):
+
+        # Make it so degradation reduces the battery capacity
+        self.E_max -= 1e-4 * degradation
+
+        # Make it so degradation reduces the battery charge
+        # self.P_max -= 5e-7 * degradation
+        # self.P_min += 5e-7 * degradation
+
+        
+
+    def return_outputs(self):
+        return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC}
 
 
 if __name__ == "__main__":
+
+    class SimpleBattery2(SimpleBattery):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+        def SS_input_function(self, P_charge):
+            P_in = 1e-6 * P_charge**3
+            return P_in
+
+        def SS_input_function_inverse(self, P_in):
+            P_charge = np.cbrt(1e6 * P_in)
+            return P_charge
+
     battery_dict = {
         "py_sim_type": SimpleBattery,
         "size": 20,  # MW size of the battery
@@ -528,8 +580,9 @@ if __name__ == "__main__":
         "discharge_rate": 2,  # discharge rate of the battery in MW
         "max_SOC": 0.9,  # upper boundary on battery SOC
         "min_SOC": 0.1,  # lower boundary on battery SOC
-        "initial_conditions": {"SOC": 0.102},
-        "roundtrip_efficiency":0.8
+        "initial_conditions": {"SOC": 0.5},
+        "roundtrip_efficiency": 1,
+        # "self_discharge_time_constant": 100000
     }
 
     SB = SimpleBattery(battery_dict, dt=1)
@@ -537,37 +590,21 @@ if __name__ == "__main__":
     # Simulation
 
     dt = 1
-    t = np.arange(0, 1000, dt)
-
-
-
+    t = np.arange(0, 24 * 3600, dt)
 
     # x = np.array([[0]]) # initial condition
 
-    u = 1000 * np.sin((t / 1000) * 2* np.pi) 
+    u = 1000 * np.sin((t / 1000) * 2 * np.pi) + 0 
 
     u_store = np.zeros((len(t), 1))
     x_store = np.zeros((len(t), 1))
     y_store = np.zeros((len(t), 2))
 
-
-
-
-
     for k in range(len(t)):
-
-  
 
         uk = u[k]
 
-        inputs = {
-            "py_sims": {
-                "inputs":{
-                    "battery_signal":uk,
-                    "available_power":uk
-                }
-            }
-        }
+        inputs = {"py_sims": {"inputs": {"battery_signal": uk, "available_power": uk}}}
 
         SB.step(inputs)
         outputs = SB.return_outputs()
@@ -576,22 +613,22 @@ if __name__ == "__main__":
         reject = outputs["reject"]
         soc = outputs["soc"]
 
-
         u_store[k, :] = power
-        x_store[k,:] = SB.x
-        y_store[k,:] = SB.y.T
+        x_store[k, :] = SB.x
+        y_store[k, :] = SB.y.T
 
         # x = integrate(xd, x)
 
-
-
-
     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots(3, 1, sharex="col")
+    fig, ax = plt.subplots(3, 1, sharex="col", layout="constrained")
     ax[0].plot(t, u_store)
     ax[0].plot(t, u)
     ax[1].plot(t, x_store)
-    ax[2].plot(t, y_store)
+    ax[2].plot(t, y_store[:, 1])
+
+    ax[0].set_ylabel("input")
+    ax[1].set_ylabel("state")
+    ax[2].set_ylabel("output")
 
     []

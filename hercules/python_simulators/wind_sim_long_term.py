@@ -1,15 +1,18 @@
-# Implements the long run wind model for Hercules
+# Implements the long run wind model for Hercules.
+
 import numpy as np
 import pandas as pd
 from floris import FlorisModel
 from hercules.utilities import load_yaml
 from scipy.interpolate import interp1d
+from scipy.stats import circmean
 
 # Note time in this non-helics framework will take some thinking but thinking that it will be something like this:
 # 1. The weather data will provide Timestamps per row with some actual date time
 # 2. Solar data should be similar
 # 3. Market data should be similar
 # 4. The starttime and endtime in the hercules input file will be in seconds and relative to the start of the weather data
+
 
 class WindSimLongTerm:
     def __init__(self, input_dict, dt):
@@ -20,13 +23,27 @@ class WindSimLongTerm:
         else:
             self.verbose = True  # default value
 
+        # Save the time step
+        self.dt = dt
+
         # Read in the input file names
         self.floris_input_file = input_dict["floris_input_file"]
         self.weather_file_name = input_dict["weather_file_name"]
         self.turbine_file_name = input_dict["turbine_file_name"]
 
-        # Save the time step
-        self.dt = dt
+        # TODO Make this more flexible
+        self.fixed_ti = 0.06
+        self.floris_wd_resolution = 1.0
+        self.floris_ws_resolution = 0.5
+
+        # TODO Make this settable in the future
+        # TODO make this in seconds and convert to array indices internally
+        # Establish the width of the FLORIS averaging window
+        self.floris_time_window_width = 30
+
+        # Make a derating alpha with a time constant matched to this window
+        # This allows a similar slow filtering of derating
+        self.derating_alpha = self.dt / (self.dt + self.floris_time_window_width)
 
         # Define needed inputs as empty dict
         self.needed_inputs = {}
@@ -43,7 +60,9 @@ class WindSimLongTerm:
         df_wd_ws = pd.read_csv(self.weather_file_name)
 
         # Like solar_pysam, make time a datetimeindex
-        df_wd_ws["Timestamp"] = pd.DatetimeIndex(pd.to_datetime(df_wd_ws["Timestamp"], format="ISO8601"))
+        df_wd_ws["Timestamp"] = pd.DatetimeIndex(
+            pd.to_datetime(df_wd_ws["Timestamp"], format="ISO8601")
+        )
         df_wd_ws = df_wd_ws.set_index("Timestamp")
 
         # Determine the dt implied by the weather file
@@ -54,29 +73,40 @@ class WindSimLongTerm:
 
         # The time step within the weather file must be an integer multiple of the dt
         if self.dt % self.dt_wd_ws != 0:
-            raise ValueError(f"dt ({self.dt}) must be an integer multiple of dt_wd_ws ({self.dt_wd_ws})")
-        
+            raise ValueError(
+                f"dt ({self.dt}) must be an integer multiple of dt_wd_ws ({self.dt_wd_ws})"
+            )
+
         # Determine the start index for wd_ws and the stride
         self.start_idx = int(self.dt / self.dt_wd_ws)
         self.stride = int(self.dt / self.dt_wd_ws)
 
-        # Convert the wind directions and wins speeds to simply numpy matrices
-        self.ws_mat = df_wd_ws[[f"ws_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
+        # Convert the wind directions and wind speeds to simply numpy matrices
         self.wd_mat = df_wd_ws[[f"wd_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
+        self.ws_mat = df_wd_ws[[f"ws_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
 
-        # Remove all columns from self.df_wd_ws, keeping just the index
-        # self.df_wd_ws = self.df_wd_ws[[]]
+        # Compute the turbine-averaged wind directions (axis = 1) using circmean
+        self.wd_mat_mean = np.apply_along_axis(
+            lambda x: circmean(x, high=360.0, low=0.0, nan_policy="omit"), axis=1, arr=self.wd_mat
+        )
+
+        # Compute the turbine averaged wind speeds (axis = 1) using mean
+        self.ws_mat_mean = np.mean(self.ws_mat, axis=1)
 
         # Get the initial wind speeds and directions per turbine
-        self.initial_wind_speeds = np.zeros(self.n_turbines)
-        self.initial_wind_directions = np.zeros(self.n_turbines)
-        for t_idx in range(self.n_turbines):
-            self.initial_wind_speeds[t_idx] = self.ws_mat[self.start_idx, t_idx]
-            self.initial_wind_directions[t_idx] = self.wd_mat[self.start_idx, t_idx]
+        self.initial_wind_directions = self.wd_mat[self.start_idx, :]
+        self.initial_wind_speeds = self.ws_mat[self.start_idx, :]
 
-        # # Get the number of time steps and final time
-        # self.n_time_steps = len(self.df_wd_ws)
-        # self.final_time = self.n_time_steps * self.dt
+        # Compute the initial floris wind direction and wind speed as at the start index
+        self.floris_wind_direction = self.wd_mat_mean[self.start_idx]
+        self.floris_wind_speed = self.ws_mat_mean[self.start_idx]
+
+        # Get the initial unwaked velocities
+        # TODO: This is more a debugging thing, not really necessary
+        self.unwaked_velocities = self.ws_mat[self.start_idx, :]
+
+        # # Compute the initial waked velocities
+        self.waked_velocities = self.compute_waked_velocities(self.start_idx)
 
         # Get the turbine information
         self.turbine_dict = load_yaml(self.turbine_file_name)
@@ -84,22 +114,69 @@ class WindSimLongTerm:
 
         # Initialize the turbine array
         if self.turbine_model_type == "filter_model":
-            self.turbine_array = [TurbineFilterModel(self.turbine_dict, self.dt, self.fmodel, self.initial_wind_speeds[t_idx]) for t_idx in range(self.n_turbines)]
+            self.turbine_array = [
+                TurbineFilterModel(
+                    self.turbine_dict, self.dt, self.fmodel, self.waked_velocities[t_idx]
+                )
+                for t_idx in range(self.n_turbines)
+            ]
 
-        # Initialze the power array to the initial wind speeds
-        self.power_mw = np.array([self.turbine_array[t_idx].prev_power/1000.0 for t_idx in range(self.n_turbines)])
+        # Initialize the power array to the initial wind speeds
+        self.power = np.array(
+            [self.turbine_array[t_idx].prev_power for t_idx in range(self.n_turbines)]
+        )
 
         # Update the user
-        print(f"Initialized WindSimLongTerm with {self.n_turbines} turbines")# and {self.n_time_steps} time steps")
+        print(f"Initialized WindSimLongTerm with {self.n_turbines} turbines")
 
+    # TODO Add derating options
+    # Consider memoization here
+    def get_floris_wake_deficits(self, wind_direction, wind_speed):
+        self.fmodel.set(
+            wind_directions=[wind_direction],
+            wind_speeds=[wind_speed],
+            turbulence_intensities=[self.fixed_ti],
+        )
+        self.fmodel.run()
 
+        # Get the velocity deficit per turbine, reducing to 1D array from FLORIS 2D default
+        velocities = self.fmodel.turbine_average_velocities.flatten()
+        return velocities.max() - velocities
+
+    def compute_waked_velocities(self, time_idx):
+        # Get the window start
+        window_start = max(0, time_idx - self.floris_time_window_width)
+
+        # Update the FLORIS wind direction and wind speed using the new window
+        self.floris_wind_direction = circmean(
+            self.wd_mat_mean[window_start:time_idx], high=360.0, low=0.0, nan_policy="omit"
+        )
+        self.floris_wind_speed = np.mean(self.ws_mat_mean[window_start:time_idx])
+
+        # Round this number to the specified resolution
+        self.floris_wind_direction = (
+            round(self.floris_wind_direction / self.floris_wd_resolution)
+            * self.floris_wd_resolution
+        )
+        self.floris_wind_speed = (
+            round(self.floris_wind_speed / self.floris_ws_resolution) * self.floris_ws_resolution
+        )
+
+        # Return the wind speeds minus wake deficits
+        return self.ws_mat[time_idx, :] - self.get_floris_wake_deficits(
+            self.floris_wind_direction, self.floris_wind_speed
+        )
 
     def return_outputs(self):
+        return {
+            "power": self.power,
+            "unwaked_velocity": self.unwaked_velocities,
+            "waked_velocity": self.waked_velocities,
+            "floris_wind_speed": self.floris_wind_speed,
+            "floris_wind_direction": self.floris_wind_direction,
+        }
 
-        return {"power_mw": self.power_mw}
-    
     def step(self, inputs):
-
         # Get the current time step
         sim_time_s = inputs["time"]
         if self.verbose:
@@ -110,19 +187,23 @@ class WindSimLongTerm:
         if self.verbose:
             print("time_index = ", time_index)
 
-        #TODO THIS IS MISSING A STEP SHOULD BE SOMETHING MORE LIKE
-        # 1) GET FLORIS WS/WD
-        # 2) RUN FLORIS AND GET WAKE REDUCTIONS IN WIND SPEED AT EACH TURBINE
-        # 3) NOW PASS THAT WAKE REDUCED WIND SPEED TO THE FUNCTION BELOW
+        # Get the unwaked velocities
+        # TODO: This is more a debugging thing, not really necessary
+        self.unwaked_velocities = self.ws_mat[time_index, :]
+
+        # Get the waked velocities
+        self.waked_velocities = self.compute_waked_velocities(time_index)
 
         # Update the turbine powers given the input wind speeds and derating
-        self.power_mw = np.array([
-            self.turbine_array[t_idx].step(
-                self.ws_mat[time_index, t_idx],
-                derating_kw=inputs["py_sims"]['inputs'][f"derating_kw_{t_idx}"] 
-            ) / 1000.0
-            for t_idx in range(self.n_turbines)
-        ])
+        self.power = np.array(
+            [
+                self.turbine_array[t_idx].step(
+                    self.waked_velocities[t_idx],
+                    derating=inputs["py_sims"]["inputs"][f"derating_{t_idx:03d}"],
+                )
+                for t_idx in range(self.n_turbines)
+            ]
+        )
 
         return self.return_outputs()
 
@@ -136,7 +217,7 @@ class TurbineFilterModel:
         self.turbine_dict = turbine_dict
 
         # Save the filter time constant
-        self.filter_time_constant = turbine_dict['filter_model']["time_constant"]
+        self.filter_time_constant = turbine_dict["filter_model"]["time_constant"]
 
         # Solve for the filter alpha value given dt and the time constant
         self.alpha = self.dt / (self.dt + self.filter_time_constant)
@@ -145,7 +226,7 @@ class TurbineFilterModel:
         turbine_type = fmodel.core.farm.turbine_definitions[0]
         wind_speeds = turbine_type["power_thrust_table"]["wind_speed"]
         powers = turbine_type["power_thrust_table"]["power"]
-        self.power_lut =  interp1d(
+        self.power_lut = interp1d(
             wind_speeds,
             powers,
             fill_value=0.0,
@@ -154,20 +235,19 @@ class TurbineFilterModel:
 
         # Initialize the previous power to the initial wind speed
         self.prev_power = self.power_lut(initial_wind_speed)
-    
-    def step(self, wind_speed, derating_kw=0.0):
-        
+
+    def step(self, wind_speed, derating=0.0):
         # Instantaneous power
         instant_power = self.power_lut(wind_speed)
 
-        # Limit the current power to not be greater then derating_kw
-        instant_power = min(instant_power, derating_kw)
+        # Limit the current power to not be greater then derating
+        instant_power = min(instant_power, derating)
 
         # Update the power
         power = self.alpha * instant_power + (1 - self.alpha) * self.prev_power
 
-        # Limit the power to not be greater then derating_kw
-        power = min(power, derating_kw)
+        # Limit the power to not be greater then derating
+        power = min(power, derating)
 
         # Update the previous power
         self.prev_power = power

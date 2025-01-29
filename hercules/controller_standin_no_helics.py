@@ -24,7 +24,11 @@ class ControllerStandinNoHelics:
 
         # Set deratings very high for now
         for t_idx in range(num_turbines):
-            main_dict["py_sims"]['inputs'][f"derating_kw_{t_idx}"] = 4000
+            main_dict["py_sims"]['inputs'][f"derating_{t_idx:03d}"] = 4000
+
+        # Lower t0 derating every other 100 seconds
+        if main_dict["time"] % 200 < 100:
+            main_dict["py_sims"]['inputs'][f"derating_000"] = 500
 
         # # Set turbine yaw angles based on current AMR-Wind wind direction
         # wd = main_dict["hercules_comms"]["amr_wind"][self.wf_name]["wind_direction"]

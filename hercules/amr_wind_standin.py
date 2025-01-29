@@ -216,6 +216,9 @@ class AMRWindStandin(FederateAgent):
                 + turbine_wind_directions
             )
 
+            # Cast all elements as native python float so they can be read in emulator
+            message_from_client_array = [float(num) for num in message_from_client_array]
+
             # Send helics message to Control Center
             # publish on topic: status
 

@@ -46,7 +46,7 @@ class EmulatorNoHelics():
         # Update the input dict components
         self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 
-        # Initialize time # TODO - does this belong in 'inital conditions' instead?
+        # Initialize time # TODO - does this belong in 'initial conditions' instead?
         if self.main_dict["py_sims"]:
             self.main_dict["py_sims"]["inputs"]["sim_time_s"] = 0.0
 
@@ -118,7 +118,7 @@ class EmulatorNoHelics():
 
         self.first_iteration = True
 
-        # Run simulation till  endtime
+        # Run simulation till endtime
         # while self.absolute_helics_time < self.endtime:
         while self.time < (self.endtime):
             print(self.time)

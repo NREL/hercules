@@ -78,8 +78,8 @@ farm:
   # data structures.
   layout_y:
   - 0.0
-  - -200.0
-  - 200.0
+  - 0.0 
+  - 500.0
 
   ###
   # Listing of turbine types for placement at the x and y coordinates given above.

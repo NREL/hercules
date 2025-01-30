@@ -23,67 +23,98 @@ class WindSimLongTerm:
         else:
             self.verbose = True  # default value
 
-        # Save the time step
-        self.dt = dt
-
-        # Read in the input file names
-        self.floris_input_file = input_dict["floris_input_file"]
-        self.weather_file_name = input_dict["weather_file_name"]
-        self.turbine_file_name = input_dict["turbine_file_name"]
-
-        # TODO Make this more flexible
-        self.fixed_ti = 0.06
-        self.floris_wd_resolution = 1.0
-        self.floris_ws_resolution = 0.5
-
-        # TODO Make this settable in the future
-        # TODO make this in seconds and convert to array indices internally
-        # Establish the width of the FLORIS averaging window
-        self.floris_time_window_width = 30
-
-        # Make a derating alpha with a time constant matched to this window
-        # This allows a similar slow filtering of derating
-        self.derating_alpha = self.dt / (self.dt + self.floris_time_window_width)
-
         # Define needed inputs as empty dict
         self.needed_inputs = {}
 
+        # Save the time step for Hercules
+        self.dt = dt
+
+        # Track the number of FLORIS calculation
+        self.num_floris_calcs = 0
+
+        # Get the start time
+        #TODO: NEED TO ACTUALLY FIGURE OUT HOW TO DO THIS
+        self.start_time_s = 0 #input_dict["sim_time_s"]
+
+        # Get the start index
+        self.start_idx = int(self.start_time_s / self.dt)
+
+        # Read in the input file names
+        self.floris_input_file = input_dict["floris_input_file"]
+        self.wind_input_filename = input_dict["wind_input_filename"]
+        self.turbine_file_name = input_dict["turbine_file_name"]
+
+        # Read in the weather file data
+        df_wi = pd.read_csv(self.wind_input_filename)
+
+        # Like solar_pysam, make time a datetimeindex
+        df_wi["Timestamp"] = pd.DatetimeIndex(
+            pd.to_datetime(df_wi["Timestamp"], format="ISO8601")
+        )
+        df_wi = df_wi.set_index("Timestamp")
+
+        # Determine the dt implied by the weather file
+        self.dt_wi = df_wi.index[1] - df_wi.index[0]
+
+        # Convert the dt to seconds
+        self.dt_wi = self.dt_wi.total_seconds()
+
+        # The time step within the weather file must be an integer multiple of the dt
+        if self.dt % self.dt_wi != 0:
+            raise ValueError(
+                f"dt ({self.dt}) must be an integer multiple of dt_wi ({self.dt_wi})"
+            )
+        
+        # If dt_wi is less than dt, then resample df_wi so that its time steps are equal to dt
+        if self.dt_wi < self.dt:
+            num_steps_initial = df_wi.shape[0]
+            df_wi = df_wi.iloc[::int(self.dt/self.dt_wi)]
+            if self.verbose:
+                print(f"Resampled df_wi from {num_steps_initial} to {df_wi.shape[0]} rows")
+
+
+        # FLORIS PREPARATION
+
         # Initialize the FLORIS model
         self.fmodel = FlorisModel(self.floris_input_file)
+
+        # Change to the simple-derating model turbine
+        # (Note this could also be done with the mixed model)
+        self.fmodel.set_operation_model("simple-derating")
 
         # Get the layout and number of turbines from FLORIS
         self.layout_x = self.fmodel.layout_x
         self.layout_y = self.fmodel.layout_y
         self.n_turbines = self.fmodel.n_turbines
 
-        # Read in the weather file data
-        df_wd_ws = pd.read_csv(self.weather_file_name)
 
-        # Like solar_pysam, make time a datetimeindex
-        df_wd_ws["Timestamp"] = pd.DatetimeIndex(
-            pd.to_datetime(df_wd_ws["Timestamp"], format="ISO8601")
-        )
-        df_wd_ws = df_wd_ws.set_index("Timestamp")
+        # TODO Switch this to an input
+        self.floris_wd_threshold = 1.0
+        self.floris_ws_threshold = 0.5
+        self.floris_ti_threshold = 0.01
+        self.floris_derating_threshold = 10 #kW
 
-        # Determine the dt implied by the weather file
-        self.dt_wd_ws = df_wd_ws.index[1] - df_wd_ws.index[0]
+        # TODO Make this settable in the future
+        # TODO make this in seconds and convert to array indices internally
+        # Establish the width of the FLORIS averaging window
+        self.floris_time_window_width_s = 30
+        self.floris_time_window_width = int(self.floris_time_window_width_s / self.dt)
 
-        # Convert the dt to seconds
-        self.dt_wd_ws = self.dt_wd_ws.total_seconds()
+        # How often to update the wake deficits
+        self.floris_update_time_s = 10
+        self.floris_update_time = int(self.floris_update_time_s / self.dt)
 
-        # The time step within the weather file must be an integer multiple of the dt
-        if self.dt % self.dt_wd_ws != 0:
-            raise ValueError(
-                f"dt ({self.dt}) must be an integer multiple of dt_wd_ws ({self.dt_wd_ws})"
-            )
+        # Declare the derating buffer to hold previous derating commands
+        self.derating_buffer = np.zeros((self.floris_time_window_width,self.n_turbines)) * np.nan
+        self.derating_buffer_idx = 0 # Initialize the index to 0
 
-        # Determine the start index for wd_ws and the stride
-        self.start_idx = int(self.dt / self.dt_wd_ws)
-        self.stride = int(self.dt / self.dt_wd_ws)
+        # Add an initial non-nan value to be over-written on first step
+        self.derating_buffer[0, :] = 1E12
 
-        # Convert the wind directions and wind speeds to simply numpy matrices
-        self.wd_mat = df_wd_ws[[f"wd_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
-        self.ws_mat = df_wd_ws[[f"ws_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
+        # Convert the wind directions and wind speeds and ti to simply numpy matrices
+        self.wd_mat = df_wi[[f"wd_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
+        self.ws_mat = df_wi[[f"ws_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
+        self.ti_mat = df_wi[[f"ti_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
 
         # Compute the turbine-averaged wind directions (axis = 1) using circmean
         self.wd_mat_mean = np.apply_along_axis(
@@ -93,20 +124,32 @@ class WindSimLongTerm:
         # Compute the turbine averaged wind speeds (axis = 1) using mean
         self.ws_mat_mean = np.mean(self.ws_mat, axis=1)
 
+        # Compute the turbine averaged turbulence intensities (axis = 1) using mean
+        self.ti_mat_mean = np.mean(self.ti_mat, axis=1)
+
         # Get the initial wind speeds and directions per turbine
         self.initial_wind_directions = self.wd_mat[self.start_idx, :]
         self.initial_wind_speeds = self.ws_mat[self.start_idx, :]
+        self.initial_tis = self.ti_mat[self.start_idx, :]
 
         # Compute the initial floris wind direction and wind speed as at the start index
         self.floris_wind_direction = self.wd_mat_mean[self.start_idx]
         self.floris_wind_speed = self.ws_mat_mean[self.start_idx]
+        self.floris_ti = self.ti_mat_mean[self.start_idx]
+        self.floris_derating = np.nanmean(self.derating_buffer, axis=0)
+
+        # Iniialize the wake deficits
+        self.floris_wake_deficits = np.zeros(self.n_turbines)
 
         # Get the initial unwaked velocities
         # TODO: This is more a debugging thing, not really necessary
         self.unwaked_velocities = self.ws_mat[self.start_idx, :]
 
         # # Compute the initial waked velocities
-        self.waked_velocities = self.compute_waked_velocities(self.start_idx)
+        self.update_wake_deficits(self.start_idx)
+
+        # Compute waked velocities
+        self.waked_velocities = self.ws_mat[self.start_idx, :] - self.floris_wake_deficits
 
         # Get the turbine information
         self.turbine_dict = load_yaml(self.turbine_file_name)
@@ -129,43 +172,70 @@ class WindSimLongTerm:
         # Update the user
         print(f"Initialized WindSimLongTerm with {self.n_turbines} turbines")
 
-    # TODO Add derating options
-    # Consider memoization here
-    def get_floris_wake_deficits(self, wind_direction, wind_speed):
-        self.fmodel.set(
-            wind_directions=[wind_direction],
-            wind_speeds=[wind_speed],
-            turbulence_intensities=[self.fixed_ti],
-        )
-        self.fmodel.run()
 
-        # Get the velocity deficit per turbine, reducing to 1D array from FLORIS 2D default
-        velocities = self.fmodel.turbine_average_velocities.flatten()
-        return velocities.max() - velocities
+    def update_wake_deficits(self, time_idx):
 
-    def compute_waked_velocities(self, time_idx):
         # Get the window start
         window_start = max(0, time_idx - self.floris_time_window_width)
 
-        # Update the FLORIS wind direction and wind speed using the new window
-        self.floris_wind_direction = circmean(
-            self.wd_mat_mean[window_start:time_idx], high=360.0, low=0.0, nan_policy="omit"
+        # Compute new values of the floris inputs
+        #TODO: CONFIRM THE +1 in the slice is right
+        floris_wind_direction = circmean(
+            self.wd_mat_mean[window_start:time_idx+1], high=360.0, low=0.0, nan_policy="omit"
         )
-        self.floris_wind_speed = np.mean(self.ws_mat_mean[window_start:time_idx])
+        floris_wind_speed = np.mean(self.ws_mat_mean[window_start:time_idx+1])
+        floris_ti = np.mean(self.ti_mat_mean[window_start:time_idx+1])
 
-        # Round this number to the specified resolution
-        self.floris_wind_direction = (
-            round(self.floris_wind_direction / self.floris_wd_resolution)
-            * self.floris_wd_resolution
-        )
-        self.floris_wind_speed = (
-            round(self.floris_wind_speed / self.floris_ws_resolution) * self.floris_ws_resolution
-        )
+        # Compute the deratings over the same window
+        floris_derating = np.nanmean(self.derating_buffer, axis=0)
 
-        # Return the wind speeds minus wake deficits
-        return self.ws_mat[time_idx, :] - self.get_floris_wake_deficits(
-            self.floris_wind_direction, self.floris_wind_speed
-        )
+        # Reshape derating to be 2D with number on axis 1
+        floris_derating = floris_derating.reshape(1, -1)
+
+        # If any of the FLORIS inputs have sufficienty changed, update wake deficits
+        if (
+            np.abs(floris_wind_direction - self.floris_wind_direction) > self.floris_wd_threshold
+            or np.abs(floris_wind_speed - self.floris_wind_speed) > self.floris_ws_threshold
+            or np.abs(floris_ti - self.floris_ti) > self.floris_ti_threshold
+            or np.any(np.abs(floris_derating - self.floris_derating) > self.floris_derating_threshold)
+        ):
+            # If verbose
+            if self.verbose:
+                print("...Updating FLORIS model==================================================================")
+
+            # Update the FLORIS inputs
+            self.floris_wind_direction = floris_wind_direction
+            self.floris_wind_speed = floris_wind_speed
+            self.floris_ti = floris_ti
+            self.floris_derating = floris_derating
+
+            # Update the FLORIS model
+            self.fmodel.set(
+                wind_directions=[self.floris_wind_direction],
+                wind_speeds=[self.floris_wind_speed],
+                turbulence_intensities=[self.floris_ti],
+                power_setpoints= 1000 * self.floris_derating,
+            )
+            self.fmodel.run()
+
+            # Compute the deficits
+            velocities = self.fmodel.turbine_average_velocities.flatten()
+            self.floris_wake_deficits =  velocities.max() - velocities
+
+            # Update the number of FLORIS calculations
+            self.num_floris_calcs += 1
+
+            if self.verbose:
+                print(f"Num of FLORIS calculations = {self.num_floris_calcs}")
+        
+
+    def update_derating_buffer(self, derating):
+        
+        # Update the derating buffer
+        self.derating_buffer[self.derating_buffer_idx, :] = derating
+
+        # Increment the index
+        self.derating_buffer_idx = (self.derating_buffer_idx + 1) % self.floris_time_window_width
 
     def return_outputs(self):
         return {
@@ -183,23 +253,33 @@ class WindSimLongTerm:
             print("sim_time_s = ", sim_time_s)
 
         # select appropriate row based on current time
-        time_index = self.start_idx + int(sim_time_s * self.stride)
+        time_index = int(sim_time_s / self.dt)
         if self.verbose:
             print("time_index = ", time_index)
+
+        # Grab the instantaneous derating signal and update the derating buffer
+        derating = np.array([inputs["py_sims"]["inputs"][f"derating_{t_idx:03d}"] for t_idx in range(self.n_turbines)])
+        self.update_derating_buffer(derating)
 
         # Get the unwaked velocities
         # TODO: This is more a debugging thing, not really necessary
         self.unwaked_velocities = self.ws_mat[time_index, :]
 
-        # Get the waked velocities
-        self.waked_velocities = self.compute_waked_velocities(time_index)
+        # Check if it is time to update the waked velocities
+        if time_index % self.floris_update_time == 0:
+            if self.verbose:
+                print(".check for floris update...")
+            self.update_wake_deficits(time_index)
+
+        # Compute waked velocities
+        self.waked_velocities = self.ws_mat[time_index, :] - self.floris_wake_deficits
 
         # Update the turbine powers given the input wind speeds and derating
         self.power = np.array(
             [
                 self.turbine_array[t_idx].step(
                     self.waked_velocities[t_idx],
-                    derating=inputs["py_sims"]["inputs"][f"derating_{t_idx:03d}"],
+                    derating=derating[t_idx],
                 )
                 for t_idx in range(self.n_turbines)
             ]

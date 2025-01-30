@@ -48,7 +48,7 @@ class EmulatorNoHelics():
 
         # Initialize time # TODO - does this belong in 'initial conditions' instead?
         if self.main_dict["py_sims"]:
-            self.main_dict["py_sims"]["inputs"]["sim_time_s"] = 0.0
+            self.main_dict["py_sims"]["inputs"]["sim_time_s"] = self.starttime
 
         # Read in any external data
         self.external_data_all = {}

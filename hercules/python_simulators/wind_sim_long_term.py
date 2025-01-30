@@ -7,11 +7,13 @@ from hercules.utilities import load_yaml
 from scipy.interpolate import interp1d
 from scipy.stats import circmean
 
-# Note time in this non-helics framework will take some thinking but thinking that it will be something like this:
-# 1. The weather data will provide Timestamps per row with some actual date time
+# Note time in this non-helics framework will take some thinking but thinking 
+# that it will be something like this:
+# 1. The wind input data will provide Timestamps per row with some actual date time
 # 2. Solar data should be similar
 # 3. Market data should be similar
-# 4. The starttime and endtime in the hercules input file will be in seconds and relative to the start of the weather data
+# 4. The starttime and endtime in the hercules input file will be in seconds
+#    and relative to the start of the wind input data
 
 
 class WindSimLongTerm:

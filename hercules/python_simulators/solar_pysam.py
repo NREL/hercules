@@ -6,6 +6,7 @@ import json
 import numpy as np
 import pandas as pd
 import PySAM.Pvsamv1 as pvsam
+import PySAM.Pvsamv1Tools
 
 
 class SolarPySAM:
@@ -179,6 +180,9 @@ class SolarPySAM:
         # print('----------------------------------------------')
         # print('solar_resource_data = ',solar_resource_data)
 
+        target_system_capacity = input_dict["target_system_capacity"]
+        target_ratio = input_dict["target_dc_ac_ratio"]
+        n_strings, n_combiners, n_inverters, calculated_system_capacity = PySAM.Pvsamv1Tools.size_electrical_parameters(system_model, target_system_capacity, target_ratio)
         system_model.execute()
         out = system_model.Outputs.export()
 

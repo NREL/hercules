@@ -80,6 +80,8 @@ class SolarPySAM:
         self.dc_power_mw = input_dict["initial_conditions"]["power"]
         self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
+        self.target_system_capacity = input_dict["target_system_capacity"]
+        self.target_dc_ac_ratio = input_dict["target_dc_ac_ratio"]
 
     def return_outputs(self):
         return {
@@ -183,9 +185,9 @@ class SolarPySAM:
         # print('----------------------------------------------')
         # print('solar_resource_data = ',solar_resource_data)
 
-        target_system_capacity = input_dict["target_system_capacity"]
+        target_system_capacity = self.target_system_capacity
         #target_system_capacity = self.power_mw * 1000 #kWdc (where is this specified)
-        target_ratio = input_dict["target_dc_ac_ratio"]
+        target_ratio = self.target_dc_ac_ratio
         #target_ratio = 1.3 #probably hardcoded DC/AC
         n_strings, n_combiners, n_inverters, calculated_system_capacity = tools.Pvsamv1Tools.size_electrical_parameters(system_model, target_system_capacity, target_ratio)
         #n_strings, n_combiners, n_inverters, calculated_system_capacity = PySAM.Pvsamv1Tools.size_electrical_parameters(system_model, target_system_capacity, target_ratio)

@@ -194,7 +194,7 @@ class SolarPySAM:
         #target_system_capacity = self.power_mw * 1000 #kWdc (where is this specified)
         target_ratio = self.target_dc_ac_ratio
         #target_ratio = 1.3 #probably hardcoded DC/AC
-        n_strings, n_combiners, n_inverters, calculated_system_capacity = hercules.tools.Pvsamv1Tools.size_electrical_parameters(system_model, target_system_capacity, target_ratio)
+        n_strings, n_combiners, n_inverters, calculated_system_capacity = tools.Pvsamv1Tools.size_electrical_parameters(system_model, target_system_capacity, target_ratio)
         #n_strings, n_combiners, n_inverters, calculated_system_capacity = PySAM.Pvsamv1Tools.size_electrical_parameters(system_model, target_system_capacity, target_ratio)
 
         system_model.execute()

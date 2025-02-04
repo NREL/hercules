@@ -12,7 +12,7 @@ import sys
 # setting path
 sys.path.append('../hercules')
 
-import hercules.tools.Pvsamv1Tools
+import tools.Pvsamv1Tools
 import math
 from typing import List, Optional
 

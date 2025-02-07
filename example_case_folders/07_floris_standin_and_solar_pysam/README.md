@@ -2,29 +2,20 @@
 
 ## Description
 
-This example demonstrates how to use the FLORIS Standin and a solar model using pysam.
+This example demonstrates how to use the FLORIS Standin and a solar model using pysam.  The simulation should run for 20 simulated seconds.
+
 
 ## Running
 
 To run the example, execute the following command in the terminal:
 
 ```bash
-bash batch_script.sh
+bash run_script.sh
 ```
+## Outputs
 
+To plot the outputs run the following command in the terminal:
 
-To run `hercules` using the PV plant controller, which provides power setpoints and adjusts the PV power output accordingly, ensure the following line is uncommented in `batch_script.sh`:
-
+```bash
+python plot_outputs.py
 ```
-python3 hercules_runscript.py hercules_controller_input_000.yaml >> outputs/loghercules.log 2>&1 &
-```
-
-To run `hercules` without the PV plant controller, ensure the folling line is uncommented `batch_script.sh`:
-
-```
-python3 hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 &
-```
-
-## Notes
-
-Make sure hercules conda or venv is activated before running the example.

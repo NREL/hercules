@@ -25,7 +25,7 @@ def get_solar_params():
         },
 
         "system_info_file_name": path+
-            '/../../example_case_folders/07_floris_standin_and_solar_pysam/100MW_1axis_pvsamv1.json',
+            '/../test_inputs/100MW_1axis_pvsamv1.json',
         "lat": 39.7442, 
         "lon": -105.1778, 
         "elev": 1829,

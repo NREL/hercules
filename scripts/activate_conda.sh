@@ -8,7 +8,8 @@ if [ -f "/home/$USER/anaconda3/etc/profile.d/conda.sh" ]; then
     CONDA_PATH="/home/$USER/anaconda3/etc/profile.d/conda.sh"
 elif [ -f "/Users/$USER/anaconda3/etc/profile.d/conda.sh" ]; then
     # Common path for Anaconda on macOS
-    CONDA_PATH="/Users/$USER/anaconda3/etc/profile.d/conda.sh"
+    # CONDA_PATH="/Users/$USER/anaconda3/etc/profile.d/conda.sh"
+    CONDA_PATH="/Users/$USER/miniforge3/etc/profile.d/conda.sh"
 elif [ -f "/opt/anaconda3/etc/profile.d/conda.sh" ]; then
     # Alternative system-wide installation path
     CONDA_PATH="/opt/anaconda3/etc/profile.d/conda.sh"
@@ -22,7 +23,8 @@ else
     echo "Conda installation not found. Please ensure Conda is installed and in your PATH."
     exit 1
 fi
+echo "$CONDA_PATH"
 
 # Source the Conda initialization script
 source "$CONDA_PATH"
-conda activate hercules
+conda activate hercules-pysam6-whoc

@@ -3,11 +3,11 @@
 import numpy as np
 import pandas as pd
 from floris import FlorisModel
-from hercules.utilities import load_yaml
+from hercules.utilities import load_yaml, load_perffile
 from scipy.interpolate import interp1d
 from scipy.stats import circmean
 
-# Note time in this non-helics framework will take some thinking but thinking
+# Note time in this non-helics framework will take some thinking but thinking 
 # that it will be something like this:
 # 1. The wind input data will provide Timestamps per row with some actual date time
 # 2. Solar data should be similar
@@ -15,6 +15,7 @@ from scipy.stats import circmean
 # 4. The starttime and endtime in the hercules input file will be in seconds
 #    and relative to the start of the wind input data
 
+RPM2RADperSec = 2 * np.pi / 60.0
 
 class WindSimLongTerm:
     def __init__(self, input_dict, dt):
@@ -165,6 +166,15 @@ class WindSimLongTerm:
                 )
                 for t_idx in range(self.n_turbines)
             ]
+        elif self.turbine_model_type == "dof1_model":
+            self.turbine_array = [
+                Turbine1dofModel(
+                    self.turbine_dict, self.dt, self.fmodel, self.waked_velocities[t_idx]
+                )
+                for t_idx in range(self.n_turbines)
+            ]
+        else:
+            raise Exception('Turbine model type should be either fileter_model or dof1_model')
 
         # Initialize the power array to the initial wind speeds
         self.power = np.array(
@@ -339,3 +349,63 @@ class TurbineFilterModel:
 
         # Return the power
         return power
+
+class Turbine1dofModel:
+    def __init__(self, turbine_dict, dt, fmodel, initial_wind_speed):
+        # Save the time step
+        self.dt = dt
+
+        # Save the turbine dict
+        self.turbine_dict = turbine_dict
+
+        # Obtain more data from floris
+        turbine_type = fmodel.core.farm.turbine_definitions[0]
+        self.rotor_radius = turbine_type['rotor_diameter']/2
+        self.rotor_area = np.pi*self.rotor_radius**2
+        
+
+        # Save performance data functions
+        perffile = turbine_dict['dof1_model']['cq_table_file']
+        self.perffuncs = load_perffile(perffile)
+
+        self.rho = self.turbine_dict['dof1_model']['rho']
+        omega0 = self.turbine_dict['dof1_model']['initial_rpm']*RPM2RADperSec
+        pitch,gentq = self.simplecontroller(initial_wind_speed,omega0)
+        tsr = self.rotor_radius*omega0/initial_wind_speed
+        self.prev_power = self.perffuncs['Cp']([tsr,pitch]) * 0.5 * self.rho * self.rotor_area * initial_wind_speed**3
+        self.prev_omega = omega0
+        self.prev_aerotq = 0.5 * self.rho * self.rotor_area * self.rotor_radius * initial_wind_speed ** 2 * self.perffuncs["Cq"]([tsr, pitch])
+        self.prev_gentq = gentq
+        
+        pass
+        
+    def step(self, wind_speed, derating=0.0):
+        pitch,gentq = self.simplecontroller(wind_speed,self.prev_omega)
+        tsr = float(self.prev_omega * self.rotor_radius / wind_speed)
+        
+        aerotq = (
+            0.5
+            * self.rho
+            * self.rotor_area
+            * self.rotor_radius
+            * wind_speed ** 2
+            * self.perffuncs["Cq"]([tsr, pitch])
+        )
+        omega = self.prev_omega + (aerotq - self.prev_gentq*self.turbine_dict['dof1_model']['gearbox_ratio']) * self.dt / self.turbine_dict['dof1_model']['rotor_inertia']
+        
+        power = self.perffuncs['Cp']([tsr,pitch]) * 0.5 * self.rho * self.rotor_area * wind_speed**3
+
+        self.prev_omega = omega
+        self.prev_aerotq = aerotq
+        self.prev_power = power
+        
+        return power
+
+
+    def simplecontroller(self,wind_speed,omega):
+        # if omega <= self.turbine_dict['dof1_model']['rated_wind_speed']:
+        pitch = 0.0
+        gentorque = self.turbine_dict['dof1_model']['controller']['r2_k_torque'] * omega**2
+        # else
+        #     raise Exception("Region-3 controller not implemented yet")
+        return pitch,gentorque

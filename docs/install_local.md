@@ -107,31 +107,39 @@ bash run_script.sh
 ## Running manually
 
 To run locally without the included runscript using a standin for AMR-Wind, launch 3 separate 
-terminals. In each, `conda activate` your hercules environment (`conda 
+terminals. These three terminals will be used to execute one of each of the three main run command lines in the run_script.sh file.
+
+In each, `conda activate` your hercules environment (`conda 
 activate hercules`). 
 
-In the first terminal, run
+In the first terminal, run the helics launch command below, which does not change between runs:
 ```
 helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT &
 ```
 from any directory.
 
-In the second and third terminals, navigate to 
-hercules/example_case_folders/example_sim_05 (you'll need to be on the 
-develop branch of hercules). Then, in one of these 
-terminals, run 
+In the second terminal, navigate to the run directory and run the Hercules launch command. This comand will be different based on which wind simulator you are using, but has the form:
+
 ```
-python hercules_runscript_dummy_amr.py amr_input.inp
+python <Hercules emulator python launch script>.py <Hercules input file>.inp $HELICS_PORT >> outputs/<Hercules log file>.log 2>&1
 ```
-and in the other, run
+An example of this is the following, which uses the floris standin model:
 ```
-python hercules_runscript.py hercules_input_000.yaml
+python hercules_runscript_CLcontrol.py hercules_input_000.yaml $HELICS_PORT >> outputs/loghercules_cl.log 2>&1 &
 ```
 
-The first of these launches the dummy stand-in for AMR-wind, and the second 
-launches the hercules emulator. These will connect to the helics_broker and 
-run the co-simulation. You should see printout from both the dummy AMR-wind 
-process and the hercules emulator printed to your screen.
+In the third terminal, navigate to the run directory and run the wind simulator launch command. This command will be different based on which wind simulator you are using, but has the form:
+
+```
+python <wind simulator python launch script>.py <wind farm input file>.inp <wind input data file>.csv $HELICS_PORT >> outputs/<wind log file>.log 2>&1
+```
+An example of this is the following, which uses the floris standin model:
+```
+python floris_runscript.py amr_input.inp floris_standin_data.csv $HELICS_PORT >> outputs/logfloris_cl.log 2>&1
+```
+
+These will connect to the helics_broker and 
+run the co-simulation. You should see printout from both the wind simulator and the hercules emulator printed to your screen.
 
 
 However, if the simulation hangs, be sure to check if there are multiple processes running with 

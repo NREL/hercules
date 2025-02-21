@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
-  <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
@@ -80,7 +77,6 @@
     <link rel="prev" title="Installation" href="install_instructions.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -96,8 +92,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -105,6 +112,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search this book..."
          aria-label="Search this book..."
          autocomplete="off"
@@ -112,8 +120,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -129,8 +137,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -160,17 +167,21 @@
     
     
     <img src="_static/herc.png" class="logo__image only-light" alt="HERCULES - Home"/>
-    <img src="_static/herc.png" class="logo__image only-dark pst-js-only" alt="HERCULES - Home"/>
+    <script>document.write(`<img src="_static/herc.png" class="logo__image only-dark" alt="HERCULES - Home"/>`);</script>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button></div>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -185,7 +196,6 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="install_instructions.html">Installation</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Local installation instructions</a></li>
-
 
 
 <li class="toctree-l1"><a class="reference internal" href="install_on_kestrel.html">Installation on Kestrel</a></li>
@@ -379,16 +389,24 @@
 
 
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
 
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
 <button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
@@ -413,9 +431,23 @@
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Local installation instructions</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-local">Running [Local]</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-kestrel">Running [Kestrel]</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conda-environment">Conda environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hercules">Hercules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#seas-electrolyzer-pysam-and-whoc">SEAS, Electrolyzer, PySAM, and WHOC</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#seas">SEAS</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#electrolyzer">Electrolyzer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyyaml">PyYAML</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#whoc">WHOC</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-local">Running [Local]</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-run-scripts">Using the run scripts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-manually">Running manually</a></li>
+</ul>
+</li>
 </ul>
 
             </nav>
@@ -433,11 +465,16 @@
 </section>
 <section class="tex2jax_ignore mathjax_ignore" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
+<section id="conda-environment">
+<h2>Conda environment<a class="headerlink" href="#conda-environment" title="Link to this heading">#</a></h2>
 <p>Create a new conda environment for hercules:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">hercules</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11</span>
 <span class="n">conda</span> <span class="n">activate</span> <span class="n">hercules</span>
 </pre></div>
 </div>
+</section>
+<section id="hercules">
+<h2>Hercules<a class="headerlink" href="#hercules" title="Link to this heading">#</a></h2>
 <p>If you haven’t already cloned hercules:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NREL</span><span class="o">/</span><span class="n">hercules</span>
 </pre></div>
@@ -448,9 +485,14 @@
 </div>
 <p>Possibly, <code class="docutils literal notranslate"><span class="pre">cd</span></code> into hercules and switch to the
 develop branch.</p>
+</section>
+<section id="seas-electrolyzer-pysam-and-whoc">
+<h2>SEAS, Electrolyzer, PySAM, and WHOC<a class="headerlink" href="#seas-electrolyzer-pysam-and-whoc" title="Link to this heading">#</a></h2>
+<section id="seas">
+<h3>SEAS<a class="headerlink" href="#seas" title="Link to this heading">#</a></h3>
 <p>SEAS is also required for hercules. To install
 SEAS, use</p>
-<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">https://github.com/NREL/SEAS/blob/main/SEAS.tar.gz?raw=true</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">https://github.com/NREL/SEAS/blob/v1/SEAS.tar.gz?raw=true</span></code></p>
 <p>If this fails, the following may work instead (but you need permissions):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">nrel</span><span class="o">.</span><span class="n">gov</span><span class="o">/</span><span class="n">SEAS</span><span class="o">/</span><span class="n">SEAS</span>
 <span class="n">cd</span> <span class="n">SEAS</span>
@@ -467,6 +509,9 @@ SEAS, use</p>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">SEAS</span>
 </pre></div>
 </div>
+</section>
+<section id="electrolyzer">
+<h3>Electrolyzer<a class="headerlink" href="#electrolyzer" title="Link to this heading">#</a></h3>
 <p>A python electrolyzer model is also required for hercules. To install
 the electrolyzer, use</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">NREL</span><span class="o">/</span><span class="n">electrolyzer</span><span class="o">.</span><span class="n">git</span>
@@ -484,14 +529,16 @@ the electrolyzer, use</p>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">electrolyzer</span>
 </pre></div>
 </div>
-<p>NREL’s PySAM software is also required for hercules. To install, use</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">nrel</span><span class="o">-</span><span class="n">pysam</span><span class="o">==</span><span class="mf">4.2.0</span>
-</pre></div>
-</div>
+</section>
+<section id="pyyaml">
+<h3>PyYAML<a class="headerlink" href="#pyyaml" title="Link to this heading">#</a></h3>
 <p>If you run hercules and get an error that <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code> is missing, you may also need to install it using</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">pyyaml</span>
 </pre></div>
 </div>
+</section>
+<section id="whoc">
+<h3>WHOC<a class="headerlink" href="#whoc" title="Link to this heading">#</a></h3>
 <p>NREL’s Wind Hybrid Open Controller (WHOC) software is used to implement controllers in the Hercules platform. This package is not essential to run Hercules by itself, but is needed to implement any controls in the platform. Example 06 has an example of how this is used to control a battery based on wind farm power output.</p>
 <p>To install:
 Go back to herc_root</p>
@@ -502,144 +549,22 @@ Go back to herc_root</p>
 </pre></div>
 </div>
 <p>Note: if you want the newest updates to the WHOC repository, you can checkout the develop branch instead of the main branch.</p>
-<!--
-# Other steps for era 5
-Now need to add a file called APIKEY which contains the API Key you'll find in your data.planetos account
-
-The instructions said to place it in the folder
-OpenOA/operational_analysis/toolkits
-
-But I found I also had to copy it down to here:
-/Users/pfleming/opt/anaconda3/envs/hercules/lib/python3.8/site-packages/operational_analysis/toolkits/
-
-Col
--->
+</section>
+</section>
 </section>
 <section class="tex2jax_ignore mathjax_ignore" id="running-local">
 <h1>Running [Local]<a class="headerlink" href="#running-local" title="Link to this heading">#</a></h1>
-<p>To run locally using a standin for AMR-Wind, launch 3 separate
-terminals. In each, <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span></code> your hercules environment (<code class="docutils literal notranslate"><span class="pre">conda</span>&#160; <span class="pre">activate</span> <span class="pre">hercules</span></code>).</p>
-<p>In the first terminal, run</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>helics_broker -f 2 --consoleloglevel=trace --loglevel=debug --local_port=$HELICS_PORT &amp;
+<section id="using-the-run-scripts">
+<h2>Using the run scripts<a class="headerlink" href="#using-the-run-scripts" title="Link to this heading">#</a></h2>
+<p>The simplest way to run hercules is to use the provided run scripts via:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bash</span> <span class="n">run_script</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>from any directory.</p>
-<p>In the second and third terminals, navigate to
-hercules/example_case_folders/example_sim_05 (you’ll need to be on the
-develop branch of hercules). Then, in one of these
-terminals, run</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">hercules_runscript_dummy_amr</span><span class="o">.</span><span class="n">py</span> <span class="n">amr_input</span><span class="o">.</span><span class="n">inp</span>
-</pre></div>
-</div>
-<p>and in the other, run</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">hercules_runscript</span><span class="o">.</span><span class="n">py</span> <span class="n">hercules_input_000</span><span class="o">.</span><span class="n">yaml</span>
-</pre></div>
-</div>
-<p>The first of these launches the dummy stand-in for AMR-wind, and the second
-launches the hercules emulator. These will connect to the helics_broker and
-run the co-simulation. You should see printout from both the dummy AMR-wind
-process and the hercules emulator printed to your screen.</p>
-<p>Alternatively, the bash files in each example are set up to be run from the terminal using</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">bash_script</span><span class="o">.</span><span class="n">sh</span>
-</pre></div>
-</div>
-<p>However, if the simulation hangs, be sure to check if there are multiple processes running with</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span>
-</pre></div>
-</div>
-<p>which will tell you all of the processes currently working.  You can kill processes that you do not want by using the kill command, paired with the process ID (filled into the blank in the command below).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kill</span> <span class="o">&lt;</span><span class="n">PID</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<!--
-In 4 different terminals with location set to hercules/, type the following commands
-(This is more and more out of date)
-
-- Terminal 1: `python control_center.py`
-- Terminal 2: `python testclient.py`
-- Terminal 3: `python vis_client.py`
-- Terminal 4: `python front_end_dash.py`
--->
 </section>
-<section class="tex2jax_ignore mathjax_ignore" id="running-kestrel">
-<h1>Running [Kestrel]<a class="headerlink" href="#running-kestrel" title="Link to this heading">#</a></h1>
-<p>Running hercules in full requires installing AMR-Wind (likely on Kestrel/HPC).
-The steps are detailed in section <strong>HPC Installation</strong>.</p>
-<!--
-
-below, and assume that you have already installed 
-the other parts of hercules as described above under **Installation**. 
--->
-<!--
-```bash
-    # After connecting to eagle, reconnect or start a new screen (helpful for disconnects)
-    # To detach later while keeping session: ctrl+a d
-    screen -r emulator # If already exists, otherwise: screen -S emulator
-
-    # Next request nodes, in my case I use a saved alias from Matt C
-    interactive_4node_high # Requesting 4 nodes
-
-    # When you have the interactive node, note the name of the node in the command line, 
-    # You will need this, it will be something like rXXXnXX or something
-
-    # Once these are granted can run AMRWind, first need to call the setup function
-    # Defined in your .bashrc or .bash_profile:
-    # amr_env_emulator <- what I used to do
-    module purge
-    module load helics
-    --or--
-    module load helics/helics-3.1.0_openmpi
-    
-    module load netcdf-c/4.7.3/gcc-mpi
-
-    # Go to the AMR-Wind case folder
-    cd test_folder
-
-    # When ready to run AMR wind, something like:
-    # srun -n 144 amr_wind input.i # Where 144 comes from nodes=4 * 36
-    mpirun -n 1 ~/c2c/amr-wind/build/amr_wind input.i
-    --or--
-    mpirun -n 1 /projects/aumc/mbrazell/amr-wind/build4/amr_wind input.i
-    
-```
-
-### Setting up tunnel for serving the front end
-```bash
-    # Use the name of the node in the command, run locally from your machine
-    # In a new terminal
-    ssh -L 8050:rXXXnXX:8050 el1.hpc.nrel.gov
-```
-
-### Running the python codes
-```bash
-    # Will now need 4 additional terminals logged into eagle, in each case:
-
-    # ssh all 4 into the same node
-    ssh rXXXnXX
-
-    # Probably you then need to setup your conda environment, in my case 
-    # I call a function saved to my profile
-    hercules_go
-
-    # Launch the helics broker
-    helics_broker -f 2
-
-    # Finally launch one of these in each terminal
-    python control_center.py
-    # OR #
-    python vis_client.py
-    # OR #
-    python front_end_dash.py
-```
-
-### Final setps
-```bash
-    # If not already running, run amr_wind
-
-    # The terminal running front_end_dash.py will show a web address
-    # Enter that address into a web browser on your local machine
-```
--->
+<section id="running-manually">
+<h2>Running manually<a class="headerlink" href="#running-manually" title="Link to this heading">#</a></h2>
+<p>It is recommended to run primarily using the run scripts as they will handle the launching of the various components of the hercules platform. However, if you wish to run manually, referring to the sequence of commands in the run_script.sh file will be helpful to see how to execute various configurations of the platform.</p>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -697,8 +622,7 @@ the other parts of hercules as described above under **Installation**.
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -708,9 +632,23 @@ the other parts of hercules as described above under **Installation**.
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Local installation instructions</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-local">Running [Local]</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-kestrel">Running [Kestrel]</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conda-environment">Conda environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hercules">Hercules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#seas-electrolyzer-pysam-and-whoc">SEAS, Electrolyzer, PySAM, and WHOC</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#seas">SEAS</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#electrolyzer">Electrolyzer</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pyyaml">PyYAML</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#whoc">WHOC</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#running-local">Running [Local]</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-run-scripts">Using the run scripts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-manually">Running manually</a></li>
+</ul>
+</li>
 </ul>
 
   </nav></div>
@@ -760,8 +698,8 @@ By National Renewable Energy Laboratory
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

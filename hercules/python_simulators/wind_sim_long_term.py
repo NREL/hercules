@@ -7,7 +7,7 @@ from hercules.utilities import load_yaml
 from scipy.interpolate import interp1d
 from scipy.stats import circmean
 
-# Note time in this non-helics framework will take some thinking but thinking 
+# Note time in this non-helics framework will take some thinking but thinking
 # that it will be something like this:
 # 1. The wind input data will provide Timestamps per row with some actual date time
 # 2. Solar data should be similar
@@ -35,8 +35,8 @@ class WindSimLongTerm:
         self.num_floris_calcs = 0
 
         # Get the start time
-        #TODO: NEED TO ACTUALLY FIGURE OUT HOW TO DO THIS
-        self.start_time_s = 0 #input_dict["sim_time_s"]
+        # TODO: NEED TO ACTUALLY FIGURE OUT HOW TO DO THIS
+        self.start_time_s = 0  # input_dict["sim_time_s"]
 
         # Get the start index
         self.start_idx = int(self.start_time_s / self.dt)
@@ -50,9 +50,7 @@ class WindSimLongTerm:
         df_wi = pd.read_csv(self.wind_input_filename)
 
         # Like solar_pysam, make time a datetimeindex
-        df_wi["Timestamp"] = pd.DatetimeIndex(
-            pd.to_datetime(df_wi["Timestamp"], format="ISO8601")
-        )
+        df_wi["Timestamp"] = pd.DatetimeIndex(pd.to_datetime(df_wi["Timestamp"], format="ISO8601"))
         df_wi = df_wi.set_index("Timestamp")
 
         # Determine the dt implied by the weather file
@@ -63,17 +61,14 @@ class WindSimLongTerm:
 
         # The time step within the weather file must be an integer multiple of the dt
         if self.dt % self.dt_wi != 0:
-            raise ValueError(
-                f"dt ({self.dt}) must be an integer multiple of dt_wi ({self.dt_wi})"
-            )
-        
+            raise ValueError(f"dt ({self.dt}) must be an integer multiple of dt_wi ({self.dt_wi})")
+
         # If dt_wi is less than dt, then resample df_wi so that its time steps are equal to dt
         if self.dt_wi < self.dt:
             num_steps_initial = df_wi.shape[0]
-            df_wi = df_wi.iloc[::int(self.dt/self.dt_wi)]
+            df_wi = df_wi.iloc[:: int(self.dt / self.dt_wi)]
             if self.verbose:
                 print(f"Resampled df_wi from {num_steps_initial} to {df_wi.shape[0]} rows")
-
 
         # FLORIS PREPARATION
 
@@ -89,12 +84,11 @@ class WindSimLongTerm:
         self.layout_y = self.fmodel.layout_y
         self.n_turbines = self.fmodel.n_turbines
 
-
         # TODO Switch this to an input
         self.floris_wd_threshold = 1.0
         self.floris_ws_threshold = 0.5
         self.floris_ti_threshold = 0.01
-        self.floris_derating_threshold = 10 #kW
+        self.floris_derating_threshold = 10  # kW
 
         # TODO Make this settable in the future
         # TODO make this in seconds and convert to array indices internally
@@ -107,11 +101,11 @@ class WindSimLongTerm:
         self.floris_update_time = int(self.floris_update_time_s / self.dt)
 
         # Declare the derating buffer to hold previous derating commands
-        self.derating_buffer = np.zeros((self.floris_time_window_width,self.n_turbines)) * np.nan
-        self.derating_buffer_idx = 0 # Initialize the index to 0
+        self.derating_buffer = np.zeros((self.floris_time_window_width, self.n_turbines)) * np.nan
+        self.derating_buffer_idx = 0  # Initialize the index to 0
 
         # Add an initial non-nan value to be over-written on first step
-        self.derating_buffer[0, :] = 1E12
+        self.derating_buffer[0, :] = 1e12
 
         # Convert the wind directions and wind speeds and ti to simply numpy matrices
         self.wd_mat = df_wi[[f"wd_{t_idx:03d}" for t_idx in range(self.n_turbines)]].to_numpy()
@@ -174,19 +168,17 @@ class WindSimLongTerm:
         # Update the user
         print(f"Initialized WindSimLongTerm with {self.n_turbines} turbines")
 
-
     def update_wake_deficits(self, time_idx):
-
         # Get the window start
         window_start = max(0, time_idx - self.floris_time_window_width)
 
         # Compute new values of the floris inputs
-        #TODO: CONFIRM THE +1 in the slice is right
+        # TODO: CONFIRM THE +1 in the slice is right
         floris_wind_direction = circmean(
-            self.wd_mat_mean[window_start:time_idx+1], high=360.0, low=0.0, nan_policy="omit"
+            self.wd_mat_mean[window_start : time_idx + 1], high=360.0, low=0.0, nan_policy="omit"
         )
-        floris_wind_speed = np.mean(self.ws_mat_mean[window_start:time_idx+1])
-        floris_ti = np.mean(self.ti_mat_mean[window_start:time_idx+1])
+        floris_wind_speed = np.mean(self.ws_mat_mean[window_start : time_idx + 1])
+        floris_ti = np.mean(self.ti_mat_mean[window_start : time_idx + 1])
 
         # Compute the deratings over the same window
         floris_derating = np.nanmean(self.derating_buffer, axis=0)
@@ -199,11 +191,13 @@ class WindSimLongTerm:
             np.abs(floris_wind_direction - self.floris_wind_direction) > self.floris_wd_threshold
             or np.abs(floris_wind_speed - self.floris_wind_speed) > self.floris_ws_threshold
             or np.abs(floris_ti - self.floris_ti) > self.floris_ti_threshold
-            or np.any(np.abs(floris_derating - self.floris_derating) > self.floris_derating_threshold)
+            or np.any(
+                np.abs(floris_derating - self.floris_derating) > self.floris_derating_threshold
+            )
         ):
             # If verbose
             if self.verbose:
-                print("...Updating FLORIS model==================================================================")
+                print("...Updating FLORIS model==========================================")
 
             # Update the FLORIS inputs
             self.floris_wind_direction = floris_wind_direction
@@ -216,23 +210,21 @@ class WindSimLongTerm:
                 wind_directions=[self.floris_wind_direction],
                 wind_speeds=[self.floris_wind_speed],
                 turbulence_intensities=[self.floris_ti],
-                power_setpoints= 1000 * self.floris_derating,
+                power_setpoints=1000 * self.floris_derating,
             )
             self.fmodel.run()
 
             # Compute the deficits
             velocities = self.fmodel.turbine_average_velocities.flatten()
-            self.floris_wake_deficits =  velocities.max() - velocities
+            self.floris_wake_deficits = velocities.max() - velocities
 
             # Update the number of FLORIS calculations
             self.num_floris_calcs += 1
 
             if self.verbose:
                 print(f"Num of FLORIS calculations = {self.num_floris_calcs}")
-        
 
     def update_derating_buffer(self, derating):
-        
         # Update the derating buffer
         self.derating_buffer[self.derating_buffer_idx, :] = derating
 
@@ -260,7 +252,12 @@ class WindSimLongTerm:
             print("time_index = ", time_index)
 
         # Grab the instantaneous derating signal and update the derating buffer
-        derating = np.array([inputs["py_sims"]["inputs"][f"derating_{t_idx:03d}"] for t_idx in range(self.n_turbines)])
+        derating = np.array(
+            [
+                inputs["py_sims"]["inputs"][f"derating_{t_idx:03d}"]
+                for t_idx in range(self.n_turbines)
+            ]
+        )
         self.update_derating_buffer(derating)
 
         # Get the unwaked velocities

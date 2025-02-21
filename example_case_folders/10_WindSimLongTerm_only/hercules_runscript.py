@@ -15,7 +15,6 @@ input_dict = load_yaml(sys.argv[1])
 # input_dict = load_yaml("hercules_input_000.yaml")
 
 
-
 controller = ControllerStandinNoHelics(input_dict)
 
 

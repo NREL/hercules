@@ -40,6 +40,9 @@ hercules/local_amr_wind_demo/sample_copy.nc
 !example_case_folders/07_floris_standin_and_solar_pysam/inputs/Flatirons_solar_data_precursor-tztest.csv
 !example_case_folders/07_floris_standin_and_solar_pysam/inputs/Flatirons_solar_data_highDNI.csv
 
+# Larger wind input file
+example_case_folders/12_WindSimLongTerm_RealisticInflow/inputs/wind_resource_rex
+
 # Some output files to ignore
 t_00*
 logdummy

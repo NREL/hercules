@@ -16,7 +16,8 @@ class ControllerStandinNoHelics:
 
     def __init__(self, input_dict):
         # Get wind farm information (assumes exactly one wind farm)
-        self.wf_name = list(input_dict["py_sims"].keys())[0] # Assumes WindSimLongTerm is first entry in py_sims
+        # Assumes WindSimLongTerm is first entry in py_sims
+        self.wf_name = list(input_dict["py_sims"].keys())[0] 
 
     @abstractmethod
     def step(self, main_dict):
@@ -28,7 +29,7 @@ class ControllerStandinNoHelics:
 
         # Lower t0 derating every other 100 seconds
         if main_dict["time"] % 200 < 100:
-            main_dict["py_sims"]['inputs'][f"derating_000"] = 500
+            main_dict["py_sims"]['inputs']["derating_000"] = 500
 
         # # Set turbine yaw angles based on current AMR-Wind wind direction
         # wd = main_dict["hercules_comms"]["amr_wind"][self.wf_name]["wind_direction"]

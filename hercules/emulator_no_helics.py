@@ -10,9 +10,9 @@ LOGFILE = str(dt.datetime.now()).replace(":", "_").replace(" ", "_").replace("."
 
 Path("outputs").mkdir(parents=True, exist_ok=True)
 
-class EmulatorNoHelics():
+
+class EmulatorNoHelics:
     def __init__(self, controller, py_sims, input_dict):
-        
         # Make sure output folder exists
         Path("outputs").mkdir(parents=True, exist_ok=True)
 
@@ -35,6 +35,8 @@ class EmulatorNoHelics():
         self.dt = input_dict["dt"]
         self.starttime = input_dict["starttime"]
         self.endtime = input_dict["endtime"]
+        self.total_simulation_time = self.endtime - self.starttime
+        self.total_simulation_days = self.total_simulation_time / 86400
         self.time = 0.0
 
         # Initialize components
@@ -54,8 +56,6 @@ class EmulatorNoHelics():
             self._read_external_data_file(input_dict["external_data_file"])
             self.external_signals = {}
             self.main_dict["external_signals"] = {}
-
-
 
         # TODO: NOT SURE WHETHER ANY OF THIS STUFF NEEDS TO BE BROUGHT IN
         # # TODO For now, need to assume for simplicity there is one and only
@@ -87,7 +87,6 @@ class EmulatorNoHelics():
         # self.wind_speed = 0
         # self.wind_direction = 0
 
-
     def _read_external_data_file(self, filename):
         # Read in the external data file
         df_ext = pd.read_csv(filename)
@@ -98,8 +97,8 @@ class EmulatorNoHelics():
         # Goes to 1 time step past stoptime specified in the input file.
         times = np.arange(
             self.helics_config_dict["starttime"],
-            self.helics_config_dict["stoptime"]+(2*self.dt),
-            self.dt
+            self.helics_config_dict["stoptime"] + (2 * self.dt),
+            self.dt,
         )
         self.external_data_all["time"] = times
         for c in df_ext.columns:
@@ -107,11 +106,29 @@ class EmulatorNoHelics():
                 self.external_data_all[c] = np.interp(times, df_ext.time, df_ext[c])
 
     def enter_execution(self, function_targets=[], function_arguments=[[]]):
+        # Record the current wall time
+        self.start_time_wall = dt.datetime.now()
+
         # Run the main loop
         self.run()
 
-    def run(self):
+        # Note the total elapsed time
+        self.end_time_wall = dt.datetime.now()
+        self.total_time_wall = self.end_time_wall - self.start_time_wall
 
+        # Update the user on time performance
+        print("=====================================")
+        print(
+            f"Total simulated time: {self.total_simulation_time} seconds ({self.total_simulation_days} days)"
+        )
+        print(f"Total wall time: {self.total_time_wall}")
+        print(
+            "Rate of simulation: ",
+            f"{self.total_simulation_time/self.total_time_wall.total_seconds():.1f}x real time"
+        )
+        print("=====================================")
+
+    def run(self):
         print(" #### Entering main loop #### ")
 
         self.first_iteration = True
@@ -134,10 +151,9 @@ class EmulatorNoHelics():
                 self.py_sims.step(self.main_dict)
                 self.main_dict["py_sims"] = self.py_sims.get_py_sim_dict()
 
-            
             # Log the current state
             self.log_main_dict()
-            
+
             # If this is first iteration print the input dict
             # And turn off the first iteration flag
             if self.first_iteration:
@@ -147,7 +163,6 @@ class EmulatorNoHelics():
 
             # Update the time
             self.time = self.time + self.dt
-
 
     def recursive_flatten_main_dict(self, nested_dict, prefix=""):
         # Recursively flatten the input dict
@@ -207,4 +222,3 @@ class EmulatorNoHelics():
 
     def parse_input_yaml(self, filename):
         pass
-

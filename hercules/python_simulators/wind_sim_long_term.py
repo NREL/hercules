@@ -47,7 +47,13 @@ class WindSimLongTerm:
         self.turbine_file_name = input_dict["turbine_file_name"]
 
         # Read in the weather file data
-        df_wi = pd.read_csv(self.wind_input_filename)
+        # If a csv file is provided, read it in
+        if self.wind_input_filename.endswith(".csv"):
+            df_wi = pd.read_csv(self.wind_input_filename)
+        elif self.wind_input_filename.endswith(".p"):
+            df_wi = pd.read_pickle(self.wind_input_filename)
+        else:
+            raise ValueError("Wind input file must be a .csv or .p file")
 
         # Like solar_pysam, make time a datetimeindex
         df_wi["Timestamp"] = pd.DatetimeIndex(pd.to_datetime(df_wi["Timestamp"], format="ISO8601"))

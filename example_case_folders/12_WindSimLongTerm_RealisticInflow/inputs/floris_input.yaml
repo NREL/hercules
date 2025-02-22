@@ -67,9 +67,15 @@ farm:
   # The order of the coordinates here corresponds to the index of the turbine in the primary
   # data structures.
   layout_x:
-  - 0.0
-  - 630.0
-  - 630.0
+  - 626248.7
+  - 628580.0
+  - 630911.2
+  - 633242.5
+  - 635573.7
+  - 637905.0
+  - 640236.2
+  - 642567.5
+  - 644898.8
 
   ###
   # Coordinates for the turbine locations in the y-direction which is typically considered
@@ -77,9 +83,15 @@ farm:
   # The order of the coordinates here corresponds to the index of the turbine in the primary
   # data structures.
   layout_y:
-  - 0.0
-  - 0.0 
-  - 500.0
+  - 4053422.7
+  - 4056660.2
+  - 4048075.3
+  - 4052600.3
+  - 4060462.5
+  - 4060531.3
+  - 4044673.8
+  - 4046353.9
+  - 4043148.8
 
   ###
   # Listing of turbine types for placement at the x and y coordinates given above.

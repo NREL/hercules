@@ -1,9 +1,8 @@
-# Example 10: Long Run Wind Only
+# Example 11: Long Run Wind Only: 1-DOF model
 
 ## Description
 
-...
-
+This example runs the 1-DOF long-duration wind simulation.
 
 ## Running
 

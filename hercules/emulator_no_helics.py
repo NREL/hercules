@@ -119,7 +119,8 @@ class EmulatorNoHelics:
         # Update the user on time performance
         print("=====================================")
         print(
-            f"Total simulated time: {self.total_simulation_time} seconds ({self.total_simulation_days} days)"
+            f"Total simulated time: {self.total_simulation_time} seconds \
+                ({self.total_simulation_days} days)"
         )
         print(f"Total wall time: {self.total_time_wall}")
         print(

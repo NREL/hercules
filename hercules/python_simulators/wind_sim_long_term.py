@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from floris import FlorisModel
-from hercules.utilities import load_yaml, load_perffile
+from hercules.utilities import load_perffile, load_yaml
 from scipy.interpolate import interp1d
 from scipy.stats import circmean
 
@@ -372,9 +372,22 @@ class Turbine1dofModel:
         omega0 = self.turbine_dict['dof1_model']['initial_rpm']*RPM2RADperSec
         pitch,gentq = self.simplecontroller(initial_wind_speed,omega0)
         tsr = self.rotor_radius*omega0/initial_wind_speed
-        self.prev_power = self.perffuncs['Cp']([tsr,pitch]) * 0.5 * self.rho * self.rotor_area * initial_wind_speed**3
+        self.prev_power = (
+            self.perffuncs["Cp"]([tsr, pitch])
+            * 0.5
+            * self.rho
+            * self.rotor_area
+            * initial_wind_speed**3
+        )
         self.prev_omega = omega0
-        self.prev_aerotq = 0.5 * self.rho * self.rotor_area * self.rotor_radius * initial_wind_speed ** 2 * self.perffuncs["Cq"]([tsr, pitch])
+        self.prev_aerotq = (
+            0.5
+            * self.rho
+            * self.rotor_area
+            * self.rotor_radius
+            * initial_wind_speed**2
+            * self.perffuncs["Cq"]([tsr, pitch])
+        )
         self.prev_gentq = gentq
         
         pass
@@ -391,7 +404,12 @@ class Turbine1dofModel:
             * wind_speed ** 2
             * self.perffuncs["Cq"]([tsr, pitch])
         )
-        omega = self.prev_omega + (aerotq - self.prev_gentq*self.turbine_dict['dof1_model']['gearbox_ratio']) * self.dt / self.turbine_dict['dof1_model']['rotor_inertia']
+        omega = (
+            self.prev_omega
+            + (aerotq - self.prev_gentq * self.turbine_dict["dof1_model"]["gearbox_ratio"])
+            * self.dt
+            / self.turbine_dict["dof1_model"]["rotor_inertia"]
+        )
         
         power = self.perffuncs['Cp']([tsr,pitch]) * 0.5 * self.rho * self.rotor_area * wind_speed**3
 

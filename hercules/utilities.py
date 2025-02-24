@@ -1,7 +1,9 @@
 import os
+
 import numpy as np
-from scipy.interpolate import interp1d, RegularGridInterpolator
 import yaml
+from scipy.interpolate import RegularGridInterpolator
+
 
 class Loader(yaml.SafeLoader):
     def __init__(self, stream):

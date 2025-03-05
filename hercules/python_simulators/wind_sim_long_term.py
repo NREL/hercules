@@ -370,6 +370,8 @@ class Turbine1dofModel:
         self.perffuncs = load_perffile(perffile)
 
         self.rho = self.turbine_dict['dof1_model']['rho']
+        self.max_pitch_rate = self.turbine_dict['dof1_model']['max_pitch_rate']
+        self.max_torque_rate = self.turbine_dict['dof1_model']['max_torque_rate']
         omega0 = self.turbine_dict['dof1_model']['initial_rpm']*RPM2RADperSec
         pitch,gentq = self.simplecontroller(initial_wind_speed,omega0)
         tsr = self.rotor_radius*omega0/initial_wind_speed
@@ -391,6 +393,7 @@ class Turbine1dofModel:
             * self.perffuncs["Cq"]([tsr, pitch])
         )
         self.prev_gentq = gentq
+        self.prev_pitch = pitch
         
         pass
         
@@ -415,6 +418,9 @@ class Turbine1dofModel:
             )
             pitch = optpitch.x
 
+        pitch = np.clip(pitch,self.prev_pitch-self.max_pitch_rate*self.dt,self.prev_pitch+self.max_pitch_rate*self.dt)
+        gentq = np.clip(gentq,self.prev_gentq-self.max_torque_rate*self.dt,self.prev_gentq+self.max_torque_rate*self.dt)
+
         aerotq = (
             0.5
             * self.rho
@@ -431,6 +437,7 @@ class Turbine1dofModel:
         self.prev_omega = omega
         self.prev_aerotq = aerotq
         self.prev_gentq = gentq
+        self.prev_pitch = pitch
         self.prev_power = power[0] / 1000.0
         
         return self.prev_power

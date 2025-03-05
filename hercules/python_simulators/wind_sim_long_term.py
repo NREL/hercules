@@ -5,6 +5,7 @@ import pandas as pd
 from floris import FlorisModel
 from hercules.utilities import load_perffile, load_yaml
 from scipy.interpolate import interp1d
+from scipy.optimize import minimize_scalar
 from scipy.stats import circmean
 
 # Note time in this non-helics framework will take some thinking but thinking 
@@ -372,13 +373,14 @@ class Turbine1dofModel:
         omega0 = self.turbine_dict['dof1_model']['initial_rpm']*RPM2RADperSec
         pitch,gentq = self.simplecontroller(initial_wind_speed,omega0)
         tsr = self.rotor_radius*omega0/initial_wind_speed
-        self.prev_power = (
+        prev_power = (
             self.perffuncs["Cp"]([tsr, pitch])
             * 0.5
             * self.rho
             * self.rotor_area
             * initial_wind_speed**3
         )
+        self.prev_power = np.array(prev_power[0]/1000.0)
         self.prev_omega = omega0
         self.prev_aerotq = (
             0.5
@@ -393,9 +395,26 @@ class Turbine1dofModel:
         pass
         
     def step(self, wind_speed, derating=0.0):
-        pitch,gentq = self.simplecontroller(wind_speed,self.prev_omega)
-        tsr = float(self.prev_omega * self.rotor_radius / wind_speed)
-        
+        omega = (
+            self.prev_omega
+            + (
+                self.prev_aerotq
+                - self.prev_gentq * self.turbine_dict["dof1_model"]["gearbox_ratio"]
+            )
+            * self.dt
+            / self.turbine_dict["dof1_model"]["rotor_inertia"]
+        )
+        pitch,gentq = self.simplecontroller(wind_speed,omega)
+        tsr = float(omega * self.rotor_radius / wind_speed)
+        if derating > 0:
+            desiredcp = derating*1000 / ( 0.5 * self.rho * self.rotor_area * wind_speed**3)
+            optpitch = minimize_scalar(
+                lambda p: abs(float(self.perffuncs["Cp"]([tsr, float(p)])) - desiredcp),
+                method='bounded',
+                bounds=(0,1.57)
+            )
+            pitch = optpitch.x
+
         aerotq = (
             0.5
             * self.rho
@@ -404,21 +423,17 @@ class Turbine1dofModel:
             * wind_speed ** 2
             * self.perffuncs["Cq"]([tsr, pitch])
         )
-        omega = (
-            self.prev_omega
-            + (aerotq - self.prev_gentq * self.turbine_dict["dof1_model"]["gearbox_ratio"])
-            * self.dt
-            / self.turbine_dict["dof1_model"]["rotor_inertia"]
+
+        power = (
+            self.perffuncs["Cp"]([tsr, pitch]) * 0.5 * self.rho * self.rotor_area * wind_speed**3
         )
-        
-        power = self.perffuncs['Cp']([tsr,pitch]) * 0.5 * self.rho * self.rotor_area * wind_speed**3
 
         self.prev_omega = omega
         self.prev_aerotq = aerotq
-        self.prev_power = power
+        self.prev_gentq = gentq
+        self.prev_power = power[0] / 1000.0
         
-        return power
-
+        return self.prev_power
 
     def simplecontroller(self,wind_speed,omega):
         # if omega <= self.turbine_dict['dof1_model']['rated_wind_speed']:

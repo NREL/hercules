@@ -418,8 +418,16 @@ class Turbine1dofModel:
             )
             pitch = optpitch.x
 
-        pitch = np.clip(pitch,self.prev_pitch-self.max_pitch_rate*self.dt,self.prev_pitch+self.max_pitch_rate*self.dt)
-        gentq = np.clip(gentq,self.prev_gentq-self.max_torque_rate*self.dt,self.prev_gentq+self.max_torque_rate*self.dt)
+        pitch = np.clip(
+            pitch,
+            self.prev_pitch - self.max_pitch_rate * self.dt,
+            self.prev_pitch + self.max_pitch_rate * self.dt,
+        )
+        gentq = np.clip(
+            gentq,
+            self.prev_gentq - self.max_torque_rate * self.dt,
+            self.prev_gentq + self.max_torque_rate * self.dt,
+        )
 
         aerotq = (
             0.5

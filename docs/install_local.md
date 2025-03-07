@@ -72,6 +72,12 @@ Then,
 cd ..
 pip install -e electrolyzer
 ```
+
+NREL's PySAM software is also required for hercules. To install, use 
+```
+pip install nrel-pysam==6.0.0
+```
+
 ### PyYAML
 
 If you run hercules and get an error that `pyyaml` is missing, you may also need to install it using

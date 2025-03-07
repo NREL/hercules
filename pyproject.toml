@@ -28,7 +28,7 @@ dependencies = [
 "matplotlib~=3.8",
 "pandas~=2.0",
 "floris~=4.0",
-"nrel-pysam~=4.2",
+"nrel-pysam~=6.0",
 "netCDF4",
 ]
 

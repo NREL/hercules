@@ -114,8 +114,8 @@ class SolarPySAM:
 
         # predict power
         system_model = pvsam.new()
-        system_model.AdjustmentFactors.constant = 0
-        system_model.AdjustmentFactors.dc_constant = 0
+        system_model.AdjustmentFactors.adjust_constant = 0
+        system_model.AdjustmentFactors.dc_adjust_constant = 0
 
         for k, v in self.model_params.items():
             try:

@@ -50,7 +50,7 @@ Go back to herc_root
 #### Install SEAS from public repo
 
 ```
-pip install https://github.com/NREL/SEAS/blob/main/SEAS.tar.gz?raw=true
+pip install https://github.com/NREL/SEAS/blob/v1/SEAS.tar.gz?raw=true
 ```
 
 If this fails can also try but note need special permissions:
@@ -97,7 +97,7 @@ chmod 600 ~/.ssh/*
 Note: This section is untested.
 Go back to herc_root
 ```
-pip install nrel-pysam==4.2.0
+pip install nrel-pysam==6.0.0
 ```
 
 If you run hercules and get an error that `pyyaml` is missing, you may also need to install it using

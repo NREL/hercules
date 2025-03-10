@@ -1,3 +1,4 @@
+import csv
 import datetime as dt
 import os
 import sys
@@ -12,9 +13,12 @@ Path("outputs").mkdir(parents=True, exist_ok=True)
 
 
 class EmulatorNoHelics:
-    def __init__(self, controller, py_sims, input_dict):
+    def __init__(self, controller, py_sims, input_dict, logger):
         # Make sure output folder exists
         Path("outputs").mkdir(parents=True, exist_ok=True)
+
+        # Use the provided logger
+        self.logger = logger
 
         # Save the input dict to main dict
         self.main_dict = input_dict
@@ -28,8 +32,22 @@ class EmulatorNoHelics:
         else:
             self.output_file = "outputs/hercules_output.csv"
 
+        # Initialize the csv writer
+        self.csv_file = None
+        self.csv_writer = None
+        self.header_written = False
+        self.header = None
+
+        # Initialize the csv buffer
+        self.csv_buffer_size = 1000
+        self.csv_buffer = []
+
         # Save time step
         self.dt = input_dict["dt"]
+
+        # How often to update the user on current emulator time
+        self.time_log_interval = 600  # seconds
+        self.last_log_time = 0
 
         # Save time step, start time and end time
         self.dt = input_dict["dt"]
@@ -76,38 +94,63 @@ class EmulatorNoHelics:
                 self.external_data_all[c] = np.interp(times, df_ext.time, df_ext[c])
 
     def enter_execution(self, function_targets=[], function_arguments=[[]]):
-        # Record the current wall time
-        self.start_time_wall = dt.datetime.now()
+        # Open the output file
+        self.open_output_file()
 
-        # Run the main loop
-        self.run()
+        # Wrap this effort in a try block so on failure or completion sure to purge csv buffer
+        try:
+            # Record the current wall time
+            self.start_time_wall = dt.datetime.now()
 
-        # Note the total elapsed time
-        self.end_time_wall = dt.datetime.now()
-        self.total_time_wall = self.end_time_wall - self.start_time_wall
+            # Run the main loop
+            self.run()
 
-        # Update the user on time performance
-        print("=====================================")
-        print(
-            "Total simulated time: ",
-            f"{self.total_simulation_time} seconds ({self.total_simulation_days} days)"
-        )
-        print(f"Total wall time: {self.total_time_wall}")
-        print(
-            "Rate of simulation: ",
-            f"{self.total_simulation_time/self.total_time_wall.total_seconds():.1f}x real time",
-        )
-        print("=====================================")
+            # Note the total elapsed time
+            self.end_time_wall = dt.datetime.now()
+            self.total_time_wall = self.end_time_wall - self.start_time_wall
+
+            # Update the user on time performance
+            self.logger.info("=====================================")
+            self.logger.info(
+                (
+                    "Total simulated time: ",
+                    f"{self.total_simulation_time} seconds ({self.total_simulation_days} days)",
+                )
+            )
+            self.logger.info(f"Total wall time: {self.total_time_wall}")
+            self.logger.info(
+                (
+                    "Rate of simulation: ",
+                    f"{self.total_simulation_time/self.total_time_wall.total_seconds():.1f}x real time",
+                )
+            )
+            self.logger.info("=====================================")
+
+        except Exception as e:
+            # Log the error
+            self.logger.error(f"Error during execution: {str(e)}", exc_info=True)
+            # Re-raise the exception after cleanup
+            raise
+
+        finally:
+            # Ensure the CSV file is properly flushed and closed
+            self.logger.info("Closing output files and flushing buffers")
+            self.flush_buffer()  # Flush any remaining buffered rows
+            self.close_output_file()
 
     def run(self):
-        print(" #### Entering main loop #### ")
+        self.logger.info(" #### Entering main loop #### ")
 
         self.first_iteration = True
 
         # Run simulation till endtime
         # while self.absolute_helics_time < self.endtime:
         while self.time < (self.endtime):
-            print(self.time)
+            # Log the current time
+            if self.time - self.last_log_time > self.time_log_interval or self.first_iteration:
+                self.last_log_time = self.time
+                self.logger.info(f"Emulator time: {self.time} (ending at {self.endtime})")
+                self.logger.info(f"--Percent completed: {100 * self.time / self.endtime:.2f}%")
 
             for k in self.external_data_all:
                 self.main_dict["external_signals"][k] = self.external_data_all[k][
@@ -125,10 +168,10 @@ class EmulatorNoHelics:
             # Log the current state
             self.log_main_dict()
 
-            # If this is first iteration print the input dict
+            # If this is first iteration log the input dict
             # And turn off the first iteration flag
             if self.first_iteration:
-                print(self.main_dict)
+                self.logger.info(self.main_dict)
                 self.save_main_dict_as_text()
                 self.first_iteration = False
 
@@ -151,6 +194,45 @@ class EmulatorNoHelics:
                 if isinstance(v, (int, np.integer, float)):
                     self.main_dict_flat[prefix + k] = v
 
+    def open_output_file(self):
+        """Open the output file with bufferinge."""
+        # Create directory if it doesn't exist
+        output_dir = os.path.dirname(os.path.abspath(self.output_file))
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Open the file with buffering
+        self.csv_file = open(self.output_file, "a", newline="", buffering=8192)  # 8KB buffer
+        self.csv_writer = csv.writer(self.csv_file)
+
+        # Check if file is empty to determine if header needs to be written
+        if os.path.getsize(self.output_file) == 0:
+            self.header_written = False
+        else:
+            self.header_written = True
+            # Read the header from file
+            with open(self.output_file, "r") as f:
+                self.header = f.readline().strip().split(",")
+
+    def close_output_file(self):
+        """Properly close the output file."""
+        if self.csv_file:
+            self.flush_buffer()
+            self.csv_file.flush()
+            self.csv_file.close()
+            self.csv_file = None
+            self.csv_writer = None
+
+    def flush_buffer(self):
+        """Write buffered rows to the file."""
+        if not self.csv_buffer:
+            return
+
+        for row in self.csv_buffer:
+            self.csv_writer.writerow(row)
+
+        # Clear the buffer
+        self.csv_buffer = []
+
     def log_main_dict(self):
         # Update the flattened input dict
         self.recursive_flatten_main_dict(self.main_dict)
@@ -162,24 +244,46 @@ class EmulatorNoHelics:
         keys = list(self.main_dict_flat.keys())
         values = list(self.main_dict_flat.values())
 
-        # If this is first iteration, write the keys as csv header
-        if self.first_iteration:
-            with open(self.output_file, "w") as filex:
-                filex.write(",".join(keys) + os.linesep)
+        # Ensure the output file is open
+        if not self.csv_file:
+            self.open_output_file()
 
-        # Load the csv header and check if it matches the current keys
-        with open(self.output_file, "r") as filex:
-            header = filex.readline().strip().split(",")
-            if header != keys:
-                print(
-                    "WARNING: Input dict keys have changed since first iteration.\
-                        Not writing to csv file."
-                )
-                return
+        # Handle header
+        if not self.header_written:
+            self.csv_writer.writerow(keys)
+            self.header = keys
+            self.header_written = True
+        elif self.header != keys:
+            self.logger.warning(
+                "Input dict keys have changed since first iteration. Not writing to csv file."
+            )
+            return
 
-        # Append the values to the csv file
-        with open(self.output_file, "a") as filex:
-            filex.write(",".join([str(v) for v in values]) + os.linesep)
+        # Add the values to the buffer
+        self.csv_buffer.append(values)
+
+        # Flush if buffer is full
+        if len(self.csv_buffer) >= self.csv_buffer_size:
+            self.flush_buffer()
+
+        # # If this is first iteration, write the keys as csv header
+        # if self.first_iteration:
+        #     with open(self.output_file, "w") as filex:
+        #         filex.write(",".join(keys) + os.linesep)
+
+        # # Load the csv header and check if it matches the current keys
+        # with open(self.output_file, "r") as filex:
+        #     header = filex.readline().strip().split(",")
+        #     if header != keys:
+        #         self.logger.warning(
+        #             "WARNING: Input dict keys have changed since first iteration.\
+        #                 Not writing to csv file."
+        #         )
+        #         return
+
+        # # Append the values to the csv file
+        # with open(self.output_file, "a") as filex:
+        #     filex.write(",".join([str(v) for v in values]) + os.linesep)
 
     def save_main_dict_as_text(self):
         # Echo the dictionary to a seperate file in case it is helpful

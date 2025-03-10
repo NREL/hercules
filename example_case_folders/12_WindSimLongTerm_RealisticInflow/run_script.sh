@@ -16,7 +16,7 @@ mkdir -p outputs
 
 
 # Run Hercules
-python hercules_runscript.py hercules_input_000.yaml >> outputs/loghercules.log 2>&1 & # Start the controller center and pass in input file
+python hercules_runscript.py hercules_input_000.yaml >> outputs/log_bash.log 2>&1 # Start the controller center and pass in input file
 
 # Clean up helics output if there
 # Search for a file that begins with the current year

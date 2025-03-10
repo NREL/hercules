@@ -7,15 +7,25 @@ import pandas as pd
 df = pd.read_csv("outputs/hercules_output.csv", index_col=False)
 
 # Limit to the first 4 hours
-df = df.iloc[:3600 * 4]
+df = df.iloc[: 3600 * 4]
 
-print(df['py_sims.wind_farm_0.outputs.floris_wind_direction'].head())
+print(df["py_sims.wind_farm_0.outputs.floris_wind_direction"].head())
 
 # Set number of turbines
-turbines_to_plot = [0,8]
+turbines_to_plot = [0, 8]
 
 # Define a consistent color map with 9
-colors = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple", "tab:brown", "tab:pink", "tab:gray", "tab:olive"]
+colors = [
+    "tab:blue",
+    "tab:orange",
+    "tab:green",
+    "tab:red",
+    "tab:purple",
+    "tab:brown",
+    "tab:pink",
+    "tab:gray",
+    "tab:olive",
+]
 
 fig, axarr = plt.subplots(2, 1, sharex=True)
 

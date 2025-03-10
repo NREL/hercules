@@ -57,36 +57,6 @@ class EmulatorNoHelics:
             self.external_signals = {}
             self.main_dict["external_signals"] = {}
 
-        # TODO: NOT SURE WHETHER ANY OF THIS STUFF NEEDS TO BE BROUGHT IN
-        # # TODO For now, need to assume for simplicity there is one and only
-        # # one AMR_Wind simulation
-        # self.num_turbines = self.amr_wind_dict[self.amr_wind_names[0]]["num_turbines"]
-        # self.rotor_diameter = self.amr_wind_dict[self.amr_wind_names[0]]["rotor_diameter"]
-        # self.turbine_locations = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_locations"]
-        # self.turbine_labels = self.amr_wind_dict[self.amr_wind_names[0]]["turbine_labels"]
-
-        # # TODO In fugure could cover multiple farms
-        # # Initialize the turbine power array
-        # self.turbine_power_array = np.zeros(self.num_turbines)
-        # self.amr_wind_dict[self.amr_wind_names[0]]["turbine_powers"] = np.zeros(self.num_turbines)
-        # self.amr_wind_dict[self.amr_wind_names[0]]["turbine_wind_directions"] = [
-        #     0.0
-        # ] * self.num_turbines
-        # # Write to hercules_comms so that controller can access
-        # self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]["turbine_powers"] = [
-        #     0.0
-        # ] * self.num_turbines
-        # self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-        #     "turbine_wind_directions"
-        # ] = [0.0] * self.num_turbines
-        # self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]]["wind_direction"] = 0
-        # self.main_dict["hercules_comms"]["amr_wind"][self.amr_wind_names[0]][
-        #     "sim_time_s_amr_wind"
-        # ] = 0
-
-        # self.wind_speed = 0
-        # self.wind_direction = 0
-
     def _read_external_data_file(self, filename):
         # Read in the external data file
         df_ext = pd.read_csv(filename)

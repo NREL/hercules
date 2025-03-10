@@ -4,6 +4,7 @@ from hercules.controller_standin_no_helics import ControllerStandinNoHelics
 from hercules.emulator_no_helics import EmulatorNoHelics
 from hercules.py_sims import PySims
 from hercules.utilities import load_yaml, setup_logging
+
 # Get the logger
 logger = setup_logging()
 

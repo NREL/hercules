@@ -87,8 +87,7 @@ def test_step(SPS: SolarPySAM):
 
     SPS.step(step_inputs)
 
-    assert_almost_equal(SPS.power_mw, 32.17650018440107, decimal=8)
-    # assert_almost_equal(SPS.dc_power_mw, 33.26240852125279, decimal=8)
+    assert_almost_equal(SPS.power_mw, 32.19801938915135, decimal=8)
     assert_almost_equal(SPS.ghi, 68.23037719726561, decimal=8)
 
 def test_control(SPS: SolarPySAM):

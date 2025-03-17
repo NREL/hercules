@@ -1,7 +1,7 @@
 # Input YAML for hercules
 
 # Name
-name: example_010
+name: example_013
 
 ###
 # Describe this emulator setup
@@ -23,6 +23,20 @@ py_sims:
     wind_input_filename: inputs/wind_input.csv
     turbine_file_name: inputs/turbine_filter_model.yaml
     log_file_name: outputs/log_wind_sim.log
+
+  solar_farm_0: # The name of py_sim object 1
+    py_sim_type: SolarPySAM
+    verbose: True # flag to print debugging statements
+    weather_file_name: inputs/Flatirons_solar_data_sunset_1s.csv
+    system_info_file_name: inputs/100MW_1axis_pvsamv1.json
+    lat: 39.7442
+    lon: -105.1778
+    elev: 1829
+
+    initial_conditions:
+
+      power: 25 # MW
+      dni: 1000
 
 
 controller:

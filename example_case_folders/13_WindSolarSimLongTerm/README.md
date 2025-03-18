@@ -1,4 +1,4 @@
-# Example 10: Long Run Wind Only
+# Example 13: Long Run Wind and Solar
 
 ## Description
 

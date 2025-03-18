@@ -1,5 +1,6 @@
 # Electrolyzer plant module
-from electrolyzer import Supervisor
+# from electrolyzer import Supervisor
+from electrolyzer.simulation.supervisor import Supervisor
 
 
 class ElectrolyzerPlant:

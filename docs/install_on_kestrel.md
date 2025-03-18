@@ -50,7 +50,7 @@ Go back to herc_root
 #### Install SEAS from public repo
 
 ```
-pip install https://github.com/NREL/SEAS/blob/main/SEAS.tar.gz?raw=true
+pip install https://github.com/NREL/SEAS/blob/v1/SEAS.tar.gz?raw=true
 ```
 
 If this fails can also try but note need special permissions:

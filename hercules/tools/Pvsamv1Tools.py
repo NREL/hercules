@@ -1,20 +1,23 @@
 import math
 from typing import List, Optional
-import numpy as np
-import PySAM.Pvsamv1 as PVSamv1
-import pandas as pd
 
+import numpy as np
+import pandas as pd
 
 """
 
-This file contains all the utilities required to make intermediate calculations of the PV design and layout.
+This file contains all the utilities required to make intermediate 
+calculations of the PV design and layout.
 
-Functions that can be kept separate and self-contained should be here to enable re-use by other scripts and tests.
-Making these functions standalone helps clarify the required inputs and function scope.
-It also reduces the bulk of the PVPlant classes, making it easier to understand what aggregate logic it performs.
+Functions that can be kept separate and self-contained should be here 
+to enable re-use by other scripts and tests. Making these functions 
+standalone helps clarify the required inputs and function scope. It 
+also reduces the bulk of the PVPlant classes, making it easier to 
+understand what aggregate logic it performs.
 
-These may include any helper functions for calculating any system variable such as number of inverters, combiner boxes, etc
-or for estimating some value given a PV layout
+These may include any helper functions for calculating any system 
+variable such as number of inverters, combiner boxes, etc or for 
+estimating some value given a PV layout.
 
 """
 def find_modules_per_string(
@@ -27,7 +30,8 @@ def find_modules_per_string(
     target_relative_string_voltage: float=None,
     ) -> float:
     """
-    Helper function for size_electrical_parameters that calculates the number of modules per string to best match target string voltage
+    Helper function for size_electrical_parameters that calculates the 
+    number of modules per string to best match target string voltage
 
     :param model: PySAM.PVsamv1 model
     :param v_mppt_min: lower boundary of inverter maximum-power-point operating window, V
@@ -35,7 +39,8 @@ def find_modules_per_string(
     :param v_mp_module: voltage of module at maximum point point at reference conditions, V
     :param v_oc_module: open circuit voltage of module at reference conditions, V
     :param inv_vdcmax: maximum inverter input DC voltage, V
-    :param target_relative_string_voltage: relative string voltage within MPPT voltage window, [0, 1]
+    :param target_relative_string_voltage: relative string voltage within MPPT voltage window, 
+        [0, 1]
 
     :returns: number of modules per string
     """
@@ -73,7 +78,9 @@ def find_inverter_count(
 
     :returns: number of inverters in array
     """
-    n_inverters_frac = modules_per_string * n_strings * module_power / (dc_ac_ratio * inverter_power)
+    n_inverters_frac = modules_per_string * n_strings * module_power / (
+        dc_ac_ratio * inverter_power
+        )
     n_inverters = max(1, round(n_inverters_frac))
     model.value('inverter_count', n_inverters)
     return n_inverters
@@ -88,7 +95,8 @@ def size_electrical_parameters(
     n_inputs_combiner: Optional[float]=None,
     ):
     """
-    Calculates the number of strings, combiner boxes and inverters to best match target capacity and DC/AC ratio
+    Calculates the number of strings, combiner boxes and inverters to best match target 
+    capacity and DC/AC ratio
 
     :param model: PySAM.Pvsamv1 model
     :param target_system_capacity: target system capacity, kW
@@ -97,7 +105,8 @@ def size_electrical_parameters(
     :param n_inputs_inverter: number of DC inputs per inverter
     :param n_inputs_combiner: number of DC inputs per combiner box
 
-    :returns: number of strings, number of combiner boxes, number of inverters, calculated system capacity, kW
+    :returns: number of strings, number of combiner boxes, number of inverters, calculated 
+        system capacity, kW
     """
     
 
@@ -164,7 +173,8 @@ def size_electrical_parameters(
         vdcmax_inv = vdcmax_inverter
     v_mppt_min = model.value('mppt_low_inverter')
     v_mppt_max = model.value('mppt_hi_inverter')
-    modules_per_string = find_modules_per_string(model, v_mppt_min, v_mppt_max, module_vmp, module_voc, vdcmax_inv)
+    modules_per_string = find_modules_per_string(model, v_mppt_min, v_mppt_max, 
+                                                 module_vmp, module_voc, vdcmax_inv)
 
     n_strings_frac = target_system_capacity * 1000.0 / (modules_per_string * module_power) #Wac/Wdc
     n_strings = max(1, round(n_strings_frac))
@@ -208,26 +218,33 @@ def verify_capacity_from_electrical_parameters(
     percent_max_deviation: float = 5
     ) -> float:
     """
-    Computes system capacity from specified number of strings, modules per string and module power.
-    If computed capacity is significantly different than the specified capacity an exception will be thrown.
+    Computes system capacity from specified number of strings, modules per 
+    string and module power. If computed capacity is significantly different than 
+    the specified capacity an exception will be thrown.
     
     :param system_capacity_target: target system capacity, kW
     :param n_strings: number of strings in each subarray, -
     :param modules_per_string: modules per string in each subarray, -
     :param module_power: module power at maximum point point at reference conditions, kW
-    :param percent_max_deviation: if calculated system capacity differs from target by this percent or more, raise an exception; if None, do not check
+    :param percent_max_deviation: if calculated system capacity differs from target by 
+        this percent or more, raise an exception; if None, do not check
 
     :returns: calculated system capacity, kW
     """
-    PERCENT_MAX_DEVIATION = 5       # [%]
+    # PERCENT_MAX_DEVIATION = 5       # [%]
     assert len(n_strings) == len(modules_per_string)
-    calculated_system_capacity = sum(np.array(n_strings) * np.array(modules_per_string)) * module_power
-    if percent_max_deviation is not None and abs((calculated_system_capacity / system_capacity_target - 1)) * 100 > percent_max_deviation:
-        raise Exception(f"The specified system capacity of {system_capacity_target} kW is more than " \
-                        f"{percent_max_deviation}% from the value calculated from the specified number " \
-                        f"of strings, modules per string and module power ({int(calculated_system_capacity)} kW).")
+    calc_sys_capacity = sum(np.array(n_strings) * np.array(modules_per_string)) * module_power
+    if percent_max_deviation is not None and abs(
+        (calc_sys_capacity / system_capacity_target - 1)
+        ) * 100 > percent_max_deviation:
+        raise Exception(f"The specified system capacity of {system_capacity_target} kW "
+                        f"is more than " \
+                        f"{percent_max_deviation}% from the value calculated from the "
+                        f"specified number " \
+                        f"of strings, modules per string and module power "
+                        f"({int(calc_sys_capacity)} kW).")
 
-    return calculated_system_capacity
+    return calc_sys_capacity
 
 
 def align_from_capacity(
@@ -299,19 +316,23 @@ def set_cec_module_library_selection(model, module_name: str) -> dict:
     """
     module_model = model.value('module_model')
     if (module_model != 1):
-        print("This function only works if module_model == 1 (CEC Performance Model with Module Database)")
+        print("This function only works if module_model == 1 "
+        "(CEC Performance Model with Module Database)")
         return
 
     file = 'https://raw.githubusercontent.com/NREL/SAM/patch/deploy/libraries/CEC%20Modules.csv'
-    db = pd.read_csv(file, index_col=0, header=2) # Reading this might take 1 min or so, the database is big.
+    db = pd.read_csv(file, index_col=0, header=2) # Reading this might take 1 min or so, 
+                                                  # the database is big.
 
     modfilter = db.index.str.startswith(module_name)
     CECMod = db[modfilter]
-    CECParamList = CECMod.values.tolist()
+    # CECParamList = CECMod.values.tolist()
     print(len(CECMod), " modules selected. Name of 1st entry: ", CECMod.index[0])
-    column_names = list(CECMod.columns)
+    # column_names = list(CECMod.columns)
     for columnName, columnData in CECMod.items():
-        if (columnName.startswith("cec_") and columnName != 'cec_material' and columnName != 'cec_gamma_pmp'):
+        if (columnName.startswith("cec_") and 
+            columnName != 'cec_material' and 
+            columnName != 'cec_gamma_pmp'):
             print(columnName)
             model.value(columnName, columnData)
         else:
@@ -335,13 +356,14 @@ def set_cec_inverter_library_selection(model, inverter_name: str) -> dict:
         return
 
     file = 'https://raw.githubusercontent.com/NREL/SAM/patch/deploy/libraries/CEC%20Inverters.csv'
-    db = pd.read_csv(file, index_col=0, header=2) # Reading this might take 1 min or so, the database is big.
+    db = pd.read_csv(file, index_col=0, header=2) # Reading this might take 1 min or so, 
+                                                  # the database is big.
 
     invfilter = db.index.str.startswith(inverter_name)
     CECInv = db[invfilter]
-    CECParamList = CECInv.values.tolist()
+    # CECParamList = CECInv.values.tolist()
     print(len(CECInv), " inverters selected. Name of 1st entry: ", CECInv.index[0])
-    column_names = list(CECInv.columns)
+    # column_names = list(CECInv.columns)
     unused_cols = ["inv_snl_ac_voltage", "inv_snl_idcmax"]
     for columnName, columnData in CECInv.items():
         print(columnName)

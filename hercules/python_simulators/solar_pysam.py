@@ -3,15 +3,13 @@
 
 import json
 
+#from PySAM.Pvsamv1Tools import size_electrical_parameters
 import numpy as np
 import pandas as pd
 import PySAM.Pvsamv1 as pvsam
-#import PySAM.Pvsamv1Tools
 
+#import PySAM.Pvsamv1Tools
 from hercules.tools.Pvsamv1Tools import size_electrical_parameters
-#from PySAM.Pvsamv1Tools import size_electrical_parameters
-import math
-from typing import List, Optional
 
 
 class SolarPySAM:
@@ -191,8 +189,11 @@ class SolarPySAM:
         #target_system_capacity = self.power_mw * 1000 #kWdc (where is this specified)
         target_ratio = self.target_dc_ac_ratio
         #target_ratio = 1.3 #probably hardcoded DC/AC
-        n_strings, n_combiners, n_inverters, calculated_system_capacity = size_electrical_parameters(system_model, target_system_capacity, target_ratio)
-        #n_strings, n_combiners, n_inverters, calculated_system_capacity = PySAM.Pvsamv1Tools.size_electrical_parameters(system_model, target_system_capacity, target_ratio)
+        n_strings,n_combiners,n_inverters,calc_sys_capacity = size_electrical_parameters(
+            system_model, target_system_capacity, target_ratio)
+        #n_strings,n_combiners,n_inverters,calc_sys_capacity = 
+        # PySAM.Pvsamv1Tools.size_electrical_parameters(
+        # system_model, target_system_capacity, target_ratio)
 
         system_model.execute()
         out = system_model.Outputs.export()

@@ -22,6 +22,7 @@ else
     echo "Conda installation not found. Please ensure Conda is installed and in your PATH."
     exit 1
 fi
+echo "$CONDA_PATH"
 
 # Source the Conda initialization script
 source "$CONDA_PATH"

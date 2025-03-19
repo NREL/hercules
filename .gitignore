@@ -46,6 +46,10 @@ example_case_folders/12_WindSimLongTerm_RealisticInflow/inputs/wind_resource_rex
 # Wind input pickle files
 wind_input.p
 
+# Intermediate notebook files
+*.nbconvert.ipynb
+*.ipynb_checkpoints
+
 # Some output files to ignore
 t_00*
 logdummy

@@ -1,5 +1,8 @@
 # Implements the long run wind model for Hercules.
 
+import logging
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from floris import FlorisModel
@@ -8,22 +11,24 @@ from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
 from scipy.stats import circmean
 
-# Note time in this non-helics framework will take some thinking but thinking 
-# that it will be something like this:
-# 1. The wind input data will provide Timestamps per row with some actual date time
-# 2. Solar data should be similar
-# 3. Market data should be similar
-# 4. The starttime and endtime in the hercules input file will be in seconds
-#    and relative to the start of the wind input data
-
 RPM2RADperSec = 2 * np.pi / 60.0
 
 class WindSimLongTerm:
     def __init__(self, input_dict, dt):
-        print("trying to read in verbose flag")
+        
+        # Check if log_file_name is defined in the input_dict
+        if "log_file_name" in input_dict:
+            self.log_file_name = input_dict["log_file_name"]
+        else:
+            self.log_file_name = "outputs/log_wind_sim.log"
+
+        # Set up logging
+        self.logger = self._setup_logging(self.log_file_name)
+
+        self.logger.info("trying to read in verbose flag")
         if "verbose" in input_dict:
             self.verbose = input_dict["verbose"]
-            print("read in verbose flag = ", self.verbose)
+            self.logger.info(f"read in verbose flag = {self.verbose}")
         else:
             self.verbose = True  # default value
 
@@ -76,7 +81,9 @@ class WindSimLongTerm:
             num_steps_initial = df_wi.shape[0]
             df_wi = df_wi.iloc[:: int(self.dt / self.dt_wi)]
             if self.verbose:
-                print(f"Resampled df_wi from {num_steps_initial} to {df_wi.shape[0]} rows")
+                self.logger.info(
+                    f"Resampled df_wi from {num_steps_initial} to {df_wi.shape[0]} rows"
+                )
 
         # FLORIS PREPARATION
 
@@ -85,7 +92,7 @@ class WindSimLongTerm:
 
         # Change to the simple-derating model turbine
         # (Note this could also be done with the mixed model)
-        self.fmodel.set_operation_model("simple-derating")
+        self.fmodel.set_operation_model("mixed")
 
         # Get the layout and number of turbines from FLORIS
         self.layout_x = self.fmodel.layout_x
@@ -183,7 +190,27 @@ class WindSimLongTerm:
         )
 
         # Update the user
-        print(f"Initialized WindSimLongTerm with {self.n_turbines} turbines")
+        self.logger.info(f"Initialized WindSimLongTerm with {self.n_turbines} turbines")
+
+    def _setup_logging(self, log_file_name):
+        # Split the logfile into directory and filename
+        log_dir = Path(log_file_name).parent
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        # Get the logger for wind_sim, note that root logger already in use
+        logger = logging.getLogger("wind_sim")
+        logger.setLevel(logging.INFO)
+
+        # Clear any existing handlers to avoid duplicates
+        for handler in logger.handlers[:]:
+            logger.removeHandler(handler)
+
+        # Add file handler
+        file_handler = logging.FileHandler(log_file_name)
+        file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+        logger.addHandler(file_handler)
+
+        return logger
 
     def update_wake_deficits(self, time_idx):
         # Get the window start
@@ -214,7 +241,9 @@ class WindSimLongTerm:
         ):
             # If verbose
             if self.verbose:
-                print("...Updating FLORIS model==========================================")
+                self.logger.info(
+                    "...Updating FLORIS model=========================================="
+                )
 
             # Update the FLORIS inputs
             self.floris_wind_direction = floris_wind_direction
@@ -239,7 +268,7 @@ class WindSimLongTerm:
             self.num_floris_calcs += 1
 
             if self.verbose:
-                print(f"Num of FLORIS calculations = {self.num_floris_calcs}")
+                self.logger.info(f"Num of FLORIS calculations = {self.num_floris_calcs}")
 
     def update_derating_buffer(self, derating):
         # Update the derating buffer
@@ -261,12 +290,12 @@ class WindSimLongTerm:
         # Get the current time step
         sim_time_s = inputs["time"]
         if self.verbose:
-            print("sim_time_s = ", sim_time_s)
+            self.logger.info(f"sim_time_s = {sim_time_s}")
 
         # select appropriate row based on current time
         time_index = int(sim_time_s / self.dt)
         if self.verbose:
-            print("time_index = ", time_index)
+            self.logger.info(f"time_index = {time_index}")
 
         # Grab the instantaneous derating signal and update the derating buffer
         derating = np.array(
@@ -284,7 +313,7 @@ class WindSimLongTerm:
         # Check if it is time to update the waked velocities
         if time_index % self.floris_update_time == 0:
             if self.verbose:
-                print(".check for floris update...")
+                self.logger.info(".check for floris update...")
             self.update_wake_deficits(time_index)
 
         # Compute waked velocities

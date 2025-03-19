@@ -23,6 +23,27 @@ def kWh2kJ(kJ):
     """Convert a value in kJ to kWh"""
     return kJ * 3600
 
+def years_to_usage_rate(years, dt):
+    """Convert a number of years to a usage rate
+    inputs:
+        years: life of the storage system in years
+        dt: time step of the simulation, in seconds
+     """
+    days = years * 365
+    hours = days * 24
+    seconds = hours * 3600
+    usage_lifetime = seconds / dt
+
+    return 1/usage_lifetime
+
+def cycles_to_usage_rate(cycles):
+    """Convert cycle number to degradation rate
+    inputs: 
+        cycles: number of cycles until the unit needs to be replaced
+        dt: time step of the simulation, in seconds
+    """
+    return 1/cycles
+
 
 class Battery:
     def __init__(self, input_dict, dt):
@@ -392,12 +413,43 @@ class SimpleBattery:
         else:
             self.tau_self_discharge = np.inf
 
+        if "track_usage_percentage" in input_dict.keys():
+            if input_dict["track_usage_percentage"]:
+                self.track_usage = True
+                # Set usage tracking parameters
+                if "usage_calc_interval" in input_dict.keys():
+                    self.usage_calc_interval = input_dict["usage_calc_interval"]
+                else:
+                    self.usage_calc_interval = 100 # timesteps
+                
+                if "usage_lifetime" in input_dict.keys():
+                    usage_lifetime = input_dict["usage_lifetime"]
+                    self.usage_time_rate = years_to_usage_rate(usage_lifetime, self.dt)
+                else:
+                    self.usage_time_rate = 0 
+                if "usage_cycles" in input_dict.keys():
+                    usage_cycles = input_dict["usage_cycles"]
+                    self.usage_cycles_rate = cycles_to_usage_rate(usage_cycles)
+                else:
+                    self.usage_cycles_rate = 0 
+
+                # TODO: add the ability to impact efficiency of the battery operation
+
+            else:
+                self.track_usage = False
+                self.usage_calc_interval = np.inf
+        else:
+            self.track_usage = False
+        
+
         # Degradation and state storage
         self.P_charge_storage = []
         self.E_store = []
-        self.total_degradation = 0
+        self.total_cycle_usage = 0
+        self.cycle_usage_perc = 0
+        self.total_time_usage = 0
+        self.time_usage_perc = 0
         self.step_counter = 0
-        self.degradation_calc_interval = 100
         # TODO there should be a better way to dynamically store these than to append a list
 
         self.build_SS()
@@ -438,10 +490,10 @@ class SimpleBattery:
         self.P_charge_storage.append(P_charge)
         self.E_store.append(self.E)
 
-        if self.step_counter >= self.degradation_calc_interval:
+        if self.step_counter >= self.usage_calc_interval:
             # reset step_counter
             self.step_counter = 0
-            self.calc_degradation()
+            self.calc_usage()
 
         return self.return_outputs()
 
@@ -536,15 +588,29 @@ class SimpleBattery:
         # better integration -> use the closed form step response solution?
         return x + xd * self.dt  # Euler integration
 
-    def calc_degradation(self):
+    def calc_usage(self):
+
         # Count rainflow cycles
         cycles = rainflow.count_cycles(self.E_store)
-        this_period_degradation = np.sum([cycle[0] * cycle[1] for cycle in cycles])
-        self.total_degradation += this_period_degradation
-        self.apply_degradation(this_period_degradation)
+        self.total_cycle_usage = np.sum([cycle[0] * cycle[1] for cycle in cycles]) / self.E_max
+        # self.total_cycle_usage += this_period_usage
+        # print("this period cycles",this_period_usage )
+        self.cycle_usage_perc = self.total_cycle_usage * self.usage_cycles_rate * 100
+
+        # Calculate time usage
+        self.total_time_usage += self.usage_calc_interval * self.dt
+        self.time_usage_perc = self.total_time_usage * self.usage_time_rate * 100
+
+        # self.apply_degradation(this_period_degradation)
 
     def apply_degradation(self, degradation):
+        # total_degradation_effect = self.total_degradation*self.degradation_rate
+        # print('degradation penalty', total_degradation_effect, np.sqrt(total_degradation_effect))
+        # self.eta_charge = self.eta_charge - np.sqrt(total_degradation_effect)
+        # self.eta_discharge = self.eta_discharge - np.sqrt(total_degradation_effect)
         pass
 
     def return_outputs(self):
-        return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC}
+        return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC,
+                "usage_in_time": self.time_usage_perc, "usage_in_cycles": self.cycle_usage_perc,
+                "total_cycles":self.total_cycle_usage}

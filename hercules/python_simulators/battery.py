@@ -440,7 +440,7 @@ class SimpleBattery:
                 self.usage_calc_interval = np.inf
         else:
             self.track_usage = False
-        
+            self.usage_calc_interval = np.inf        
 
         # Degradation and state storage
         self.P_charge_storage = []

@@ -41,15 +41,15 @@ py_sims:
   battery_0: # The name of py_sim object 1
 
     py_sim_type: SimpleBattery
-    energy_capacity: 40 # total capacity of the battery in MWh (4-hour 20 MW battery)
-    charge_rate: 10 # charge rate of the battery in MW
-    discharge_rate: 10 # discharge rate of the battery in MW
+    energy_capacity: 20 # total capacity of the battery in MWh (4-hour 5 MW battery)
+    charge_rate: 5 # charge rate of the battery in MW
+    discharge_rate: 5 # discharge rate of the battery in MW
     max_SOC: .9 # upper boundary on battery SOC
     min_SOC: 0.1 # lower boundary on battery SOC
     roundtrip_efficiency: 0.9 # roundtrip efficiency of the battery
-    self_discharge_time_constant: 100000000 
-    track_usage_percentage: True
-    degradation_calc_interval: 200 # how many time steps between cycle counts
+    self_discharge_time_constant: 10000000000 # Making this very large to not use
+    track_usage: True
+    usage_calc_interval: 100 # how many seconds between cycle counts
     usage_lifetime: 0.5 # number of years you can use the battery for
     usage_cycles: 100 # total number of cycles you can use the battery for
 

@@ -413,14 +413,14 @@ class SimpleBattery:
         else:
             self.tau_self_discharge = np.inf
 
-        if "track_usage_percentage" in input_dict.keys():
-            if input_dict["track_usage_percentage"]:
+        if "track_usage" in input_dict.keys():
+            if input_dict["track_usage"]:
                 self.track_usage = True
                 # Set usage tracking parameters
                 if "usage_calc_interval" in input_dict.keys():
-                    self.usage_calc_interval = input_dict["usage_calc_interval"]
+                    self.usage_calc_interval = input_dict["usage_calc_interval"] / self.dt
                 else:
-                    self.usage_calc_interval = 100 # timesteps
+                    self.usage_calc_interval = 100 / self.dt # timesteps
                 
                 if "usage_lifetime" in input_dict.keys():
                     usage_lifetime = input_dict["usage_lifetime"]

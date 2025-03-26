@@ -68,7 +68,7 @@ def test_SB_init():
 
     assert SB.tau_self_discharge == np.inf
 
-    assert SB.track_usage == False
+    assert not SB.track_usage
     assert SB.usage_calc_interval == np.inf
 
     assert SB.power_mw == 0
@@ -89,7 +89,7 @@ def test_SB_init():
 
     assert SB.tau_self_discharge == 100
 
-    assert SB.track_usage == True
+    assert SB.track_usage
     assert SB.usage_calc_interval == 100
     assert SB.usage_time_rate == 3.170979198376459e-7
     assert SB.usage_cycles_rate == 0.1

@@ -591,10 +591,10 @@ class SimpleBattery:
     def calc_usage(self):
 
         # Count rainflow cycles
-        cycles = rainflow.count_cycles(self.E_store)
-        self.total_cycle_usage = np.sum([cycle[0] * cycle[1] for cycle in cycles]) / self.E_max
-        # self.total_cycle_usage += this_period_usage
-        # print("this period cycles",this_period_usage )
+        ranges_counts = rainflow.count_cycles(self.E_store)
+        ranges = np.array([rc[0] for rc in ranges_counts])
+        counts = np.array([rc[1] for rc in ranges_counts])
+        self.total_cycle_usage = (ranges * counts).sum() / self.E_max
         self.cycle_usage_perc = self.total_cycle_usage * self.usage_cycles_rate * 100
 
         # Calculate time usage
@@ -608,7 +608,9 @@ class SimpleBattery:
         # print('degradation penalty', total_degradation_effect, np.sqrt(total_degradation_effect))
         # self.eta_charge = self.eta_charge - np.sqrt(total_degradation_effect)
         # self.eta_discharge = self.eta_discharge - np.sqrt(total_degradation_effect)
-        pass
+        raise NotImplementedError(
+            "Degradation impacts on real-time efficiency have not yet been implemented."
+        )
 
     def return_outputs(self):
         return {"power": self.power_mw, "reject": self.P_reject, "soc": self.SOC,

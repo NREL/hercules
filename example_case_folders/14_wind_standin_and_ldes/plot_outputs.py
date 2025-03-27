@@ -106,7 +106,7 @@ ax.set_ylabel("Cycle Count")
 
 
 # # Plot the wind data
-# wind_power_individuals = df[["hercules_comms.amr_wind.wind_farm_0.turbine_powers.{0:03d}".format(t)
+#wind_power_individuals = df[["hercules_comms.amr_wind.wind_farm_0.turbine_powers.{0:03d}".format(t)
 #                              for t in range(n_wind_turbines)]].to_numpy() / 1e3
 # fig, ax = plt.subplots(2, 1, sharex=True, figsize=(7,5))
 # ax[0].plot(time, wind_power, color=wind_col)

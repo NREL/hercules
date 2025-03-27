@@ -11,11 +11,6 @@ from whoc.controllers import (
 )
 from whoc.interfaces.hercules_hybrid_actuator_disk_interface import HerculesHybridADInterface
 
-# from whoc.controllers.wind_battery_controller import (
-#     WindBatteryController,
-# )
-# from whoc.interfaces.hercules_wind_battery_interface import HerculesWindBatteryInterface
-
 # Check that command line arguments are provided
 if len(sys.argv) != 3:
     raise Exception("Usage: python hercules_runscript.py <hercules_input_file> <helics_port>")

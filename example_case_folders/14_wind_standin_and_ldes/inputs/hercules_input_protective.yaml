@@ -1,5 +1,5 @@
 # Name
-name: example_006
+name: example_014_protective
 
 ###
 # Describe this emulator setup
@@ -59,11 +59,8 @@ py_sims:
       SOC: 0.5   # initial state of charge of the battery in percentage of total size
 
 controller:
-  controller_type: SimpleYawController # This may not be needed
   num_turbines: 2 # Should match AMR-Wind! Ideally, would come from AMR-wind
-  initial_conditions:
-      yaw: 270. # degrees (same for all turbines) (will this work?)
-  k_batt: 0.001 # Or, possibly 0.001
-  clipping_thresholds: [0.1, 0.2, 0.8, 0.9]
+  k_batt: 0.001 # "Protective" battery controller setting
+  clipping_thresholds: [0.1, 0.2, 0.8, 0.9] # "Protective" battery controller setting
 
 external_data_file: inputs/power_reference_signal-constant.csv  # this is in kW

@@ -1,4 +1,4 @@
-# Example 13: Floris Wind Simulator with Battery Usage
+# Example 14: Floris Wind Simulator with Battery Usage
 
 ## Description
 
@@ -13,10 +13,4 @@ To run the example, execute the following command in the terminal:
 bash run_script.sh
 ```
 
-## Checking outputs
-
-To check the outputs, execute the following command in the terminal:
-
-```bash
-python plot_outputs.py
-```
+This will also plot outputs. 

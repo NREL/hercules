@@ -60,7 +60,7 @@ for file in ${current_year}*.csv; do
 done
 
 # # Report success and plot results
-# echo "Finished running simulations. Plotting results."
-# python plot_output_data.py
+echo "Finished running simulations. Plotting results."
+python plot_outputs.py
 
 # exit 0

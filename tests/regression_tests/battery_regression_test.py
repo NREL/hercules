@@ -120,6 +120,16 @@ soc_base_lib = np.array(
     ]
 )
 
+usage_calc_base_dict = {
+    "out_power": 1800,
+    "SB.total_cycle_usage": 0.02193261935938851,
+    "SB.cycle_usage_perc":  0.43865238718777017,
+    "SB.total_time_usage":  20.0,
+    "SB.time_usage_perc":  63.41958396752917,
+    "SB.SOC (1)":  0.18644728149025358,
+    "SB.SOC (2)":  0.15097155977675195,
+}
+
 def test_SimpleBattery_regression_():
 
     dt = 0.5
@@ -188,3 +198,71 @@ def test_LIB_regression_():
     assert np.allclose(powers_base_lib, powers_test)
     assert np.allclose(reject_base_lib, reject_test)
     assert np.allclose(soc_base_lib, soc_test)
+
+def test_SimpleBattery_usage_calc_regression():
+
+    battery_dict = test_input_dict
+    dt = 1
+
+    # Modify battery configuration for testing
+    battery_dict["size"] = 2
+    battery_dict["energy_capacity"] = 8  
+    battery_dict["charge_rate"] = 2
+    battery_dict["discharge_rate"] = 2
+    battery_dict["roundtrip_efficiency"] = 0.9
+    battery_dict["self_discharge_time_constant"] = 100
+    battery_dict["track_usage"] = True
+    battery_dict["usage_calc_interval"] = 10
+    battery_dict["usage_lifetime"] = 0.000001
+    battery_dict["usage_cycles"] = 5
+    battery_dict["initial_conditions"] = {"SOC": 0.23}
+
+
+    SB = SimpleBattery(battery_dict, dt)
+
+    power_avail = 10e3 * np.ones(21)
+    power_signal = [1500, 1500, 1500, -1700, -1700, -1700, 1800, 1800, 1800, 1800, 1800,\
+                    -1800, -1800, -1800, -1800, -1800, 1800, 1800, 1800, 1800, 1800]
+
+    for i in range(len(power_avail)):
+        step_input_dict = {
+            "py_sims": {"inputs": {
+                "available_power": power_avail[i],
+                "battery_signal": power_signal[i]
+                }
+            },
+        }
+        out = SB.step(step_input_dict)
+        # assert out["power"] == power_signal[i]
+    
+    assert SB.step_counter == 1
+    assert out["power"] == usage_calc_base_dict["out_power"]
+
+    assert SB.total_cycle_usage == usage_calc_base_dict["SB.total_cycle_usage"]
+    assert SB.cycle_usage_perc == usage_calc_base_dict["SB.cycle_usage_perc"]
+    assert SB.total_time_usage == usage_calc_base_dict["SB.total_time_usage"]
+    assert SB.time_usage_perc == usage_calc_base_dict["SB.time_usage_perc"]
+
+    assert SB.SOC == usage_calc_base_dict["SB.SOC (1)"]
+
+    if PRINT_VALUES:
+        print("out_power: ", out["power"])
+        print("SB.total_cycle_usage: ", SB.total_cycle_usage)
+        print("SB.cycle_usage_perc: ", SB.cycle_usage_perc)
+        print("SB.total_time_usage: ", SB.total_time_usage)
+        print("SB.time_usage_perc: ", SB.time_usage_perc)
+        print("SB.SOC (1): ", SB.SOC)
+    
+    for i in range(len(power_avail)):
+        step_input_dict = {
+            "py_sims": {"inputs": {
+                "available_power": power_avail[i],
+                "battery_signal": 0
+                }
+            },
+        }
+        out = SB.step(step_input_dict)
+    assert SB.SOC == usage_calc_base_dict["SB.SOC (2)"]
+
+    if PRINT_VALUES:
+        print("SB.SOC (2): ", SB.SOC)

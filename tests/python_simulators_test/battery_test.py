@@ -173,44 +173,6 @@ def test_SB_step(SB: SimpleBattery):
     assert SB.SOC == 0.1
     assert SB.P_charge == 0
 
-def test_SB_usage_calculations():
-    battery_dict, dt = get_battery_params(SimpleBattery)
-
-    battery_dict["size"] = 2
-    battery_dict["energy_capacity"] = 8  
-    battery_dict["roundtrip_efficiency"] = 0.9
-    battery_dict["self_discharge_time_constant"] = 100
-    battery_dict["track_usage"] = True
-    battery_dict["usage_calc_interval"] = 10
-    battery_dict["usage_lifetime"] = 0.000001
-    battery_dict["usage_cycles"] = 5
-    battery_dict["initial_conditions"] = {"SOC": 0.23}
-
-
-    SB = SimpleBattery(battery_dict, dt)
-
-    power_avail = 10e3 * np.ones(21)
-    power_signal = [1500, 1500, 1500, -1700, -1700, -1700, 1800, 1800, 1800, 1800, 1800,\
-                    -1800, -1800, -1800, -1800, -1800, 1800, 1800, 1800, 1800, 1800]
-
-    for i in range(len(power_avail)):
-        out = SB.step(step_inputs(P_avail=power_avail[i], P_signal=power_signal[i]))
-        # assert out["power"] == power_signal[i]
-    
-    assert SB.step_counter == 1
-    assert out["power"] == 1800
-
-    assert SB.total_cycle_usage == 0.02193261935938851
-    assert SB.cycle_usage_perc == 0.43865238718777017
-    assert SB.total_time_usage == 20.0
-    assert SB.time_usage_perc == 63.41958396752917
-
-    assert SB.SOC == 0.18644728149025358
-    
-    for i in range(len(power_avail)):
-        out = SB.step(step_inputs(P_avail=power_avail[i], P_signal=0))
-    assert SB.SOC == 0.15097155977675195
-        
 
 def test_LI_init():
     """Test init"""

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Example 08: FLORIS Standin Only &#8212; HERCULES</title>
+    <title>Example 14: Floris Wind Simulator with Energy Storage Usage &#8212; HERCULES</title>
   
   
   
@@ -70,11 +70,10 @@
                 gtag('config', 'G-3V1BDK8KEJ');
             </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/08_floris_standin_only';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/14_energy_storage_control_and_wind';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example 09: Heterogeneous Wind" href="09_heterogeneous_wind.html" />
-    <link rel="prev" title="Example 07: FLORIS Standin and Solar PySAM" href="07_floris_standin_and_solar_pysam.html" />
+    <link rel="prev" title="Example 09: Heterogeneous Wind" href="09_heterogeneous_wind.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -216,9 +215,9 @@
 <li class="toctree-l1"><a class="reference internal" href="05_floris_standin_and_electrolyzer.html">Example 05: FLORIS Standin and Electrolyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="06_amr_wind_standin_and_battery.html">Example 06: AMR Wind Standin and Battery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="07_floris_standin_and_solar_pysam.html">Example 07: FLORIS Standin and Solar PySAM</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Example 08: FLORIS Standin Only</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_floris_standin_only.html">Example 08: FLORIS Standin Only</a></li>
 <li class="toctree-l1"><a class="reference internal" href="09_heterogeneous_wind.html">Example 09: Heterogeneous Wind</a></li>
-<li class="toctree-l1"><a class="reference internal" href="14_energy_storage_control_and_wind.html">Example 14: Floris Wind Simulator with Energy Storage Usage</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Example 14: Floris Wind Simulator with Energy Storage Usage</a></li>
 </ul>
 
     </div>
@@ -290,7 +289,7 @@
       
       
       
-      <li><a href="https://github.com/NREL/hercules/edit/develop/docs/examples/08_floris_standin_only.md" target="_blank"
+      <li><a href="https://github.com/NREL/hercules/edit/develop/docs/examples/14_energy_storage_control_and_wind.md" target="_blank"
    class="btn btn-sm btn-source-edit-button dropdown-item"
    title="Suggest edit"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -307,7 +306,7 @@
       
       
       
-      <li><a href="https://github.com/NREL/hercules/issues/new?title=Issue%20on%20page%20%2Fexamples/08_floris_standin_only.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/NREL/hercules/issues/new?title=Issue%20on%20page%20%2Fexamples/14_energy_storage_control_and_wind.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -337,7 +336,7 @@
       
       
       
-      <li><a href="../_sources/examples/08_floris_standin_only.md" target="_blank"
+      <li><a href="../_sources/examples/14_energy_storage_control_and_wind.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -421,7 +420,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Example 08: FLORIS Standin Only</h1>
+    <h1>Example 14: Floris Wind Simulator with Energy Storage Usage</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -433,7 +432,6 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#description">Description</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running">Running</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs">Outputs</a></li>
 </ul>
             </nav>
         </div>
@@ -445,11 +443,12 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="example-08-floris-standin-only">
-<h1>Example 08: FLORIS Standin Only<a class="headerlink" href="#example-08-floris-standin-only" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="example-14-floris-wind-simulator-with-energy-storage-usage">
+<h1>Example 14: Floris Wind Simulator with Energy Storage Usage<a class="headerlink" href="#example-14-floris-wind-simulator-with-energy-storage-usage" title="Link to this heading">#</a></h1>
 <section id="description">
 <h2>Description<a class="headerlink" href="#description" title="Link to this heading">#</a></h2>
-<p>This example demonstrates how to use the FLORIS as the AMR Wind Standin model. This model uses the <code class="docutils literal notranslate"><span class="pre">floris_runscript.py</span></code> in the bash file and still requires <code class="docutils literal notranslate"><span class="pre">amr_input.inp</span></code> as an input file.</p>
+<p>This example demonstrates how to use the FLORIS wind simulator and energy storage models in a case that demonstrates the battery cycle counting.  The FLORIS wind simulator is set to use
+the floris_standin_data_fixedwd-hour.csv.</p>
 </section>
 <section id="running">
 <h2>Running<a class="headerlink" href="#running" title="Link to this heading">#</a></h2>
@@ -457,13 +456,7 @@ document.write(`
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>run_script.sh
 </pre></div>
 </div>
-</section>
-<section id="outputs">
-<h2>Outputs<a class="headerlink" href="#outputs" title="Link to this heading">#</a></h2>
-<p>To plot the outputs run the following command in the terminal:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>plot_outputs.py
-</pre></div>
-</div>
+<p>This will also plot outputs.</p>
 </section>
 </section>
 
@@ -498,22 +491,13 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="07_floris_standin_and_solar_pysam.html"
+       href="09_heterogeneous_wind.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Example 07: FLORIS Standin and Solar PySAM</p>
-      </div>
-    </a>
-    <a class="right-next"
-       href="09_heterogeneous_wind.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
         <p class="prev-next-title">Example 09: Heterogeneous Wind</p>
       </div>
-      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
@@ -533,7 +517,6 @@ document.write(`
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#description">Description</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running">Running</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#outputs">Outputs</a></li>
 </ul>
   </nav></div>
 

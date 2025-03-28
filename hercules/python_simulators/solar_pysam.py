@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 import PySAM.Pvsamv1 as pvsam
 
+#import PySAM.Pvsamv1Tools
+from hercules.tools.Pvsamv1Tools import size_electrical_parameters
+
 
 class SolarPySAM:
     def __init__(self, input_dict, dt):
@@ -76,6 +79,8 @@ class SolarPySAM:
         self.dc_power_mw = input_dict["initial_conditions"]["power"]
         self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
+        self.target_system_capacity = input_dict["target_system_capacity"]
+        self.target_dc_ac_ratio = input_dict["target_dc_ac_ratio"]
 
     def return_outputs(self):
         return {
@@ -114,8 +119,8 @@ class SolarPySAM:
 
         # predict power
         system_model = pvsam.new()
-        system_model.AdjustmentFactors.constant = 0
-        system_model.AdjustmentFactors.dc_constant = 0
+        system_model.AdjustmentFactors.adjust_constant = 0
+        system_model.AdjustmentFactors.dc_adjust_constant = 0
 
         for k, v in self.model_params.items():
             try:
@@ -179,6 +184,11 @@ class SolarPySAM:
         # print('----------------------------------------------')
         # print('solar_resource_data = ',solar_resource_data)
 
+        target_system_capacity = self.target_system_capacity
+        target_ratio = self.target_dc_ac_ratio
+        n_strings,n_combiners,n_inverters,calc_sys_capacity = size_electrical_parameters(
+            system_model, target_system_capacity, target_ratio)
+
         system_model.execute()
         out = system_model.Outputs.export()
 
@@ -215,3 +225,5 @@ class SolarPySAM:
         self.aoi = out["subarray1_aoi"][0]  # angle of incidence
 
         return self.return_outputs()
+
+

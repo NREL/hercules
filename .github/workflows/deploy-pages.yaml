@@ -10,7 +10,7 @@ on:
 # This job installs dependencies, builds the book, and pushes it to `gh-pages`
 jobs:
   deploy-book:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
 
@@ -27,11 +27,13 @@ jobs:
     - name: Make copies of example docs
       run: |
         mkdir -vp docs/examples
-        cp -v example_case_folders/05_floris_wind_standin_and_electrolyzer/README.md docs/examples/05_floris_wind_standin_and_electrolyzer.md
+
+        cp -v example_case_folders/05_floris_standin_and_electrolyzer/README.md docs/examples/05_floris_standin_and_electrolyzer.md
         cp -v example_case_folders/06_amr_wind_standin_and_battery/README.md docs/examples/06_amr_wind_standin_and_battery.md
         cp -v example_case_folders/07_floris_standin_and_solar_pysam/README.md docs/examples/07_floris_standin_and_solar_pysam.md
-        cp -v example_case_folders/08_floris_only/README.md docs/examples/08_floris_only.md
-        cp -v example_case_folders/09_amr_wind_openfast/README.md docs/examples/09_amr_wind_openfast.md
+        cp -v example_case_folders/08_floris_standin_only/README.md docs/examples/08_floris_standin_only.md
+        cp -v example_case_folders/09_heterogeneous_wind/README.md docs/examples/09_heterogeneous_wind.md
+        cp -v example_case_folders/14_energy_storage_control_and_wind/README.md docs/examples/14_energy_storage_control_and_wind.md
         ls -l docs/examples
 
     # Build the book

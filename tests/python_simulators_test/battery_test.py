@@ -63,10 +63,36 @@ def test_SB_init():
 
     assert SB.energy_capacity == battery_dict["energy_capacity"] * 1e3
 
+    assert SB.eta_charge == 1
+    assert SB.eta_discharge == 1
+
+    assert SB.tau_self_discharge == np.inf
+
+    assert not SB.track_usage
+    assert SB.usage_calc_interval == np.inf
+
     assert SB.power_mw == 0
     assert SB.P_reject == 0
     assert SB.P_charge == 0
 
+    battery_dict["roundtrip_efficiency"] = 0.9
+    battery_dict["self_discharge_time_constant"] = 100
+    battery_dict["track_usage"] = True
+    battery_dict["usage_calc_interval"] = 100
+    battery_dict["usage_lifetime"] = 0.1
+    battery_dict["usage_cycles"] = 10
+
+    SB = SimpleBattery(battery_dict, dt)
+
+    assert SB.eta_charge == np.sqrt(0.9)
+    assert SB.eta_discharge == np.sqrt(0.9)
+
+    assert SB.tau_self_discharge == 100
+
+    assert SB.track_usage
+    assert SB.usage_calc_interval == 100
+    assert SB.usage_time_rate == 3.170979198376459e-7
+    assert SB.usage_cycles_rate == 0.1
 
 def test_SB_return_outputs(SB: SimpleBattery):
     # outputs after initialization - all outputs should reflect input dict
@@ -75,11 +101,17 @@ def test_SB_return_outputs(SB: SimpleBattery):
     assert outputs_init["power"] == 0
     assert outputs_init["reject"] == 0
     assert outputs_init["soc"] == 0.102
+    assert outputs_init["usage_in_time"] == 0
+    assert outputs_init["usage_in_cycles"] == 0
+    assert outputs_init["total_cycles"] == 0
 
     # change simple battery state as if during simulation
     SB.power_mw = 35
     SB.P_reject = 2
     SB.SOC = 0.25
+    SB.time_usage_perc = 23
+    SB.cycle_usage_perc = 25
+    SB.total_cycle_usage = 143
 
     # check that outputs return the changed battery state
     outputs_sim = SB.return_outputs()
@@ -87,7 +119,9 @@ def test_SB_return_outputs(SB: SimpleBattery):
     assert outputs_sim["power"] == 35
     assert outputs_sim["reject"] == 2
     assert outputs_sim["soc"] == 0.25
-
+    assert outputs_sim["usage_in_time"] == 23
+    assert outputs_sim["usage_in_cycles"] == 25
+    assert outputs_sim["total_cycles"] == 143
 
 def test_SB_control_power_constraint(SB: SimpleBattery):
     # test upper charging limit
@@ -107,11 +141,13 @@ def test_SB_control_power_constraint(SB: SimpleBattery):
 
 def test_SB_control_energy_constraint(SB: SimpleBattery):
     SB.E = SB.E_min + 500
+    SB.x[0,0] = SB.E
     out = SB.step(step_inputs(P_avail=3e3, P_signal=-1.5e3))
     assert out["power"] == -500
     assert out["reject"] == -1000
 
     SB.E = SB.E_max - 500
+    SB.x[0,0] = SB.E
     out = SB.step(step_inputs(P_avail=3e3, P_signal=1.5e3))
     assert out["power"] == 500
     assert out["reject"] == 1000
@@ -120,12 +156,14 @@ def test_SB_control_energy_constraint(SB: SimpleBattery):
 def test_SB_step(SB: SimpleBattery):
     SB.step(step_inputs(P_avail=1e3, P_signal=1e3))
 
-    assert_almost_equal(SB.E, 29377000, decimal=0)
+    assert_almost_equal(SB.E, 29377000, decimal=6)
     assert_almost_equal(SB.current_batt_state, 8160.27, decimal=1)
     assert_almost_equal(SB.SOC, 0.102003472, decimal=8)
     assert SB.P_charge == 1e3
 
     SB.E = SB.E_min + 5e3
+    SB.x[0,0] = SB.E
+
 
     for i in range(4):
         SB.step(step_inputs(P_avail=1e3, P_signal=-2e3))

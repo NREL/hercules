@@ -1,1 +1,0 @@
-This example runs the AMR Wind standin without any additional generation

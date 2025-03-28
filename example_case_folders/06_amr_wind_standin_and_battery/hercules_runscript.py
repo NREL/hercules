@@ -8,15 +8,22 @@ from whoc.controllers.wind_battery_controller import (
 )
 from whoc.interfaces.hercules_wind_battery_interface import HerculesWindBatteryInterface
 
+# Check that command line arguments are provided
+if len(sys.argv) != 3:
+    raise Exception("Usage: python hercules_runscript.py <hercules_input_file> <helics_port>")
+
 # if len(sys.argv) > 1:
 input_dict = load_yaml(sys.argv[1])
+
+# Set the helics port
+helics_port = int(sys.argv[2])
+input_dict["hercules_comms"]["helics"]["config"]["helics"]["helicsport"] = helics_port
+print(f"Running Hercules with helics_port {helics_port}")
 
 
 interface = HerculesWindBatteryInterface(input_dict)
 controller = WindBatteryController(interface, input_dict)
 
-
-input_dict = load_yaml(sys.argv[1])
 
 py_sims = PySims(input_dict)
 

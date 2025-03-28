@@ -2,6 +2,52 @@
 requires = ["setuptools >= 40.6.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "hercules"
+version = "1.2"
+description = "Hybrid plant emulation tool."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+     { name = "Genevieve Starke", email = "Genevieve.Starke@nrel.gov" },
+    { name = "Michael (Misha) Sinner", email = "Michael.Sinner@nrel.gov" },
+    { name = "Paul Fleming", email = "paul.fleming@nrel.gov" },
+    { name = "Brooke Stanislawski", email = "Brooke.Stanislawski@nrel.gov" },
+]
+license = { file = "LICENSE.txt" }
+urls = { "Homepage" = "https://github.com/NREL/hercules" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+"numpy~=2.0",
+"matplotlib~=3.8",
+"pandas~=2.0",
+"floris~=4.3",
+"nrel-pysam~=6.0",
+"netCDF4",
+"rainflow~=3.2",
+]
+
+[project.optional-dependencies]
+docs = [
+    "jupyter-book",
+    "sphinx-book-theme"
+]
+develop = [
+    "pytest",
+    "pre-commit",
+    "ruff",
+    "isort"
+]
+
+[tool.setuptools.packages.find]
+include = ["hercules*"]
 
 [coverage.run]
 # Coverage.py configuration file
@@ -13,13 +59,11 @@ omit = [
     "tests/*"
 ]
 
-
 [tool.pytest.ini_options]
 testpaths = "tests"
 filterwarnings = [
     "ignore::DeprecationWarning:pandas.*:"
 ]
-
 
 [tool.ruff]
 src = ["hercules", "tests"]
@@ -66,14 +110,10 @@ exclude = [
 # Allow unused variables when underscore-prefixed.
 lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-
 [tool.ruff.lint.isort]
 combine-as-imports = true
 known-first-party = ["flasc"]
 order-by-type = false
-
-# [tool.black]
-# line-length = 100
 
 [tool.ruff.lint.per-file-ignores]
 # Ignore `F401` (import violations) in all `__init__.py` files, and in `path/to/file.py`.

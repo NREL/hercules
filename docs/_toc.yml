@@ -21,13 +21,12 @@ parts:
   - caption: Examples
     chapters:
     - file: examples_overview
-    - file: examples/05_floris_wind_standin_and_electrolyzer
+    - file: examples/05_floris_standin_and_electrolyzer
     - file: examples/06_amr_wind_standin_and_battery
     - file: examples/07_floris_standin_and_solar_pysam
-    - file: examples/08_floris_only
-    - file: examples/09_amr_wind_openfast
-
-
+    - file: examples/08_floris_standin_only
+    - file: examples/09_heterogeneous_wind
+    - file: examples/14_energy_storage_control_and_wind
 
 
 

@@ -4,7 +4,7 @@
 title: HERCULES
 author: National Renewable Energy Laboratory
 logo: herc.png
-copyright: '2024'
+copyright: '2025'
 only_build_toc_files: false
 
 # Force re-execution of notebooks on each build.

@@ -25,10 +25,12 @@ def get_solar_params():
         },
 
         "system_info_file_name": path+
-            '/../../example_case_folders/07_floris_standin_and_solar_pysam/100MW_1axis_pvsamv1.json',
+            '/../test_inputs/100MW_1axis_pvsamv1.json',
         "lat": 39.7442, 
         "lon": -105.1778, 
         "elev": 1829,
+        "target_system_capacity": 100002.58266599999,
+        "target_dc_ac_ratio": 1.33,
         "initial_conditions": {
             "power": 25, 
             "dni": 1000
@@ -87,8 +89,7 @@ def test_step(SPS: SolarPySAM):
 
     SPS.step(step_inputs)
 
-    assert_almost_equal(SPS.power_mw, 32.17650018440107, decimal=8)
-    # assert_almost_equal(SPS.dc_power_mw, 33.26240852125279, decimal=8)
+    assert_almost_equal(SPS.power_mw, 32.19801938915135, decimal=8)
     assert_almost_equal(SPS.ghi, 68.23037719726561, decimal=8)
 
 def test_control(SPS: SolarPySAM):

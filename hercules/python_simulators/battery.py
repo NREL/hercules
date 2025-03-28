@@ -591,6 +591,10 @@ class SimpleBattery:
     def calc_usage(self):
 
         # Count rainflow cycles
+        # This step uses sthe rainflow algorithm to count how many cycles exist in the
+        #   storage operation using the three-point technique (ASTM Standard E 1049-85)
+        #   The algorithm returns the size (amplitude) of the cycle, and the number of cycles at 
+        #       that amplitude at that point in the signal
         ranges_counts = rainflow.count_cycles(self.E_store)
         ranges = np.array([rc[0] for rc in ranges_counts])
         counts = np.array([rc[1] for rc in ranges_counts])

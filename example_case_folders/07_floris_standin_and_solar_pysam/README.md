@@ -2,7 +2,7 @@
 
 ## Description
 
-This example demonstrates how to use the FLORIS Standin and a solar model using pysam.  The simulation should run for 20 simulated seconds.
+This example demonstrates how to use the FLORIS Standin and a solar model using pysam.  The simulation should run for 20 simulated seconds. This example also demonstartes the ability of Hercules to dynamically adjust the size (and design) of a solar farm.
 
 
 ## Running

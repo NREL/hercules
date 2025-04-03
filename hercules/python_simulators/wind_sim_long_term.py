@@ -388,6 +388,11 @@ class Turbine1dofModel:
         # Save the turbine dict
         self.turbine_dict = turbine_dict
 
+        # Set filter parameter for rotor speed
+        self.filteralpha = np.exp(
+            -self.dt * self.turbine_dict["dof1_model"]["filterfreq_rotor_speed"]
+        )
+
         # Obtain more data from floris
         turbine_type = fmodel.core.farm.turbine_definitions[0]
         self.rotor_radius = turbine_type['rotor_diameter']/2
@@ -413,6 +418,7 @@ class Turbine1dofModel:
         )
         self.prev_power = np.array(prev_power[0]/1000.0)
         self.prev_omega = omega0
+        self.prev_omegaf = omega0
         self.prev_aerotq = (
             0.5
             * self.rho
@@ -436,8 +442,10 @@ class Turbine1dofModel:
             * self.dt
             / self.turbine_dict["dof1_model"]["rotor_inertia"]
         )
-        pitch,gentq = self.simplecontroller(wind_speed,omega)
-        tsr = float(omega * self.rotor_radius / wind_speed)
+        omegaf = (1-self.filteralpha) * omega + self.filteralpha*(self.prev_omegaf)
+        # print(omegaf-omega)
+        pitch,gentq = self.simplecontroller(wind_speed,omegaf)
+        tsr = float(omegaf * self.rotor_radius / wind_speed)
         if derating > 0:
             desiredcp = derating*1000 / ( 0.5 * self.rho * self.rotor_area * wind_speed**3)
             optpitch = minimize_scalar(
@@ -467,22 +475,25 @@ class Turbine1dofModel:
             * self.perffuncs["Cq"]([tsr, pitch])
         )
 
-        power = (
-            self.perffuncs["Cp"]([tsr, pitch]) * 0.5 * self.rho * self.rotor_area * wind_speed**3
-        )
+        # power = (
+        #     self.perffuncs["Cp"]([tsr, pitch]) * 0.5 * self.rho * self.rotor_area * wind_speed**3
+        # )
+        power = gentq*omega*self.turbine_dict["dof1_model"]["gearbox_ratio"]
+
 
         self.prev_omega = omega
         self.prev_aerotq = aerotq
         self.prev_gentq = gentq
         self.prev_pitch = pitch
+        self.prev_omegaf = omegaf
         self.prev_power = power[0] / 1000.0
         
         return self.prev_power
 
-    def simplecontroller(self,wind_speed,omega):
+    def simplecontroller(self,wind_speed,omegaf):
         # if omega <= self.turbine_dict['dof1_model']['rated_wind_speed']:
         pitch = 0.0
-        gentorque = self.turbine_dict['dof1_model']['controller']['r2_k_torque'] * omega**2
+        gentorque = self.turbine_dict['dof1_model']['controller']['r2_k_torque'] * omegaf**2
         # else
         #     raise Exception("Region-3 controller not implemented yet")
         return pitch,gentorque

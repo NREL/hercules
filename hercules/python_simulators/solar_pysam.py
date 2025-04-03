@@ -36,38 +36,32 @@ class SolarPySAM:
         # print(input_dict)
 
         # set PV system model parameters
-        if input_dict["system_info_file_name"]:  # using system info json file
-            # with open(input_dict["system_info_file_name"], "r") as f:
-            #     model_params = json.load(f)
-            sys_design = {
-                "ModelParams": {
-                    "SystemDesign": {
-                        "array_type": 3.0,
-                        "azimuth": 180.0,
-                        "dc_ac_ratio": 1.1499999999999999,
-                        "gcr": 0.29999999999999999,
-                        "inv_eff": 96,
-                        "losses": 14.075660688264469,
-                        "module_type": 2.0,
-                        "system_capacity": 100000,
-                        "tilt": 0.0
-                    },
+        sys_design = {
+            "ModelParams": {
+                "SystemDesign": {
+                    "array_type": 3.0,
+                    "azimuth": 180.0,
+                    "dc_ac_ratio": input_dict["target_dc_ac_ratio"],
+                    "gcr": 0.29999999999999999,
+                    "inv_eff": 96,
+                    "losses": 14.075660688264469,
+                    "module_type": 2.0,
+                    "system_capacity": input_dict["target_system_capacity_kW"],
+                    "tilt": 0.0
                 },
-                "Other": {
-                    "lat": input_dict["lat"],
-                    "lon": input_dict["lon"],
-                    "elev": input_dict["elev"],
-                },
-            }
-        else:  # using system info data dictionary in input file
-            # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
-            sys_design = input_dict["system_info_data_input"]
+            },
+            "Other": {
+                "lat": input_dict["lat"],
+                "lon": input_dict["lon"],
+                "elev": input_dict["elev"],
+            },
+        }
 
-            if self.verbose:
-                print("sys_design")
-                print(sys_design)
-                print("model_params")
-                print(sys_design["ModelParams"])
+        if self.verbose:
+            print("sys_design")
+            print(sys_design)
+            print("model_params")
+            print(sys_design["ModelParams"])
 
         self.model_params = sys_design["ModelParams"]
         self.elev = sys_design["Other"]["elev"]
@@ -83,7 +77,6 @@ class SolarPySAM:
             print("self.tz = ", self.tz)
 
         self.needed_inputs = {}
-        # self.data = data
         self.data = weather_data_array
         self.dt = dt
 
@@ -100,13 +93,11 @@ class SolarPySAM:
         system_model.AdjustmentFactors.adjust_constant = 0
         system_model.AdjustmentFactors.dc_adjust_constant = 0
 
-        # this doesn't need to be repeated each timestep
         for k, v in self.model_params.items():
             try:
                 system_model.value(k, v)
             except Exception:
                 print(k)
-        # this doesn't need to be repeated each timestep
 
         self.system_model = system_model
 
@@ -115,7 +106,6 @@ class SolarPySAM:
     def return_outputs(self):
         return {
             "power_mw": self.power_mw,
-            # "dc_power_mw": self.dc_power_mw,
             "dni": self.dni,
             "aoi": self.aoi,
         }
@@ -152,15 +142,12 @@ class SolarPySAM:
             print("sim_time_s = ", sim_time_s)
 
         # select appropriate row based on current time
-        # time_index = self.data.index[0] + pd.Timedelta(seconds=sim_time_s)
         time_index = self.data[0,0] + pd.Timedelta(seconds=sim_time_s)
         if self.verbose:
             print("time_index = ", time_index)
         try:
             condition = self.data[:,0] == time_index
             row_index = np.where(condition)[0][0]
-            # data = self.data.loc[time_index]  # a single timestep
-            # print(data)
         except Exception:
             print("ERROR: Input solar weather file doesn't have data at requested timestamp.")
             print(
@@ -169,8 +156,6 @@ class SolarPySAM:
 
         # forcing this to be an array of lists so that tuple doesn't 
         # unpack it in solar_resource_data
-
-        # could create this array once, and then index into it each timestep - with .to_array
         weather_data = np.array( 
             [
                 [time_index.year], 
@@ -210,14 +195,9 @@ class SolarPySAM:
         # print('solar_resource_data = ',solar_resource_data)
 
         self.system_model.execute()
-        # out = self.system_model.Outputs.export() # may not need to export all the outputs - system_model.Outputs.gen for example
 
-        # ac = np.array(out["gen"]) / 1000  # in MW
         ac = np.array(self.system_model.Outputs.gen) / 1000  # in MW
-        # dc = np.array(out["dc_net"]) / 1000
-
         self.power_mw = ac[0]  # calculating one timestep at a time
-        # self.dc_power_mw = dc[0]
         if self.verbose:
             print("self.power_mw = ", self.power_mw)
 

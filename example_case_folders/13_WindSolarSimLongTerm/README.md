@@ -2,7 +2,9 @@
 
 ## Description
 
-...
+This example uses the Python simulator for wind power output and PySAM's PVWatts model for solar power output. This example was developed to run Hercules for long durations (up to 1 year).
+
+The input solar resource data is a subset of the Flatirons irradiance data at sunset, to capture varying power output from the solar farm.
 
 
 ## Running

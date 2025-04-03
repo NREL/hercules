@@ -1,11 +1,9 @@
 # Using PySAM to predict PV power based on weather data
 # code originally copied from https://github.com/NREL/pysam/blob/main/Examples/NonAnnualSimulation.ipynb
 
-import json
-
 import numpy as np
 import pandas as pd
-import PySAM.Pvsamv1 as pvsam
+import PySAM.Pvwattsv8 as pvwatts
 
 
 class SolarPySAM:
@@ -28,31 +26,40 @@ class SolarPySAM:
         data["Timestamp"] = pd.DatetimeIndex(pd.to_datetime(data["Timestamp"], format="ISO8601"))
         data = data.set_index("Timestamp")
 
+        # convert to numpy array for speedup
+        weather_data_array = data.reset_index().to_numpy()
+        self.create_col_dict(data) # create dictionary for indexing to correct column of numpy array
+
         # print('input_dict = ')
         # print(input_dict)
 
         # set PV system model parameters
-        if input_dict["system_info_file_name"]:  # using system info json file
-            with open(input_dict["system_info_file_name"], "r") as f:
-                model_params = json.load(f)
-            sys_design = {
-                "ModelParams": model_params,
-                # "Other": input_dict["other"],
-                "Other": {
-                    "lat": input_dict["lat"],
-                    "lon": input_dict["lon"],
-                    "elev": input_dict["elev"],
+        sys_design = {
+            "ModelParams": {
+                "SystemDesign": {
+                    "array_type": 3.0,
+                    "azimuth": 180.0,
+                    "dc_ac_ratio": input_dict["target_dc_ac_ratio"],
+                    "gcr": 0.29999999999999999,
+                    "inv_eff": 96,
+                    "losses": 14.075660688264469,
+                    "module_type": 2.0,
+                    "system_capacity": input_dict["target_system_capacity_kW"],
+                    "tilt": 0.0
                 },
-            }
-        else:  # using system info data dictionary in input file
-            # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
-            sys_design = input_dict["system_info_data_input"]
+            },
+            "Other": {
+                "lat": input_dict["lat"],
+                "lon": input_dict["lon"],
+                "elev": input_dict["elev"],
+            },
+        }
 
-            if self.verbose:
-                print("sys_design")
-                print(sys_design)
-                print("model_params")
-                print(sys_design["ModelParams"])
+        if self.verbose:
+            print("sys_design")
+            print(sys_design)
+            print("model_params")
+            print(sys_design["ModelParams"])
 
         self.model_params = sys_design["ModelParams"]
         self.elev = sys_design["Other"]["elev"]
@@ -68,7 +75,7 @@ class SolarPySAM:
             print("self.tz = ", self.tz)
 
         self.needed_inputs = {}
-        self.data = data
+        self.data = weather_data_array
         self.dt = dt
 
         # Save the initial condition
@@ -77,10 +84,26 @@ class SolarPySAM:
         self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
 
+        # create pysam model
+        system_model = pvwatts.new()
+        system_model.assign(self.model_params)
+
+        system_model.AdjustmentFactors.adjust_constant = 0
+        system_model.AdjustmentFactors.dc_adjust_constant = 0
+
+        for k, v in self.model_params.items():
+            try:
+                system_model.value(k, v)
+            except Exception:
+                print(k)
+
+        self.system_model = system_model
+
+        
+
     def return_outputs(self):
         return {
             "power_mw": self.power_mw,
-            # "dc_power_mw": self.dc_power_mw,
             "dni": self.dni,
             "aoi": self.aoi,
         }
@@ -112,28 +135,17 @@ class SolarPySAM:
         # print('-------------------')
         # print('vars(self) = ',vars(self))
 
-        # predict power
-        system_model = pvsam.new()
-        system_model.AdjustmentFactors.adjust_constant = 0
-        system_model.AdjustmentFactors.dc_adjust_constant = 0
-
-        for k, v in self.model_params.items():
-            try:
-                system_model.value(k, v)
-            except Exception:
-                print(k)
-
         sim_time_s = inputs["time"]
         if self.verbose:
             print("sim_time_s = ", sim_time_s)
 
         # select appropriate row based on current time
-        time_index = self.data.index[0] + pd.Timedelta(seconds=sim_time_s)
+        time_index = self.data[0,0] + pd.Timedelta(seconds=sim_time_s)
         if self.verbose:
             print("time_index = ", time_index)
         try:
-            data = self.data.loc[time_index]  # a single timestep
-            # print(data)
+            condition = self.data[:,0] == time_index
+            row_index = np.where(condition)[0][0]
         except Exception:
             print("ERROR: Input solar weather file doesn't have data at requested timestamp.")
             print(
@@ -149,13 +161,14 @@ class SolarPySAM:
                 [time_index.day],
                 [time_index.hour],
                 [time_index.minute],
-                [data["SRRL BMS Direct Normal Irradiance (W/m²_irr)"]],
-                [data["SRRL BMS Diffuse Horizontal Irradiance (W/m²_irr)"]],
-                [data["SRRL BMS Global Horizontal Irradiance (W/m²_irr)"]],
-                [data["SRRL BMS Wind Speed at 19' (m/s)"]],
-                [data["SRRL BMS Dry Bulb Temperature (°C)"]],
+                [self.data[row_index,self.col_dict['dni_col']]],
+                [self.data[row_index,self.col_dict['dhi_col']]],
+                [self.data[row_index,self.col_dict['ghi_col']]],
+                [self.data[row_index,self.col_dict['ws_col']]],
+                [self.data[row_index,self.col_dict['temp_col']]],
             ]
         )
+        # print('weather_data = ', weather_data)
 
         solar_resource_data = {
             "tz": self.tz,  # timezone
@@ -174,19 +187,15 @@ class SolarPySAM:
             "tdry": tuple(weather_data[9]),  # dry bulb temperature
         }
 
-        system_model.SolarResource.assign({"solar_resource_data": solar_resource_data})
-        system_model.AdjustmentFactors.assign({"constant": 0})
+        self.system_model.SolarResource.assign({"solar_resource_data": solar_resource_data})
+        self.system_model.AdjustmentFactors.assign({"constant": 0})
         # print('----------------------------------------------')
         # print('solar_resource_data = ',solar_resource_data)
 
-        system_model.execute()
-        out = system_model.Outputs.export()
+        self.system_model.execute()
 
-        ac = np.array(out["gen"]) / 1000  # in MW
-        # dc = np.array(out["dc_net"]) / 1000
-
+        ac = np.array(self.system_model.Outputs.gen) / 1000  # in MW
         self.power_mw = ac[0]  # calculating one timestep at a time
-        # self.dc_power_mw = dc[0]
         if self.verbose:
             print("self.power_mw = ", self.power_mw)
 
@@ -206,12 +215,28 @@ class SolarPySAM:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
-        self.dni = out["dn"][0]  # direct normal irradiance
-        self.dhi = out["df"][0]  # diffuse horizontal irradiance
-        self.ghi = out["gh"][0]  # global horizontal irradiance
+        self.dni = self.system_model.Outputs.dn[0]  # direct normal irradiance
+        self.dhi = self.system_model.Outputs.df[0]  # diffuse horizontal irradiance
+        self.ghi = self.system_model.Outputs.gh[0]  # global horizontal irradiance
         if self.verbose:
             print("self.dni = ", self.dni)
 
-        self.aoi = out["subarray1_aoi"][0]  # angle of incidence
+        self.aoi = self.system_model.Outputs.aoi[0]  # angle of incidence
 
         return self.return_outputs()
+
+    def create_col_dict(self, data):
+        col_dict = {}
+        for i, col in enumerate(data.columns):
+            if 'Global Horizontal Irradiance' in col:
+                col_dict['ghi_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
+            elif 'Direct Normal Irradiance' in col:
+                col_dict['dni_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
+            elif 'Diffuse Horizontal Irradiance' in col:
+                col_dict['dhi_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
+            elif 'Temperature' in col:
+                col_dict['temp_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
+            elif 'Wind Speed at 19' in col:
+                col_dict['ws_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
+
+        self.col_dict = col_dict

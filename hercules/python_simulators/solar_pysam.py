@@ -1,8 +1,6 @@
 # Using PySAM to predict PV power based on weather data
 # code originally copied from https://github.com/NREL/pysam/blob/main/Examples/NonAnnualSimulation.ipynb
 
-import json
-
 import numpy as np
 import pandas as pd
 import PySAM.Pvwattsv8 as pvwatts

@@ -5,7 +5,7 @@ import json
 
 import numpy as np
 import pandas as pd
-import PySAM.Pvsamv1 as pvsam
+import PySAM.Pvwattsv8 as pvwatts
 
 
 class SolarPySAM:
@@ -37,11 +37,22 @@ class SolarPySAM:
 
         # set PV system model parameters
         if input_dict["system_info_file_name"]:  # using system info json file
-            with open(input_dict["system_info_file_name"], "r") as f:
-                model_params = json.load(f)
+            # with open(input_dict["system_info_file_name"], "r") as f:
+            #     model_params = json.load(f)
             sys_design = {
-                "ModelParams": model_params,
-                # "Other": input_dict["other"],
+                "ModelParams": {
+                    "SystemDesign": {
+                        "array_type": 3.0,
+                        "azimuth": 180.0,
+                        "dc_ac_ratio": 1.1499999999999999,
+                        "gcr": 0.29999999999999999,
+                        "inv_eff": 96,
+                        "losses": 14.075660688264469,
+                        "module_type": 2.0,
+                        "system_capacity": 100000,
+                        "tilt": 0.0
+                    },
+                },
                 "Other": {
                     "lat": input_dict["lat"],
                     "lon": input_dict["lon"],
@@ -83,7 +94,9 @@ class SolarPySAM:
         self.aoi = 0
 
         # create pysam model
-        system_model = pvsam.new()
+        system_model = pvwatts.new()
+        system_model.assign(self.model_params)
+
         system_model.AdjustmentFactors.adjust_constant = 0
         system_model.AdjustmentFactors.dc_adjust_constant = 0
 
@@ -224,17 +237,13 @@ class SolarPySAM:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
-        # self.dni = out["dn"][0]  # direct normal irradiance
-        # self.dhi = out["df"][0]  # diffuse horizontal irradiance
-        # self.ghi = out["gh"][0]  # global horizontal irradiance
         self.dni = self.system_model.Outputs.dn[0]  # direct normal irradiance
         self.dhi = self.system_model.Outputs.df[0]  # diffuse horizontal irradiance
         self.ghi = self.system_model.Outputs.gh[0]  # global horizontal irradiance
         if self.verbose:
             print("self.dni = ", self.dni)
 
-        # self.aoi = out["subarray1_aoi"][0]  # angle of incidence
-        self.aoi = self.system_model.Outputs.subarray1_aoi[0]  # angle of incidence
+        self.aoi = self.system_model.Outputs.aoi[0]  # angle of incidence
 
         return self.return_outputs()
 

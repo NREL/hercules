@@ -67,7 +67,6 @@ ax.grid(True)
 ax.legend()
 ax.set_xlabel("Time [s]")
 ax.set_ylabel("Power [kW]")
-plt.show()
 
 
 # solar plots

@@ -5,6 +5,8 @@ import json
 import numpy as np
 import pandas as pd
 
+#import PySAM.Pvsamv1Tools
+from hercules.tools.Pvsamv1Tools import size_electrical_parameters
 
 class SolarPySAM:
     def __init__(self, input_dict, dt):
@@ -85,6 +87,11 @@ class SolarPySAM:
         self.dc_power_mw = input_dict["initial_conditions"]["power"]
         self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
+
+        # dynamic sizing special treatment only required for pvsam model, not for pvwatts
+        if self.pysam_model == 'pvsam':
+            self.target_system_capacity = input_dict["target_system_capacity"]
+            self.target_dc_ac_ratio = input_dict["target_dc_ac_ratio"]
 
         # create pysam model
         if self.pysam_model == 'pvsam':
@@ -192,6 +199,13 @@ class SolarPySAM:
         self.system_model.AdjustmentFactors.assign({"constant": 0})
         # print('----------------------------------------------')
         # print('solar_resource_data = ',solar_resource_data)
+
+        # dynamic sizing special treatment only required for pvsam model, not for pvwatts
+        if self.pysam_model == 'pvsam':
+            target_system_capacity = self.target_system_capacity
+            target_ratio = self.target_dc_ac_ratio
+            n_strings,n_combiners,n_inverters,calc_sys_capacity = size_electrical_parameters(
+                self.system_model, target_system_capacity, target_ratio)
 
         self.system_model.execute()
 

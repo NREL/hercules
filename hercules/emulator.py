@@ -139,8 +139,6 @@ class Emulator(FederateAgent):
         # list(self.pub.values())[0].publish(str("[-1,-1,-1]"))
         # self.logger.info(" #### Entering main loop #### ")
 
-        print('-----------------main_dict = ', self.main_dict)
-        print('-------------------------------')
 
     def _read_external_data_file(self, filename):
         # Read in the external data file

@@ -30,6 +30,7 @@ dependencies = [
 "pandas~=2.0",
 "floris~=4.3",
 "nrel-pysam~=6.0",
+"jupyter",
 "netCDF4",
 "rainflow~=3.2",
 ]
@@ -70,7 +71,6 @@ src = ["hercules", "tests"]
 line-length = 100
 target-version = "py310"
 extend-include = ["*.ipynb"]
-lint.ignore-init-module-imports = true
 
 # See https://github.com/charliermarsh/ruff#supported-rules
 # for rules included and matching to prefix.

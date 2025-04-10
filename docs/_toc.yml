@@ -26,6 +26,7 @@ parts:
     - file: examples/07_floris_standin_and_solar_pysam
     - file: examples/08_floris_standin_only
     - file: examples/09_heterogeneous_wind
+    - file: examples/14_energy_storage_control_and_wind
 
 
 

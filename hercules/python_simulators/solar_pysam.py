@@ -5,16 +5,17 @@ import json
 import numpy as np
 import pandas as pd
 
-#import PySAM.Pvsamv1Tools
-from hercules.tools.Pvsamv1Tools import size_electrical_parameters
+
 
 class SolarPySAM:
     def __init__(self, input_dict, dt):
 
         self.pysam_model = input_dict["pysam_model"]
         if self.pysam_model == 'pvsam':
-            
             import PySAM.Pvsamv1 as pvsam
+
+            #import PySAM.Pvsamv1Tools
+            from hercules.tools.Pvsamv1Tools import size_electrical_parameters 
         elif self.pysam_model == 'pvwatts':
             import PySAM.Pvwattsv8 as pvwatts
 
@@ -38,32 +39,50 @@ class SolarPySAM:
         self.create_col_dict(data) # create dictionary for indexing to correct column of numpy array
 
         # set PV system model parameters
-        sys_design = {
-            "ModelParams": {
-                "SystemDesign": {
-                    "array_type": 3.0,
-                    "azimuth": 180.0,
-                    "dc_ac_ratio": input_dict["target_dc_ac_ratio"],
-                    "gcr": 0.29999999999999999,
-                    "inv_eff": 96,
-                    "losses": 14.075660688264469,
-                    "module_type": 2.0,
-                    "system_capacity": input_dict["target_system_capacity_kW"],
-                    "tilt": 0.0
-                },
-            },
-            "Other": {
-                "lat": input_dict["lat"],
-                "lon": input_dict["lon"],
-                "elev": input_dict["elev"],
-            },
-        }
+        if self.pysam_model == 'pvsam':
+            if input_dict["system_info_file_name"]:  # using system info json file
+                with open(input_dict["system_info_file_name"], "r") as f:
+                    model_params = json.load(f)
+                sys_design = {
+                    "ModelParams": model_params,
+                    # "Other": input_dict["other"],
+                    "Other": {
+                        "lat": input_dict["lat"],
+                        "lon": input_dict["lon"],
+                        "elev": input_dict["elev"],
+                    },
+                }
+            else:  # using system info data dictionary in input file
+                # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
+                sys_design = input_dict["system_info_data_input"]
 
-        if self.verbose:
-            print("sys_design")
-            print(sys_design)
-            print("model_params")
-            print(sys_design["ModelParams"])
+                if self.verbose:
+                    print("sys_design")
+                    print(sys_design)
+                    print("model_params")
+                    print(sys_design["ModelParams"])
+
+        elif self.pysam_model == 'pvwatts':
+            sys_design = {
+                "ModelParams": { 
+                    "SystemDesign": {
+                        "array_type": 3.0,
+                        "azimuth": 180.0,
+                        "dc_ac_ratio": input_dict["target_dc_ac_ratio"],
+                        "gcr": 0.29999999999999999,
+                        "inv_eff": 96,
+                        "losses": 14.075660688264469,
+                        "module_type": 2.0,
+                        "system_capacity": input_dict["target_system_capacity_kW"],
+                        "tilt": 0.0
+                    },
+                },
+                "Other": {
+                    "lat": input_dict["lat"],
+                    "lon": input_dict["lon"],
+                    "elev": input_dict["elev"],
+                },
+            }
 
         self.model_params = sys_design["ModelParams"]
         self.elev = sys_design["Other"]["elev"]
@@ -90,7 +109,7 @@ class SolarPySAM:
 
         # dynamic sizing special treatment only required for pvsam model, not for pvwatts
         if self.pysam_model == 'pvsam':
-            self.target_system_capacity = input_dict["target_system_capacity"]
+            self.target_system_capacity = input_dict["target_system_capacity_kW"]
             self.target_dc_ac_ratio = input_dict["target_dc_ac_ratio"]
 
         # create pysam model

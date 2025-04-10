@@ -139,7 +139,6 @@ class Emulator(FederateAgent):
         # list(self.pub.values())[0].publish(str("[-1,-1,-1]"))
         # self.logger.info(" #### Entering main loop #### ")
 
-
     def _read_external_data_file(self, filename):
         # Read in the external data file
         df_ext = pd.read_csv(filename)

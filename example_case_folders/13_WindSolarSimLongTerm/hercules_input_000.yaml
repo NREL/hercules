@@ -26,6 +26,7 @@ py_sims:
 
   solar_farm_0: # The name of py_sim object 1
     py_sim_type: SolarPySAM
+    pysam_model: pvwatts #pvsam or pvwatts
     verbose: True # flag to print debugging statements
     weather_file_name: inputs/Flatirons_solar_data_sunset_1s.csv
     lat: 39.7442

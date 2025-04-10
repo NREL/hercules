@@ -75,6 +75,7 @@ def get_solar_params():
     # explicitly specifying weather inputs from the first timestep of the example file
     solar_dict = {
         "py_sim_type": SolarPySAM,
+        "pysam_model": "pvsam",
         "weather_file_name": path+'/../test_inputs/solar_pysam_data.csv',
         "system_info_file_name": path+'/../test_inputs/100MW_1axis_pvsamv1.json',
         "lat": 39.7442, 

@@ -14,6 +14,7 @@ def get_solar_params():
     # explicitly specifying weather inputs from the first timestep of the example file
     solar_dict = {
         "py_sim_type": SolarPySAM,
+        "pysam_model": "pvsam",
         "weather_file_name": None,
         "weather_data_input": {
         "Timestamp": ['2018-05-10 12:31:00+00:00'],

@@ -1,15 +1,21 @@
 # Using PySAM to predict PV power based on weather data
 # code originally copied from https://github.com/NREL/pysam/blob/main/Examples/NonAnnualSimulation.ipynb
 
+import json
 import numpy as np
 import pandas as pd
-import PySAM.Pvwattsv8 as pvwatts
 
 
 class SolarPySAM:
     def __init__(self, input_dict, dt):
 
-        print('trying to read in verbose flag')
+        self.pysam_model = input_dict["pysam_model"]
+        if self.pysam_model == 'pvsam':
+            
+            import PySAM.Pvsamv1 as pvsam
+        elif self.pysam_model == 'pvwatts':
+            import PySAM.Pvwattsv8 as pvwatts
+
         if "verbose" in input_dict:
             self.verbose = input_dict["verbose"]
             print('read in verbose flag = ',self.verbose)
@@ -22,16 +28,12 @@ class SolarPySAM:
         else:  # using an input dictionary
             data = pd.DataFrame.from_dict(input_dict["weather_data_input"])
 
-        # print(data)
         data["Timestamp"] = pd.DatetimeIndex(pd.to_datetime(data["Timestamp"], format="ISO8601"))
         data = data.set_index("Timestamp")
 
         # convert to numpy array for speedup
         weather_data_array = data.reset_index().to_numpy()
         self.create_col_dict(data) # create dictionary for indexing to correct column of numpy array
-
-        # print('input_dict = ')
-        # print(input_dict)
 
         # set PV system model parameters
         sys_design = {
@@ -85,7 +87,10 @@ class SolarPySAM:
         self.aoi = 0
 
         # create pysam model
-        system_model = pvwatts.new()
+        if self.pysam_model == 'pvsam':
+            system_model = pvsam.new()
+        elif self.pysam_model == 'pvwatts':
+            system_model = pvwatts.new()
         system_model.assign(self.model_params)
 
         system_model.AdjustmentFactors.adjust_constant = 0
@@ -130,10 +135,6 @@ class SolarPySAM:
                 print("self.power_mw after control = ", self.power_mw)
 
     def step(self, inputs):
-        # print('-------------------')
-        # print('inputs',inputs)
-        # print('-------------------')
-        # print('vars(self) = ',vars(self))
 
         sim_time_s = inputs["time"]
         if self.verbose:
@@ -141,6 +142,7 @@ class SolarPySAM:
 
         # select appropriate row based on current time
         time_index = self.data[0,0] + pd.Timedelta(seconds=sim_time_s)
+
         if self.verbose:
             print("time_index = ", time_index)
         try:
@@ -220,7 +222,10 @@ class SolarPySAM:
         if self.verbose:
             print("self.dni = ", self.dni)
 
-        self.aoi = self.system_model.Outputs.aoi[0]  # angle of incidence
+        if self.pysam_model == 'pvsam':
+            self.aoi = self.system_model.Outputs.subarray1_aoi[0]  # angle of incidence
+        elif self.pysam_model == 'pvwatts':
+            self.aoi = self.system_model.Outputs.aoi[0]  # angle of incidence
 
         return self.return_outputs()
 

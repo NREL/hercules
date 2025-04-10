@@ -9,6 +9,8 @@ The input solar resource data is a subset of the Flatirons irradiance data at su
 
 ## Running
 
+Before running the example generate the solar input by running resample_solar_history.ipynb
+
 To run the example, execute the following command in the terminal:
 
 ```bash

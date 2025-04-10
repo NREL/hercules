@@ -33,6 +33,7 @@ jobs:
         cp -v example_case_folders/07_floris_standin_and_solar_pysam/README.md docs/examples/07_floris_standin_and_solar_pysam.md
         cp -v example_case_folders/08_floris_standin_only/README.md docs/examples/08_floris_standin_only.md
         cp -v example_case_folders/09_heterogeneous_wind/README.md docs/examples/09_heterogeneous_wind.md
+        cp -v example_case_folders/14_energy_storage_control_and_wind/README.md docs/examples/14_energy_storage_control_and_wind.md
         ls -l docs/examples
 
     # Build the book

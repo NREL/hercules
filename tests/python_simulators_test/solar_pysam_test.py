@@ -30,6 +30,8 @@ def get_solar_params():
         "lat": 39.7442, 
         "lon": -105.1778, 
         "elev": 1829,
+        "target_system_capacity": 100002.58266599999,
+        "target_dc_ac_ratio": 1.33,
         "initial_conditions": {
             "power": 25, 
             "dni": 1000

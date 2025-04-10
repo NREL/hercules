@@ -168,7 +168,6 @@ class SolarPySAM:
                 [self.data[row_index,self.col_dict['temp_col']]],
             ]
         )
-        # print('weather_data = ', weather_data)
 
         solar_resource_data = {
             "tz": self.tz,  # timezone

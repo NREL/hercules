@@ -32,9 +32,6 @@ class SolarPySAM:
         weather_data_array = data.reset_index().to_numpy()
         self.create_col_dict(data) # create dictionary for indexing to correct column of numpy array
 
-        # print('input_dict = ')
-        # print(input_dict)
-
         # set PV system model parameters
         if input_dict["system_info_file_name"]:  # using system info json file
             with open(input_dict["system_info_file_name"], "r") as f:
@@ -72,7 +69,6 @@ class SolarPySAM:
             print("self.tz = ", self.tz)
 
         self.needed_inputs = {}
-        # self.data = data
         self.data = weather_data_array
         self.dt = dt
 
@@ -82,18 +78,16 @@ class SolarPySAM:
         self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
 
-        # create pysam model
+        # create pysam model here so that it is not created each timestep
         system_model = pvsam.new()
         system_model.AdjustmentFactors.adjust_constant = 0
         system_model.AdjustmentFactors.dc_adjust_constant = 0
 
-        # this doesn't need to be repeated each timestep
         for k, v in self.model_params.items():
             try:
                 system_model.value(k, v)
             except Exception:
                 print(k)
-        # this doesn't need to be repeated each timestep
 
         self.system_model = system_model
 
@@ -102,7 +96,6 @@ class SolarPySAM:
     def return_outputs(self):
         return {
             "power_mw": self.power_mw,
-            # "dc_power_mw": self.dc_power_mw,
             "dni": self.dni,
             "aoi": self.aoi,
         }
@@ -139,25 +132,19 @@ class SolarPySAM:
             print("sim_time_s = ", sim_time_s)
 
         # select appropriate row based on current time
-        # time_index = self.data.index[0] + pd.Timedelta(seconds=sim_time_s)
         time_index = self.data[0,0] + pd.Timedelta(seconds=sim_time_s)
         if self.verbose:
             print("time_index = ", time_index)
         try:
             condition = self.data[:,0] == time_index
             row_index = np.where(condition)[0][0]
-            # data = self.data.loc[time_index]  # a single timestep
-            # print(data)
         except Exception:
             print("ERROR: Input solar weather file doesn't have data at requested timestamp.")
             print(
                 "Try setting dt in .yaml file equal to (or a multiple of) dt in solar weather file."
             )
 
-        # forcing this to be an array of lists so that tuple doesn't 
-        # unpack it in solar_resource_data
-
-        # could create this array once, and then index into it each timestep - with .to_array
+        # convert to numpy array for speedup
         weather_data = np.array( 
             [
                 [time_index.year], 
@@ -187,7 +174,7 @@ class SolarPySAM:
             "dn": tuple(weather_data[5]),  # direct normal irradiance
             "df": tuple(weather_data[6]),  # diffuse irradiance
             "gh": tuple(weather_data[7]),  # global horizontal irradiance
-            "wspd": tuple(weather_data[8]),  # windspeed
+            "wspd": tuple(weather_data[8]),  # windspeed (not peak)
             "tdry": tuple(weather_data[9]),  # dry bulb temperature
         }
 
@@ -197,14 +184,10 @@ class SolarPySAM:
         # print('solar_resource_data = ',solar_resource_data)
 
         self.system_model.execute()
-        # out = self.system_model.Outputs.export() # may not need to export all the outputs - system_model.Outputs.gen for example
 
-        # ac = np.array(out["gen"]) / 1000  # in MW
         ac = np.array(self.system_model.Outputs.gen) / 1000  # in MW
-        # dc = np.array(out["dc_net"]) / 1000
 
         self.power_mw = ac[0]  # calculating one timestep at a time
-        # self.dc_power_mw = dc[0]
         if self.verbose:
             print("self.power_mw = ", self.power_mw)
 
@@ -224,16 +207,12 @@ class SolarPySAM:
             self.power_mw = 0.0
         # NOTE: need to talk about whether to have time step in here or not
 
-        # self.dni = out["dn"][0]  # direct normal irradiance
-        # self.dhi = out["df"][0]  # diffuse horizontal irradiance
-        # self.ghi = out["gh"][0]  # global horizontal irradiance
         self.dni = self.system_model.Outputs.dn[0]  # direct normal irradiance
         self.dhi = self.system_model.Outputs.df[0]  # diffuse horizontal irradiance
         self.ghi = self.system_model.Outputs.gh[0]  # global horizontal irradiance
         if self.verbose:
             print("self.dni = ", self.dni)
 
-        # self.aoi = out["subarray1_aoi"][0]  # angle of incidence
         self.aoi = self.system_model.Outputs.subarray1_aoi[0]  # angle of incidence
 
         return self.return_outputs()

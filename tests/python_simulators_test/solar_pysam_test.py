@@ -19,7 +19,7 @@ def get_solar_params():
         "Timestamp": ['2018-05-10 12:31:00+00:00'],
         "SRRL BMS Direct Normal Irradiance (W/m²_irr)": [330.8601989746094],
         "SRRL BMS Diffuse Horizontal Irradiance (W/m²_irr)": [68.23037719726561],
-        "SRRL BMS Global Horizontal Irradiance (W/m²_irr)": [68.23037719726561],
+        "SRRL BMS Global Horizontal Irradiance (W/m²_irr)": [32.576671600341804],
         "SRRL BMS Wind Speed at 19' (m/s)": [0.4400002620664621],
         "SRRL BMS Dry Bulb Temperature (°C)": [11.990000406901045],
         },
@@ -90,7 +90,7 @@ def test_step(SPS: SolarPySAM):
     SPS.step(step_inputs)
 
     assert_almost_equal(SPS.power_mw, 32.19801938915135, decimal=8)
-    assert_almost_equal(SPS.ghi, 68.23037719726561, decimal=8)
+    assert_almost_equal(SPS.ghi, 32.576671600341804, decimal=8)
 
 def test_control(SPS: SolarPySAM):
     power_setpoint_mw = 30

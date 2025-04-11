@@ -249,7 +249,7 @@ class SolarPySAM:
                 col_dict['dhi_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
             elif 'Temperature' in col:
                 col_dict['temp_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
-            elif 'Wind Speed at 19' in col:
+            elif 'Wind Speed at 19' in col and 'Peak' not in col:
                 col_dict['ws_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
 
         self.col_dict = col_dict

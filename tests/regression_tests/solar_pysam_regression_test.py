@@ -75,12 +75,13 @@ def get_solar_params():
     # explicitly specifying weather inputs from the first timestep of the example file
     solar_dict = {
         "py_sim_type": SolarPySAM,
+        "pysam_model": "pvsam",
         "weather_file_name": path+'/../test_inputs/solar_pysam_data.csv',
         "system_info_file_name": path+'/../test_inputs/100MW_1axis_pvsamv1.json',
         "lat": 39.7442, 
         "lon": -105.1778, 
         "elev": 1829,
-        "target_system_capacity": 100002.58266599999,
+        "target_system_capacity_kW": 100002.58266599999,
         "target_dc_ac_ratio": 1.33,
         "initial_conditions": {
             "power": 25, 

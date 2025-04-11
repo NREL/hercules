@@ -50,7 +50,6 @@ py_sims:
     elev: 1829
     target_system_capacity_kW: 130000
     target_dc_ac_ratio: 1.2
-    # capacity: 100 # MW
 
     initial_conditions:
 

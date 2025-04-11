@@ -5,7 +5,8 @@ import json
 import numpy as np
 import pandas as pd
 
-
+#import PySAM.Pvsamv1Tools
+from hercules.tools.Pvsamv1Tools import size_electrical_parameters 
 
 class SolarPySAM:
     def __init__(self, input_dict, dt):
@@ -13,9 +14,6 @@ class SolarPySAM:
         self.pysam_model = input_dict["pysam_model"]
         if self.pysam_model == 'pvsam':
             import PySAM.Pvsamv1 as pvsam
-
-            #import PySAM.Pvsamv1Tools
-            from hercules.tools.Pvsamv1Tools import size_electrical_parameters 
         elif self.pysam_model == 'pvwatts':
             import PySAM.Pvwattsv8 as pvwatts
 
@@ -41,6 +39,7 @@ class SolarPySAM:
         # set PV system model parameters
         if self.pysam_model == 'pvsam':
             if input_dict["system_info_file_name"]:  # using system info json file
+                print("reading initial system info from {}".format(input_dict["system_info_file_name"]))
                 with open(input_dict["system_info_file_name"], "r") as f:
                     model_params = json.load(f)
                 sys_design = {
@@ -117,7 +116,7 @@ class SolarPySAM:
             system_model = pvsam.new()
         elif self.pysam_model == 'pvwatts':
             system_model = pvwatts.new()
-        system_model.assign(self.model_params)
+            system_model.assign(self.model_params)
 
         system_model.AdjustmentFactors.adjust_constant = 0
         system_model.AdjustmentFactors.dc_adjust_constant = 0

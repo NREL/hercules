@@ -2,6 +2,7 @@
 # code originally copied from https://github.com/NREL/pysam/blob/main/Examples/NonAnnualSimulation.ipynb
 
 import json
+import sys
 
 import numpy as np
 import pandas as pd
@@ -13,8 +14,14 @@ from hercules.tools.Pvsamv1Tools import size_electrical_parameters
 class SolarPySAM:
     def __init__(self, input_dict, dt):
 
-        self.pysam_model = input_dict["pysam_model"]
-        if self.pysam_model == 'pvsam':
+        # get pysam model from input file
+        if "pysam_model" in input_dict:
+            self.pysam_model = input_dict["pysam_model"]
+        else:
+            self.pysam_model = 'pvsam'
+            print("No PySAM model specified. Setting to pvsam (detailed PV model).")
+        
+        if (self.pysam_model == 'pvsam'):
             import PySAM.Pvsamv1 as pvsam
         elif self.pysam_model == 'pvwatts':
             import PySAM.Pvwattsv8 as pvwatts
@@ -40,31 +47,27 @@ class SolarPySAM:
 
         # set PV system model parameters
         if self.pysam_model == 'pvsam':
-            if input_dict["system_info_file_name"]:  # using system info json file
+            try:
                 print("reading initial system info from {}".
                       format(input_dict["system_info_file_name"]))
                 with open(input_dict["system_info_file_name"], "r") as f:
                     model_params = json.load(f)
                 sys_design = {
                     "ModelParams": model_params,
-                    # "Other": input_dict["other"],
                     "Other": {
                         "lat": input_dict["lat"],
                         "lon": input_dict["lon"],
                         "elev": input_dict["elev"],
                     },
                 }
-            else:  # using system info data dictionary in input file
+            
+            except Exception:
+                print("Error: No PV system info json file specified for pvsam model.")
+                sys.exit(1) # exit program
+
                 # TODO: use a default if none provided
                 # sys_design = pvsam.default("FlatPlatePVSingleOwner") 
-                
-                sys_design = input_dict["system_info_data_input"]
 
-                if self.verbose:
-                    print("sys_design")
-                    print(sys_design)
-                    print("model_params")
-                    print(sys_design["ModelParams"])
 
         elif self.pysam_model == 'pvwatts':
             sys_design = {

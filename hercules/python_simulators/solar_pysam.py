@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 import PySAM.Pvsamv1 as pvsam
 
+#import PySAM.Pvsamv1Tools
+from hercules.tools.Pvsamv1Tools import size_electrical_parameters
+
 
 class SolarPySAM:
     def __init__(self, input_dict, dt):
@@ -77,6 +80,8 @@ class SolarPySAM:
         self.dc_power_mw = input_dict["initial_conditions"]["power"]
         self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
+        self.target_system_capacity = input_dict["target_system_capacity"]
+        self.target_dc_ac_ratio = input_dict["target_dc_ac_ratio"]
 
         # create pysam model here so that it is not created each timestep
         system_model = pvsam.new()
@@ -99,6 +104,7 @@ class SolarPySAM:
     def return_outputs(self):
         return {
             "power_mw": self.power_mw,
+            # "dc_power_mw": self.dc_power_mw,
             "dni": self.dni,
             "aoi": self.aoi,
         }
@@ -162,7 +168,6 @@ class SolarPySAM:
                 [self.data[row_index,self.col_dict['temp_col']]],
             ]
         )
-        # print('weather_data = ', weather_data)
 
         solar_resource_data = {
             "tz": self.tz,  # timezone
@@ -186,10 +191,14 @@ class SolarPySAM:
         # print('----------------------------------------------')
         # print('solar_resource_data = ',solar_resource_data)
 
+        target_system_capacity = self.target_system_capacity
+        target_ratio = self.target_dc_ac_ratio
+        n_strings,n_combiners,n_inverters,calc_sys_capacity = size_electrical_parameters(
+            self.system_model, target_system_capacity, target_ratio)
+
         self.system_model.execute()
 
         ac = np.array(self.system_model.Outputs.gen) / 1000  # in MW
-
         self.power_mw = ac[0]  # calculating one timestep at a time
         if self.verbose:
             print("self.power_mw = ", self.power_mw)

@@ -124,21 +124,6 @@ class SolarPySAM:
         for k, v in self.model_params.items():
             try:
                 system_model.value(k, v)
-            except Exception:
-                print(k)
-
-        self.system_model = system_model
-
-        
-
-        # create pysam model here so that it is not created each timestep
-        system_model = pvsam.new()
-        system_model.AdjustmentFactors.adjust_constant = 0
-        system_model.AdjustmentFactors.dc_adjust_constant = 0
-
-        for k, v in self.model_params.items():
-            try:
-                system_model.value(k, v)
             except Exception as e:
                 error_type = type(e).__name__
                 error_message = str(e)
@@ -146,8 +131,7 @@ class SolarPySAM:
                 print("Warning: continuing the simulation despite warning")
 
         self.system_model = system_model
-
-        
+               
 
     def return_outputs(self):
         return {

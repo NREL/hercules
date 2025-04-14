@@ -131,6 +131,24 @@ class SolarPySAM:
 
         
 
+        # create pysam model here so that it is not created each timestep
+        system_model = pvsam.new()
+        system_model.AdjustmentFactors.adjust_constant = 0
+        system_model.AdjustmentFactors.dc_adjust_constant = 0
+
+        for k, v in self.model_params.items():
+            try:
+                system_model.value(k, v)
+            except Exception as e:
+                error_type = type(e).__name__
+                error_message = str(e)
+                print(f"Warning: pysam error with parameter '{k}': {error_type} - {error_message}")
+                print("Warning: continuing the simulation despite warning")
+
+        self.system_model = system_model
+
+        
+
     def return_outputs(self):
         return {
             "power_mw": self.power_mw,
@@ -167,7 +185,6 @@ class SolarPySAM:
 
         # select appropriate row based on current time
         time_index = self.data[0,0] + pd.Timedelta(seconds=sim_time_s)
-
         if self.verbose:
             print("time_index = ", time_index)
         try:
@@ -179,8 +196,7 @@ class SolarPySAM:
                 "Try setting dt in .yaml file equal to (or a multiple of) dt in solar weather file."
             )
 
-        # forcing this to be an array of lists so that tuple doesn't 
-        # unpack it in solar_resource_data
+        # convert to numpy array for speedup
         weather_data = np.array( 
             [
                 [time_index.year], 
@@ -209,7 +225,7 @@ class SolarPySAM:
             "dn": tuple(weather_data[5]),  # direct normal irradiance
             "df": tuple(weather_data[6]),  # diffuse irradiance
             "gh": tuple(weather_data[7]),  # global horizontal irradiance
-            "wspd": tuple(weather_data[8]),  # windspeed
+            "wspd": tuple(weather_data[8]),  # windspeed (not peak)
             "tdry": tuple(weather_data[9]),  # dry bulb temperature
         }
 
@@ -272,7 +288,7 @@ class SolarPySAM:
                 col_dict['dhi_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
             elif 'Temperature' in col:
                 col_dict['temp_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
-            elif 'Wind Speed at 19' in col:
+            elif 'Wind Speed at 19' in col and 'Peak' not in col:
                 col_dict['ws_col'] = data.columns.get_loc(col) + 1 # bc 1st col will be timestamp
 
         self.col_dict = col_dict

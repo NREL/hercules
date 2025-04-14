@@ -5,7 +5,7 @@ import json
 
 import numpy as np
 import pandas as pd
-import PySAM.Pvsamv1 as pvsam
+
 
 
 class SolarPySAM:

@@ -2,11 +2,13 @@
 # code originally copied from https://github.com/NREL/pysam/blob/main/Examples/NonAnnualSimulation.ipynb
 
 import json
+
 import numpy as np
 import pandas as pd
 
 #import PySAM.Pvsamv1Tools
-from hercules.tools.Pvsamv1Tools import size_electrical_parameters 
+from hercules.tools.Pvsamv1Tools import size_electrical_parameters
+
 
 class SolarPySAM:
     def __init__(self, input_dict, dt):
@@ -39,7 +41,8 @@ class SolarPySAM:
         # set PV system model parameters
         if self.pysam_model == 'pvsam':
             if input_dict["system_info_file_name"]:  # using system info json file
-                print("reading initial system info from {}".format(input_dict["system_info_file_name"]))
+                print("reading initial system info from {}".
+                      format(input_dict["system_info_file_name"]))
                 with open(input_dict["system_info_file_name"], "r") as f:
                     model_params = json.load(f)
                 sys_design = {
@@ -52,7 +55,9 @@ class SolarPySAM:
                     },
                 }
             else:  # using system info data dictionary in input file
-                # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
+                # TODO: use a default if none provided
+                # sys_design = pvsam.default("FlatPlatePVSingleOwner") 
+                
                 sys_design = input_dict["system_info_data_input"]
 
                 if self.verbose:
@@ -131,7 +136,7 @@ class SolarPySAM:
                 print("Warning: continuing the simulation despite warning")
 
         self.system_model = system_model
-               
+
 
     def return_outputs(self):
         return {

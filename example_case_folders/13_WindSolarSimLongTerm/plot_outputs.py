@@ -22,18 +22,18 @@ for t_idx in range(3):
 
 ax.plot(
     df["time"],
-    df[f"py_sims.solar_farm_0.outputs.power_mw"]*1000,
-    label=f"Solar PV",
+    df["py_sims.solar_farm_0.outputs.power_mw"]*1000,
+    label="Solar PV",
 )
 
-total_power = df[f"py_sims.solar_farm_0.outputs.power_mw"]*1000
+total_power = df["py_sims.solar_farm_0.outputs.power_mw"]*1000
 for t_idx in range(3):
     total_power = total_power + df[f"py_sims.wind_farm_0.outputs.power.{t_idx:03}"]
 
 ax.plot(
     df["time"],
     total_power,
-    label=f"Total",
+    label="Total",
     color='k',
 )
 

@@ -33,6 +33,7 @@ powers_base_control = np.array(
         13.8       ,
         13.8       ,
         13.8       ,
+        13.8       ,
     ]
 )
 
@@ -122,25 +123,25 @@ def test_SolarPySAM_regression_no_control(SPS: SolarPySAM):
     assert np.allclose(dni_base_no_control, dni_test)
     assert np.allclose(aoi_base_no_control, aoi_test)
 
-# def test_SolarPySAM_regression_control(SPS: SolarPySAM):
-#     power_setpoint_mw = 13.80 # Slightly below most of the base outputs.
+def test_SolarPySAM_regression_control(SPS: SolarPySAM):
+    power_setpoint_mw = 13.80 # Slightly below most of the base outputs.
 
-#     times_test = np.arange(0, 5, SPS.dt)
-#     powers_test = np.zeros_like(times_test)
-#     dni_test = np.zeros_like(times_test)
-#     aoi_test = np.zeros_like(times_test)
+    times_test = np.arange(0, 5, SPS.dt)
+    powers_test = np.zeros_like(times_test)
+    dni_test = np.zeros_like(times_test)
+    aoi_test = np.zeros_like(times_test)
 
-#     for i, t in enumerate(times_test):
-#         out = SPS.step({"time": t, "py_sims": {"inputs": {"solar_setpoint_mw": power_setpoint_mw}}})
-#         powers_test[i] = out["power_mw"]
-#         dni_test[i] = out["dni"]
-#         aoi_test[i] = out["aoi"]
+    for i, t in enumerate(times_test):
+        out = SPS.step({"time": t, "py_sims": {"inputs": {"solar_setpoint_mw": power_setpoint_mw}}})
+        powers_test[i] = out["power_mw"]
+        dni_test[i] = out["dni"]
+        aoi_test[i] = out["aoi"]
 
-#     if PRINT_VALUES:
-#         print("Powers: ", powers_test)
-#         print("DNI: ", dni_test)
-#         print("AOI: ", aoi_test)
+    if PRINT_VALUES:
+        print("Powers: ", powers_test)
+        print("DNI: ", dni_test)
+        print("AOI: ", aoi_test)
 
-#     assert np.allclose(powers_base_control, powers_test)
-#     assert np.allclose(dni_base_no_control, dni_test)
-#     assert np.allclose(aoi_base_no_control, aoi_test)
+    assert np.allclose(powers_base_control, powers_test)
+    assert np.allclose(dni_base_no_control, dni_test)
+    assert np.allclose(aoi_base_no_control, aoi_test)

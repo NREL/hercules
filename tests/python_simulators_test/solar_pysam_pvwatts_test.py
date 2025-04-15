@@ -1,15 +1,10 @@
 """This module provides unit tests for 'SolarPySAM'."""
-import os
-
 import pytest
 from hercules.python_simulators.solar_pysam import SolarPySAM
 from numpy.testing import assert_almost_equal
 
 
 def get_solar_params():
-
-    full_path = os.path.realpath(__file__)
-    path = os.path.dirname(full_path)
 
     # explicitly specifying weather inputs from the first timestep of the test_input weather file
     solar_dict = {
@@ -55,7 +50,8 @@ def test_init():
 
     assert SPS.dt == dt
 
-    assert SPS.model_params["SystemDesign"]["system_capacity"] == solar_dict["target_system_capacity_kW"]
+    assert SPS.model_params["SystemDesign"]["system_capacity"] == solar_dict[
+        "target_system_capacity_kW"]
     assert SPS.power_mw == solar_dict["initial_conditions"]["power"]
     assert SPS.dc_power_mw == solar_dict["initial_conditions"]["power"]
     assert SPS.dni == solar_dict["initial_conditions"]["dni"]

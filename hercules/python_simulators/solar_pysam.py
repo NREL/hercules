@@ -73,7 +73,7 @@ class SolarPySAM:
             sys_design = {
                 "ModelParams": { 
                     "SystemDesign": {
-                        "array_type": 3.0,
+                        "array_type": 3.0, # single axis backtracking
                         "azimuth": 180.0,
                         "dc_ac_ratio": input_dict["target_dc_ac_ratio"],
                         "gcr": 0.29999999999999999,

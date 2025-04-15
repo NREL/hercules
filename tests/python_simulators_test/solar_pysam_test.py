@@ -19,8 +19,8 @@ def get_solar_params():
         "weather_data_input": {
         "Timestamp": ['2018-05-10 12:31:00+00:00'],
         "SRRL BMS Direct Normal Irradiance (W/m²_irr)": [330.8601989746094],
-        "SRRL BMS Diffuse Horizontal Irradiance (W/m²_irr)": [68.23037719726561],
-        "SRRL BMS Global Horizontal Irradiance (W/m²_irr)": [32.576671600341804],
+        "SRRL BMS Diffuse Horizontal Irradiance (W/m²_irr)": [32.576671600341804],
+        "SRRL BMS Global Horizontal Irradiance (W/m²_irr)": [68.23037719726561],
         "SRRL BMS Wind Speed at 19' (m/s)": [0.4400002620664621],
         "SRRL BMS Dry Bulb Temperature (°C)": [11.990000406901045],
         },
@@ -57,6 +57,7 @@ def test_init():
 
     assert SPS.dt == dt
 
+    assert SPS.target_system_capacity == solar_dict["target_system_capacity_kW"]
     assert SPS.power_mw == solar_dict["initial_conditions"]["power"]
     assert SPS.dc_power_mw == solar_dict["initial_conditions"]["power"]
     assert SPS.dni == solar_dict["initial_conditions"]["dni"]
@@ -72,7 +73,6 @@ def test_return_outputs(SPS: SolarPySAM):
 
     # change PV power predictions and irradiance as if during simulation
     SPS.power_mw = 800
-    # SPS.dc_power_mw = 1000
     SPS.dni = 900
     SPS.aoi = 0
 
@@ -80,7 +80,6 @@ def test_return_outputs(SPS: SolarPySAM):
     outputs_sim = SPS.return_outputs()
 
     assert outputs_sim["power_mw"] == 800
-    # assert outputs_sim["dc_power_mw"] == 1000
     assert outputs_sim["dni"] == 900
     assert outputs_sim["aoi"] == 0
 
@@ -90,11 +89,17 @@ def test_step(SPS: SolarPySAM):
 
     SPS.step(step_inputs)
 
-    assert_almost_equal(SPS.power_mw, 32.19801938915135, decimal=8)
-    assert_almost_equal(SPS.ghi, 32.576671600341804, decimal=8)
+    # test that system capacity of model matches the input target_system_capacity
+    assert_almost_equal(SPS.system_model.SystemDesign.system_capacity, SPS.target_system_capacity)
+
+    # test the calculated power output
+    assert_almost_equal(SPS.power_mw, 14.523542232511712, decimal=8)
+
+    # test the irradiance input
+    assert_almost_equal(SPS.ghi, 68.23037719726561, decimal=8)
 
 def test_control(SPS: SolarPySAM):
-    power_setpoint_mw = 30
+    power_setpoint_mw = 12
     step_inputs = {"time": 0, "py_sims": {"inputs": {"solar_setpoint_mw": power_setpoint_mw}}}
     SPS.step(step_inputs)
     assert_almost_equal(SPS.power_mw, power_setpoint_mw, decimal=8)

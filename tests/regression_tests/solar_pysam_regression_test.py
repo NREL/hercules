@@ -9,31 +9,31 @@ PRINT_VALUES = True
 
 powers_base_no_control = np.array(
     [
-        28.38546311, 
-        28.40901262, 
-        28.43256140,
-        28.45610945,
-        28.47965290,
-        28.50319954,
-        28.52674545,
-        28.55029064,
-        28.57383512,
-        28.59737495,
+        14.52354223,
+        14.53501121,
+        14.54648261,
+        14.55795135,
+        14.56942243,
+        14.58089109,
+        14.59236196,
+        14.60383039,
+        14.61529872,
+        14.62676939
     ]
 )
 
 powers_base_control = np.array(
     [
-        28.38546311,
-        28.4       ,
-        28.4       ,
-        28.4       ,
-        28.4       ,
-        28.4       ,
-        28.4       ,
-        28.4       ,
-        28.4       ,
-        28.4       ,
+        14.52354223,
+        14.53501121,
+        14.54648261,
+        14.55      ,
+        14.55      ,
+        14.55      ,
+        14.55      ,
+        14.55      ,
+        14.55      ,
+        14.55      ,
     ]
 )
 
@@ -54,16 +54,16 @@ dni_base_no_control = np.array(
 
 aoi_base_no_control = np.array(
     [   
-        41.47901733,
-        41.4790173 ,
-        41.47901726,
-        41.47901722,
-        41.47901719,
-        41.47901715,
-        41.47901711,
-        41.47901708,
-        41.47901704,
-        41.479017  ,
+        67.82689268,
+        67.82689265,
+        67.8268924 ,
+        67.82689242,
+        67.8268923 ,
+        67.82689214,
+        67.826892  ,
+        67.82689188,
+        67.82689174,
+        67.82689143,
     ]
 )
 
@@ -125,7 +125,7 @@ def test_SolarPySAM_regression_no_control(SPS: SolarPySAM):
     assert np.allclose(aoi_base_no_control, aoi_test)
 
 def test_SolarPySAM_regression_control(SPS: SolarPySAM):
-    power_setpoint_mw = 28.40 # Slightly below most of the base outputs.
+    power_setpoint_mw = 14.55 # Slightly below most of the base outputs.
 
     times_test = np.arange(0, 5, SPS.dt)
     powers_test = np.zeros_like(times_test)

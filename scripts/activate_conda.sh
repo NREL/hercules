@@ -26,5 +26,4 @@ echo "$CONDA_PATH"
 
 # Source the Conda initialization script
 source "$CONDA_PATH"
-# conda activate hercules
 conda activate hercules

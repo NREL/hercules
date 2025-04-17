@@ -1,6 +1,4 @@
 """This module provides unit tests for 'SolarPySAM'."""
-import os
-
 import pytest
 from hercules.python_simulators.solar_pysam import SolarPySAM
 from numpy.testing import assert_almost_equal
@@ -8,13 +6,10 @@ from numpy.testing import assert_almost_equal
 
 def get_solar_params():
 
-    full_path = os.path.realpath(__file__)
-    path = os.path.dirname(full_path)
-
-    # explicitly specifying weather inputs from the first timestep of the example file
+    # explicitly specifying weather inputs from the first timestep of the test_input weather file
     solar_dict = {
         "py_sim_type": SolarPySAM,
-        "pysam_model": "pvsam",
+        "pysam_model": "pvwatts",
         "weather_file_name": None,
         "weather_data_input": {
         "Timestamp": ['2018-05-10 12:31:00+00:00'],
@@ -25,8 +20,6 @@ def get_solar_params():
         "SRRL BMS Dry Bulb Temperature (°C)": [11.990000406901045],
         },
 
-        "system_info_file_name": path+
-            '/../test_inputs/100MW_1axis_pvsamv1.json',
         "lat": 39.7442, 
         "lon": -105.1778, 
         "elev": 1829,
@@ -57,7 +50,8 @@ def test_init():
 
     assert SPS.dt == dt
 
-    assert SPS.target_system_capacity == solar_dict["target_system_capacity_kW"]
+    assert SPS.model_params["SystemDesign"]["system_capacity"] == solar_dict[
+        "target_system_capacity_kW"]
     assert SPS.power_mw == solar_dict["initial_conditions"]["power"]
     assert SPS.dc_power_mw == solar_dict["initial_conditions"]["power"]
     assert SPS.dni == solar_dict["initial_conditions"]["dni"]
@@ -89,17 +83,14 @@ def test_step(SPS: SolarPySAM):
 
     SPS.step(step_inputs)
 
-    # test that system capacity of model matches the input target_system_capacity
-    assert_almost_equal(SPS.system_model.SystemDesign.system_capacity, SPS.target_system_capacity)
-
     # test the calculated power output
-    assert_almost_equal(SPS.power_mw, 14.523542232511712, decimal=8)
+    assert_almost_equal(SPS.power_mw, 13.751398242757263, decimal=8)
 
     # test the irradiance input
     assert_almost_equal(SPS.ghi, 68.23037719726561, decimal=8)
 
 def test_control(SPS: SolarPySAM):
-    power_setpoint_mw = 12
+    power_setpoint_mw = 10
     step_inputs = {"time": 0, "py_sims": {"inputs": {"solar_setpoint_mw": power_setpoint_mw}}}
     SPS.step(step_inputs)
     assert_almost_equal(SPS.power_mw, power_setpoint_mw, decimal=8)

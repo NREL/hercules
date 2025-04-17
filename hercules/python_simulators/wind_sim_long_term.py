@@ -6,10 +6,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from floris import FlorisModel
-from hercules.utilities import load_yaml
+from hercules.utilities import load_perffile, load_yaml
 from scipy.interpolate import interp1d
+from scipy.optimize import minimize_scalar
 from scipy.stats import circmean
 
+RPM2RADperSec = 2 * np.pi / 60.0
 
 class WindSimLongTerm:
     def __init__(self, input_dict, dt):
@@ -172,6 +174,15 @@ class WindSimLongTerm:
                 )
                 for t_idx in range(self.n_turbines)
             ]
+        elif self.turbine_model_type == "dof1_model":
+            self.turbine_array = [
+                Turbine1dofModel(
+                    self.turbine_dict, self.dt, self.fmodel, self.waked_velocities[t_idx]
+                )
+                for t_idx in range(self.n_turbines)
+            ]
+        else:
+            raise Exception('Turbine model type should be either fileter_model or dof1_model')
 
         # Initialize the power array to the initial wind speeds
         self.power = np.array(
@@ -368,3 +379,121 @@ class TurbineFilterModel:
 
         # Return the power
         return power
+
+class Turbine1dofModel:
+    def __init__(self, turbine_dict, dt, fmodel, initial_wind_speed):
+        # Save the time step
+        self.dt = dt
+
+        # Save the turbine dict
+        self.turbine_dict = turbine_dict
+
+        # Set filter parameter for rotor speed
+        self.filteralpha = np.exp(
+            -self.dt * self.turbine_dict["dof1_model"]["filterfreq_rotor_speed"]
+        )
+
+        # Obtain more data from floris
+        turbine_type = fmodel.core.farm.turbine_definitions[0]
+        self.rotor_radius = turbine_type['rotor_diameter']/2
+        self.rotor_area = np.pi*self.rotor_radius**2
+        
+
+        # Save performance data functions
+        perffile = turbine_dict['dof1_model']['cq_table_file']
+        self.perffuncs = load_perffile(perffile)
+
+        self.rho = self.turbine_dict['dof1_model']['rho']
+        self.max_pitch_rate = self.turbine_dict['dof1_model']['max_pitch_rate']
+        self.max_torque_rate = self.turbine_dict['dof1_model']['max_torque_rate']
+        omega0 = self.turbine_dict['dof1_model']['initial_rpm']*RPM2RADperSec
+        pitch,gentq = self.simplecontroller(initial_wind_speed,omega0)
+        tsr = self.rotor_radius*omega0/initial_wind_speed
+        prev_power = (
+            self.perffuncs["Cp"]([tsr, pitch])
+            * 0.5
+            * self.rho
+            * self.rotor_area
+            * initial_wind_speed**3
+        )
+        self.prev_power = np.array(prev_power[0]/1000.0)
+        self.prev_omega = omega0
+        self.prev_omegaf = omega0
+        self.prev_aerotq = (
+            0.5
+            * self.rho
+            * self.rotor_area
+            * self.rotor_radius
+            * initial_wind_speed**2
+            * self.perffuncs["Cq"]([tsr, pitch])
+        )
+        self.prev_gentq = gentq
+        self.prev_pitch = pitch
+        
+        pass
+        
+    def step(self, wind_speed, derating=0.0):
+        omega = (
+            self.prev_omega
+            + (
+                self.prev_aerotq
+                - self.prev_gentq * self.turbine_dict["dof1_model"]["gearbox_ratio"]
+            )
+            * self.dt
+            / self.turbine_dict["dof1_model"]["rotor_inertia"]
+        )
+        omegaf = (1-self.filteralpha) * omega + self.filteralpha*(self.prev_omegaf)
+        # print(omegaf-omega)
+        pitch,gentq = self.simplecontroller(wind_speed,omegaf)
+        tsr = float(omegaf * self.rotor_radius / wind_speed)
+        if derating > 0:
+            desiredcp = derating*1000 / ( 0.5 * self.rho * self.rotor_area * wind_speed**3)
+            optpitch = minimize_scalar(
+                lambda p: abs(float(self.perffuncs["Cp"]([tsr, float(p)])) - desiredcp),
+                method='bounded',
+                bounds=(0,1.57)
+            )
+            pitch = optpitch.x
+
+        pitch = np.clip(
+            pitch,
+            self.prev_pitch - self.max_pitch_rate * self.dt,
+            self.prev_pitch + self.max_pitch_rate * self.dt,
+        )
+        gentq = np.clip(
+            gentq,
+            self.prev_gentq - self.max_torque_rate * self.dt,
+            self.prev_gentq + self.max_torque_rate * self.dt,
+        )
+
+        aerotq = (
+            0.5
+            * self.rho
+            * self.rotor_area
+            * self.rotor_radius
+            * wind_speed ** 2
+            * self.perffuncs["Cq"]([tsr, pitch])
+        )
+
+        # power = (
+        #     self.perffuncs["Cp"]([tsr, pitch]) * 0.5 * self.rho * self.rotor_area * wind_speed**3
+        # )
+        power = gentq*omega*self.turbine_dict["dof1_model"]["gearbox_ratio"]
+
+
+        self.prev_omega = omega
+        self.prev_aerotq = aerotq
+        self.prev_gentq = gentq
+        self.prev_pitch = pitch
+        self.prev_omegaf = omegaf
+        self.prev_power = power[0] / 1000.0
+        
+        return self.prev_power
+
+    def simplecontroller(self,wind_speed,omegaf):
+        # if omega <= self.turbine_dict['dof1_model']['rated_wind_speed']:
+        pitch = 0.0
+        gentorque = self.turbine_dict['dof1_model']['controller']['r2_k_torque'] * omegaf**2
+        # else
+        #     raise Exception("Region-3 controller not implemented yet")
+        return pitch,gentorque

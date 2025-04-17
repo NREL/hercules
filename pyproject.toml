@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hercules"
-version = "1.1"
+version = "1.2"
 description = "Hybrid plant emulation tool."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -12,6 +12,7 @@ authors = [
      { name = "Genevieve Starke", email = "Genevieve.Starke@nrel.gov" },
     { name = "Michael (Misha) Sinner", email = "Michael.Sinner@nrel.gov" },
     { name = "Paul Fleming", email = "paul.fleming@nrel.gov" },
+    { name = "Brooke Stanislawski", email = "Brooke.Stanislawski@nrel.gov" },
 ]
 license = { file = "LICENSE.txt" }
 urls = { "Homepage" = "https://github.com/NREL/hercules" }
@@ -24,13 +25,14 @@ classifiers = [
 ]
 
 dependencies = [
-"numpy~=1.20",
+"numpy~=2.0",
 "matplotlib~=3.8",
 "pandas~=2.0",
-"floris~=4.0",
+"floris~=4.3",
 "nrel-pysam~=6.0",
 "jupyter",
 "netCDF4",
+"rainflow~=3.2",
 ]
 
 [project.optional-dependencies]

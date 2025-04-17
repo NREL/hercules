@@ -9,31 +9,31 @@ PRINT_VALUES = True
 
 powers_base_no_control = np.array(
     [
-        14.52354223,
-        14.53501121,
-        14.54648261,
-        14.55795135,
-        14.56942243,
-        14.58089109,
-        14.59236196,
-        14.60383039,
-        14.61529872,
-        14.62676939
+        13.75139824,
+        13.76228231,
+        13.77316639,
+        13.78405018,
+        13.79493395,
+        13.80581761,
+        13.81670114,
+        13.82758454,
+        13.83846784,
+        13.84935112,
     ]
 )
 
 powers_base_control = np.array(
     [
-        14.52354223,
-        14.53501121,
-        14.54648261,
-        14.55      ,
-        14.55      ,
-        14.55      ,
-        14.55      ,
-        14.55      ,
-        14.55      ,
-        14.55      ,
+        13.75139824,
+        13.76228231,
+        13.77316639,
+        13.78405018,
+        13.79493395,
+        13.8       ,
+        13.8       ,
+        13.8       ,
+        13.8       ,
+        13.8       ,
     ]
 )
 
@@ -75,9 +75,8 @@ def get_solar_params():
     # explicitly specifying weather inputs from the first timestep of the example file
     solar_dict = {
         "py_sim_type": SolarPySAM,
-        "pysam_model": "pvsam",
+        "pysam_model": "pvwatts",
         "weather_file_name": path+'/../test_inputs/solar_pysam_data.csv',
-        "system_info_file_name": path+'/../test_inputs/100MW_1axis_pvsamv1.json',
         "lat": 39.7442, 
         "lon": -105.1778, 
         "elev": 1829,
@@ -125,7 +124,7 @@ def test_SolarPySAM_regression_no_control(SPS: SolarPySAM):
     assert np.allclose(aoi_base_no_control, aoi_test)
 
 def test_SolarPySAM_regression_control(SPS: SolarPySAM):
-    power_setpoint_mw = 14.55 # Slightly below most of the base outputs.
+    power_setpoint_mw = 13.80 # Slightly below most of the base outputs.
 
     times_test = np.arange(0, 5, SPS.dt)
     powers_test = np.zeros_like(times_test)

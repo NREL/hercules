@@ -121,8 +121,9 @@ class EmulatorNoHelics:
             self.logger.info(
                 (
                     "Rate of simulation: ",
-                    f"{self.total_simulation_time / self.total_time_wall.total_seconds():.1f}"+
-                        "x real time",
+                    f"{self.total_simulation_time/self.total_time_wall.total_seconds():.1f}",
+                    "x real time",
+
                 )
             )
             self.logger.info("=====================================")

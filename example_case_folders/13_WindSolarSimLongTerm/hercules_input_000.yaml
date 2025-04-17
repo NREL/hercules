@@ -32,7 +32,7 @@ py_sims:
     lat: 39.7442
     lon: -105.1778
     elev: 1829
-    target_system_capacity_kW: 100000
+    target_system_capacity_kW: 30000
     target_dc_ac_ratio: 1.33
 
     initial_conditions:

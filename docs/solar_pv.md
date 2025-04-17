@@ -3,8 +3,8 @@
 The `SolarPySAM` module uses [PySAM](https://nrel-pysam.readthedocs.io/en/main/overview.html) package for the National Renewable Energy Laboratory's System Advisor Model (SAM) to predict the power output of the solar PV plant. 
 
 To calculate PV electrical output, the user specifices which specific model is used:
-1. The [Detailed Photovoltaic model](https://sam.nrel.gov/photovoltaic.html) in [`Pvsamv1`](https://nrel-pysam.readthedocs.io/en/main/modules/Pvsamv1.html), which calculates PV electrical output using separate module and inverter models. This model is more accurate, but more time-intensive.
-2. The [PVWatts model](https://sam.nrel.gov/photovoltaic.html) in [`Pvwattsv8`](https://nrel-pysam.readthedocs.io/en/main/modules/Pvwattsv8.html), which calculates estimated PV electrical output without detailed degradation or loss modeling. This model is less accurate, but less time-intensive, which makes it a good fit for longer duration simulations (of approximately 1 year). 
+1. The [Detailed Photovoltaic model](https://sam.nrel.gov/photovoltaic.html) in [`Pvsamv1`](https://nrel-pysam.readthedocs.io/en/main/modules/Pvsamv1.html), which calculates PV electrical output using separate module and inverter models. This model is more accurate, but more time-intensive. This model is set by using `pysam_model` = `pvsam` in the input dictionary.
+2. The [PVWatts model](https://sam.nrel.gov/photovoltaic.html) in [`Pvwattsv8`](https://nrel-pysam.readthedocs.io/en/main/modules/Pvwattsv8.html), which calculates estimated PV electrical output without detailed degradation or loss modeling. This model is less accurate, but less time-intensive, which makes it a good fit for longer duration simulations (of approximately 1 year). This model is set by using `pysam_model` = `pvwatts` in the input dictionary.
 
 ### Inputs
 

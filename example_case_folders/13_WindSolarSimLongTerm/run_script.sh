@@ -42,5 +42,7 @@ done
 
 # If everything is successful
 echo "Finished running hercules"
+echo "Plotting simulation results"
+python plot_outputs.py
 exit 0
 

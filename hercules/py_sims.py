@@ -4,6 +4,7 @@ from hercules.python_simulators.battery import Battery
 from hercules.python_simulators.electrolyzer_plant import ElectrolyzerPlant
 from hercules.python_simulators.simple_solar import SimpleSolar
 from hercules.python_simulators.solar_pysam import SolarPySAM
+from hercules.python_simulators.wind_sim_long_term import WindSimLongTerm
 
 
 class PySims:
@@ -22,7 +23,6 @@ class PySims:
         else:
             self.n_py_sim = len(self.py_sim_dict)
             self.py_sim_names = np.copy(list(self.py_sim_dict.keys()))
-            print(self.py_sim_names)
             self.py_sim_dict["inputs"] = {}
             self.py_sim_dict["inputs"][
                 "available_power"
@@ -30,7 +30,6 @@ class PySims:
 
             # Collect the py_sim objects, inputs and outputs
             for py_sim_name in self.py_sim_names:
-                print((self.py_sim_dict[py_sim_name]))
                 self.py_sim_dict[py_sim_name]["object"] = self.get_py_sim(
                     self.py_sim_dict[py_sim_name]
                 )
@@ -42,9 +41,7 @@ class PySims:
                     self.py_sim_dict["inputs"][needed_input] = self.py_sim_dict[py_sim_name][
                         "object"
                     ].needed_inputs[needed_input]
-            print(self.py_sim_dict["inputs"])
-            # TODO: always add 'available_power' as input??
-            # print(self.py_sim_dict['solar_farm_0']['object'])
+
 
     def get_py_sim(self, py_sim_obj_dict):
         if py_sim_obj_dict["py_sim_type"] == "SimpleSolar":
@@ -58,6 +55,11 @@ class PySims:
 
         if py_sim_obj_dict["py_sim_type"] == "ElectrolyzerPlant":
             return ElectrolyzerPlant(py_sim_obj_dict, self.dt)
+        
+        if py_sim_obj_dict["py_sim_type"] == 'WindSimLongTerm':
+            return WindSimLongTerm(py_sim_obj_dict, self.dt)
+
+        raise Exception("Unknown py_sim_type: ", py_sim_obj_dict["py_sim_type"])
 
     def get_py_sim_dict(self):
         return self.py_sim_dict
@@ -66,10 +68,6 @@ class PySims:
         # Collect the py_sim objects
         py_sims_available_power = 0.0
         for py_sim_name in self.py_sim_names:
-            print(py_sim_name)
-
-            # print('self.__dict__.keys() = ', self.__dict__.keys())
-            # print('main_dict = ',main_dict)
 
             self.py_sim_dict[py_sim_name]["outputs"] = self.py_sim_dict[py_sim_name]["object"].step(
                 main_dict

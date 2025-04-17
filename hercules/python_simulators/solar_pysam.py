@@ -2,10 +2,10 @@
 # code originally copied from https://github.com/NREL/pysam/blob/main/Examples/NonAnnualSimulation.ipynb
 
 import json
+import sys
 
 import numpy as np
 import pandas as pd
-import PySAM.Pvsamv1 as pvsam
 
 #import PySAM.Pvsamv1Tools
 from hercules.tools.Pvsamv1Tools import size_electrical_parameters
@@ -14,7 +14,18 @@ from hercules.tools.Pvsamv1Tools import size_electrical_parameters
 class SolarPySAM:
     def __init__(self, input_dict, dt):
 
-        print('trying to read in verbose flag')
+        # get pysam model from input file
+        if "pysam_model" in input_dict:
+            self.pysam_model = input_dict["pysam_model"]
+        else:
+            self.pysam_model = 'pvsam'
+            print("No PySAM model specified. Setting to pvsam (detailed PV model).")
+        
+        if (self.pysam_model == 'pvsam'):
+            import PySAM.Pvsamv1 as pvsam
+        elif self.pysam_model == 'pvwatts':
+            import PySAM.Pvwattsv8 as pvwatts
+
         if "verbose" in input_dict:
             self.verbose = input_dict["verbose"]
             print('read in verbose flag = ',self.verbose)
@@ -27,7 +38,6 @@ class SolarPySAM:
         else:  # using an input dictionary
             data = pd.DataFrame.from_dict(input_dict["weather_data_input"])
 
-        # print(data)
         data["Timestamp"] = pd.DatetimeIndex(pd.to_datetime(data["Timestamp"], format="ISO8601"))
         data = data.set_index("Timestamp")
 
@@ -36,27 +46,50 @@ class SolarPySAM:
         self.create_col_dict(data) # create dictionary for indexing to correct column of numpy array
 
         # set PV system model parameters
-        if input_dict["system_info_file_name"]:  # using system info json file
-            with open(input_dict["system_info_file_name"], "r") as f:
-                model_params = json.load(f)
+        if self.pysam_model == 'pvsam':
+            try:
+                print("reading initial system info from {}".
+                      format(input_dict["system_info_file_name"]))
+                with open(input_dict["system_info_file_name"], "r") as f:
+                    model_params = json.load(f)
+                sys_design = {
+                    "ModelParams": model_params,
+                    "Other": {
+                        "lat": input_dict["lat"],
+                        "lon": input_dict["lon"],
+                        "elev": input_dict["elev"],
+                    },
+                }
+            
+            except Exception:
+                print("Error: No PV system info json file specified for pvsam model.")
+                sys.exit(1) # exit program
+
+                # TODO: use a default if none provided
+                # sys_design = pvsam.default("FlatPlatePVSingleOwner") 
+
+
+        elif self.pysam_model == 'pvwatts':
             sys_design = {
-                "ModelParams": model_params,
-                # "Other": input_dict["other"],
+                "ModelParams": { 
+                    "SystemDesign": {
+                        "array_type": 3.0, # single axis backtracking
+                        "azimuth": 180.0,
+                        "dc_ac_ratio": input_dict["target_dc_ac_ratio"],
+                        "gcr": 0.29999999999999999,
+                        "inv_eff": 96,
+                        "losses": 14.075660688264469,
+                        "module_type": 2.0,
+                        "system_capacity": input_dict["target_system_capacity_kW"],
+                        "tilt": 0.0
+                    },
+                },
                 "Other": {
                     "lat": input_dict["lat"],
                     "lon": input_dict["lon"],
                     "elev": input_dict["elev"],
                 },
             }
-        else:  # using system info data dictionary in input file
-            # sys_design = pvsam.default("FlatPlatePVSingleOwner") # use a default if none provided
-            sys_design = input_dict["system_info_data_input"]
-
-            if self.verbose:
-                print("sys_design")
-                print(sys_design)
-                print("model_params")
-                print(sys_design["ModelParams"])
 
         self.model_params = sys_design["ModelParams"]
         self.elev = sys_design["Other"]["elev"]
@@ -80,11 +113,19 @@ class SolarPySAM:
         self.dc_power_mw = input_dict["initial_conditions"]["power"]
         self.dni = input_dict["initial_conditions"]["dni"]
         self.aoi = 0
-        self.target_system_capacity = input_dict["target_system_capacity"]
-        self.target_dc_ac_ratio = input_dict["target_dc_ac_ratio"]
 
-        # create pysam model here so that it is not created each timestep
-        system_model = pvsam.new()
+        # dynamic sizing special treatment only required for pvsam model, not for pvwatts
+        if self.pysam_model == 'pvsam':
+            self.target_system_capacity = input_dict["target_system_capacity_kW"]
+            self.target_dc_ac_ratio = input_dict["target_dc_ac_ratio"]
+
+        # create pysam model
+        if self.pysam_model == 'pvsam':
+            system_model = pvsam.new()
+        elif self.pysam_model == 'pvwatts':
+            system_model = pvwatts.new()
+            system_model.assign(self.model_params)
+
         system_model.AdjustmentFactors.adjust_constant = 0
         system_model.AdjustmentFactors.dc_adjust_constant = 0
 
@@ -99,12 +140,10 @@ class SolarPySAM:
 
         self.system_model = system_model
 
-        
 
     def return_outputs(self):
         return {
             "power_mw": self.power_mw,
-            # "dc_power_mw": self.dc_power_mw,
             "dni": self.dni,
             "aoi": self.aoi,
         }
@@ -131,10 +170,6 @@ class SolarPySAM:
                 print("self.power_mw after control = ", self.power_mw)
 
     def step(self, inputs):
-        # print('-------------------')
-        # print('inputs',inputs)
-        # print('-------------------')
-        # print('vars(self) = ',vars(self))
 
         sim_time_s = inputs["time"]
         if self.verbose:
@@ -191,10 +226,12 @@ class SolarPySAM:
         # print('----------------------------------------------')
         # print('solar_resource_data = ',solar_resource_data)
 
-        target_system_capacity = self.target_system_capacity
-        target_ratio = self.target_dc_ac_ratio
-        n_strings,n_combiners,n_inverters,calc_sys_capacity = size_electrical_parameters(
-            self.system_model, target_system_capacity, target_ratio)
+        # dynamic sizing special treatment only required for pvsam model, not for pvwatts
+        if self.pysam_model == 'pvsam':
+            target_system_capacity = self.target_system_capacity
+            target_ratio = self.target_dc_ac_ratio
+            n_strings,n_combiners,n_inverters,calc_sys_capacity = size_electrical_parameters(
+                self.system_model, target_system_capacity, target_ratio)
 
         self.system_model.execute()
 
@@ -225,7 +262,10 @@ class SolarPySAM:
         if self.verbose:
             print("self.dni = ", self.dni)
 
-        self.aoi = self.system_model.Outputs.subarray1_aoi[0]  # angle of incidence
+        if self.pysam_model == 'pvsam':
+            self.aoi = self.system_model.Outputs.subarray1_aoi[0]  # angle of incidence
+        elif self.pysam_model == 'pvwatts':
+            self.aoi = self.system_model.Outputs.aoi[0]  # angle of incidence
 
         return self.return_outputs()
 

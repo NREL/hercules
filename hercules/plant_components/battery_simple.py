@@ -91,7 +91,8 @@ class BatterySimple(ComponentBase):
 
         Args:
             h_dict (dict): Dictionary containing simulation parameters including:
-                - energy_capacity: Battery energy capacity in kWh
+                - energy_capacity: Deliverable energy capacity in kWh (energy
+                    discharged at the terminals from SOC 1 to 0)
                 - charge_rate: Maximum charge rate in kW
                 - discharge_rate: Maximum discharge rate in kW
                 - max_SOC: Optional maximum state of charge (0-1, default 1.0).

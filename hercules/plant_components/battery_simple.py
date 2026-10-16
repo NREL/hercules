@@ -112,7 +112,6 @@ class BatterySimple(ComponentBase):
         # Call the base class init (sets self.component_name and self.component_type)
         super().__init__(h_dict, component_name)
 
-        # size = h_dict[self.component_name]["size"]
         self.energy_capacity = h_dict[self.component_name]["energy_capacity"]  # [kWh]
         initial_conditions = h_dict[self.component_name]["initial_conditions"]
         self.SOC = initial_conditions["SOC"]  # [fraction]

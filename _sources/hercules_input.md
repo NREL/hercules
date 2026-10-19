@@ -80,9 +80,9 @@ solar_farm:  # User-chosen component_name
 
 battery:  # User-chosen component_name
   component_type: BatterySimple
-  energy_capacity: 100.0  # MWh
-  charge_rate: 50.0  # MW
-  discharge_rate: 50.0  # MW
+  energy_capacity: 10000  # kWh
+  charge_rate: 2500  # kW
+  discharge_rate: 2500  # kW
   # max_SOC: 1.0  # default; set < 1 to model degradation
   # min_SOC: 0.0  # default; set > 0 to model degradation
   log_channels:

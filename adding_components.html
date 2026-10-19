@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
@@ -39,10 +39,10 @@
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
@@ -60,6 +60,12 @@
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-3V1BDK8KEJ');
             </script>
@@ -69,11 +75,18 @@
     <script>
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){ dataLayer.push(arguments); }
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
                 gtag('js', new Date());
                 gtag('config', 'G-3V1BDK8KEJ');
             </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'adding_components';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="HerculesModel" href="hercules_model.html" />
@@ -81,20 +94,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -120,7 +139,51 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
     </header>
   
 
@@ -448,7 +511,7 @@
                 <h2> Contents </h2>
             </div>
             <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-create-the-component-class">Step 1: Create the Component Class</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#minimal-example">Minimal Example</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-requirements">Key Requirements</a></li>
@@ -494,28 +557,28 @@
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MyComponent</span><span class="p">(</span><span class="n">ComponentBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Brief description of the component.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Brief description of the component."""</span>
 
-    <span class="n">component_category</span> <span class="o">=</span> <span class="s2">&quot;generator&quot;</span>  <span class="c1"># or &quot;storage&quot; or &quot;load&quot;</span>
+    <span class="n">component_category</span> <span class="o">=</span> <span class="s2">"generator"</span>  <span class="c1"># or "storage" or "load"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_dict</span><span class="p">,</span> <span class="n">component_name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the component.</span>
+<span class="w">        </span><span class="sd">"""Initialize the component.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            h_dict: Dictionary containing simulation parameters.</span>
 <span class="sd">            component_name: Unique name for this instance (the YAML key).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Call base class init first</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">h_dict</span><span class="p">,</span> <span class="n">component_name</span><span class="p">)</span>
 
         <span class="c1"># Read component-specific parameters from h_dict</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rated_power</span> <span class="o">=</span> <span class="n">h_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">component_name</span><span class="p">][</span><span class="s2">&quot;rated_power&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rated_power</span> <span class="o">=</span> <span class="n">h_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">component_name</span><span class="p">][</span><span class="s2">"rated_power"</span><span class="p">]</span>
 
         <span class="c1"># Initialize internal state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">power</span> <span class="o">=</span> <span class="mf">0.0</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_initial_conditions_and_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add initial conditions and metadata to h_dict.</span>
+<span class="w">        </span><span class="sd">"""Add initial conditions and metadata to h_dict.</span>
 
 <span class="sd">        Called once during HybridPlant initialization.</span>
 
@@ -524,27 +587,27 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Updated h_dict with initial conditions.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">h_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">component_name</span><span class="p">][</span><span class="s2">&quot;power&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power</span>
+<span class="sd">        """</span>
+        <span class="n">h_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">component_name</span><span class="p">][</span><span class="s2">"power"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power</span>
         <span class="k">return</span> <span class="n">h_dict</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Advance the simulation by one time step.</span>
+<span class="w">        </span><span class="sd">"""Advance the simulation by one time step.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            h_dict: Dictionary containing current simulation state.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Updated h_dict with component outputs.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Read inputs (e.g., setpoint from controller)</span>
-        <span class="n">setpoint</span> <span class="o">=</span> <span class="n">h_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">component_name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;power_setpoint&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">setpoint</span> <span class="o">=</span> <span class="n">h_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">component_name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"power_setpoint"</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 
         <span class="c1"># Compute outputs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">power</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">setpoint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rated_power</span><span class="p">)</span>
 
         <span class="c1"># Write outputs to h_dict</span>
-        <span class="n">h_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">component_name</span><span class="p">][</span><span class="s2">&quot;power&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power</span>
+        <span class="n">h_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">component_name</span><span class="p">][</span><span class="s2">"power"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power</span>
 
         <span class="k">return</span> <span class="n">h_dict</span>
 </pre></div>
@@ -706,7 +769,7 @@
     <i class="fa-solid fa-list"></i> Contents
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-create-the-component-class">Step 1: Create the Component Class</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#minimal-example">Minimal Example</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-requirements">Key Requirements</a></li>
@@ -765,8 +828,8 @@ By National Laboratory of the Rockies
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
   </footer>

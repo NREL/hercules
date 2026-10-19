@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 from hercules.hercules_model import HerculesModel
 
 from tests.test_inputs.h_dict import h_dict_battery, h_dict_solar, h_dict_wind
@@ -475,7 +476,8 @@ def test_log_every_n_option():
         assert hmodel.log_every_n == 2
         assert hmodel.dt_log == 2.0
 
-        # Run simulation and write output
+        # Run simulation and write output. Inject a known varying plant.power so the
+        # window-average behavior of log_every_n is deterministically checkable.
         for step in range(6):  # 6 steps (0-5) for dt=1.0, endtime=6.0, starttime=0.0
             hmodel.step = step
             hmodel.time = step * hmodel.dt
@@ -483,6 +485,7 @@ def test_log_every_n_option():
             hmodel.h_dict["step"] = step
             hmodel.h_dict = hmodel.controller.step(hmodel.h_dict)
             hmodel.h_dict = hmodel.hybrid_plant.step(hmodel.h_dict)
+            hmodel.h_dict["plant"]["power"] = float(step * 10)
             hmodel._log_data_to_hdf5()
 
         hmodel.close()
@@ -490,14 +493,19 @@ def test_log_every_n_option():
         # Verify file exists and is readable
         assert os.path.exists(hmodel.output_file)
         df_hdf5 = read_hercules_hdf5(hmodel.output_file)
-        # 6 steps with log_every_n=2 should give 3 rows (0, 2, 4)
+        # 6 steps with log_every_n=2 should give 3 rows (windows [0,1], [2,3], [4,5])
         assert len(df_hdf5) == 3
+        # time/step mark the first sim step of each window
         assert df_hdf5["time"].iloc[0] == 0.0
         assert df_hdf5["time"].iloc[1] == 2.0
         assert df_hdf5["time"].iloc[2] == 4.0
         assert df_hdf5["step"].iloc[0] == 0
         assert df_hdf5["step"].iloc[1] == 2
         assert df_hdf5["step"].iloc[2] == 4
+        # plant_power is the mean over each window
+        assert df_hdf5["plant.power"].iloc[0] == pytest.approx((0 + 10) / 2)
+        assert df_hdf5["plant.power"].iloc[1] == pytest.approx((20 + 30) / 2)
+        assert df_hdf5["plant.power"].iloc[2] == pytest.approx((40 + 50) / 2)
 
     # Test with log_every_n = 3
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -521,7 +529,9 @@ def test_log_every_n_option():
         assert hmodel.log_every_n == 3
         assert hmodel.dt_log == 3.0
 
-        # Run simulation and write output
+        # Run simulation and write output. Inject a known varying plant.power so the
+        # window-average behavior of log_every_n is deterministically checkable,
+        # including the short tail window on the final step.
         for step in range(7):  # 7 steps (0-6)
             hmodel.step = step
             hmodel.time = step * hmodel.dt
@@ -529,6 +539,7 @@ def test_log_every_n_option():
             hmodel.h_dict["step"] = step
             hmodel.h_dict = hmodel.controller.step(hmodel.h_dict)
             hmodel.h_dict = hmodel.hybrid_plant.step(hmodel.h_dict)
+            hmodel.h_dict["plant"]["power"] = float(step * 10)
             hmodel._log_data_to_hdf5()
 
         hmodel.close()
@@ -536,14 +547,19 @@ def test_log_every_n_option():
         # Verify file exists and is readable
         assert os.path.exists(hmodel.output_file)
         df_hdf5 = read_hercules_hdf5(hmodel.output_file)
-        # 7 steps with log_every_n=3 should give 3 rows (0, 3, 6)
+        # 7 steps with log_every_n=3 should give 3 rows (windows [0,1,2], [3,4,5], [6])
         assert len(df_hdf5) == 3
+        # time/step mark the first sim step of each window
         assert df_hdf5["time"].iloc[0] == 0.0
         assert df_hdf5["time"].iloc[1] == 3.0
         assert df_hdf5["time"].iloc[2] == 6.0
         assert df_hdf5["step"].iloc[0] == 0
         assert df_hdf5["step"].iloc[1] == 3
         assert df_hdf5["step"].iloc[2] == 6
+        # plant_power is the mean over each window; the tail window has size 1
+        assert df_hdf5["plant.power"].iloc[0] == pytest.approx((0 + 10 + 20) / 3)
+        assert df_hdf5["plant.power"].iloc[1] == pytest.approx((30 + 40 + 50) / 3)
+        assert df_hdf5["plant.power"].iloc[2] == pytest.approx(60)
 
 
 def test_log_selective_array_element():

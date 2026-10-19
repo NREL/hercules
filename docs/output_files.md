@@ -39,8 +39,9 @@ hercules_output.h5
 └── metadata/
     ├── h_dict                  # Simulation configuration (JSON string)
     ├── dt_sim                  # Simulation time step (seconds)
-    ├── dt_log                  # Logging time step (seconds)
-    ├── log_every_n             # Logging stride value
+    ├── dt_log                  # Logging time step (seconds); also averaging window length
+    ├── log_every_n             # Number of sim steps averaged into each logged row
+    ├── logging_mode            # "window_average": each row is the mean over its window
     ├── starttime               # Simulation start time (always 0.0 seconds)
     ├── endtime                 # Simulation end time (duration in seconds)
     ├── start_clock_time        # Simulation start wall clock time

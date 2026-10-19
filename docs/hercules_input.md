@@ -206,8 +206,16 @@ Hercules supports several output configuration options to optimize file size and
 ### log_every_n
 Controls how often simulation data is logged to the output file:
 - Default: 1 (log every simulation step)
-- Example: `log_every_n: 60` logs data every 60 simulation steps
-- This reduces output file size and improves performance for long simulations
+- Example: `log_every_n: 60` logs one row every 60 simulation steps
+- This reduces output file size for long simulations
+
+When `log_every_n > 1`, each logged row is the arithmetic mean of the `log_every_n`
+simulation-step values in its window (rather than a point sample). The `time` and
+`step` columns (and reconstructed `time_utc`) mark the first simulation step of each
+window. A final short window (when the total step count is not a multiple of
+`log_every_n`) is averaged over its actual size. The output metadata attribute
+`logging_mode` is set to `"window_average"` so downstream tools can detect the
+semantics.
 
 ### output_file
 Specifies the output file path. Hercules automatically ensures the file has a `.h5` extension for HDF5 format.

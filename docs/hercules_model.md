@@ -60,8 +60,16 @@ The HerculesModel supports configurable logging frequency through the `log_every
 
 - **`log_every_n`** (int, optional): Controls how often simulation data is logged to the output file.
   - Default: 1 (log every simulation step)
-  - Example: `log_every_n: 5` logs data every 5 simulation steps
-  - This reduces output file size and improves performance for long simulations
+  - Example: `log_every_n: 5` logs one row every 5 simulation steps
+  - This reduces output file size for long simulations
+
+When `log_every_n > 1`, each logged row is the **arithmetic mean** of the values from
+the `log_every_n` consecutive simulation steps that make up its window, rather than a
+point sample of the first or last step. This avoids aliasing artifacts that a pure
+downsample can introduce. The `time` and `step` columns (and the reconstructed
+`time_utc`) mark the **first simulation step** of each window. If the total number of
+simulation steps is not a multiple of `log_every_n`, the final window is shorter and
+is averaged over its actual size.
 
 ### Output File Generation
 
@@ -69,8 +77,9 @@ The HerculesModel generates HDF5 output files containing comprehensive simulatio
 
 The output file includes metadata with:
 - `dt_sim`: Simulation time step (seconds)
-- `dt_log`: Logging time step (seconds) = `dt_sim * log_every_n`
-- `log_every_n`: Logging stride value
+- `dt_log`: Logging time step (seconds) = `dt_sim * log_every_n` (also the window length)
+- `log_every_n`: Number of simulation steps averaged into each logged row
+- `logging_mode`: `"window_average"` — each row is the mean over its `log_every_n` window
 - `start_clock_time` and `end_clock_time`: Wall clock timing information
 
 

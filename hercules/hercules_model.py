@@ -313,6 +313,9 @@ class HerculesModel:
         metadata_group.attrs["dt_sim"] = self.dt
         metadata_group.attrs["dt_log"] = self.dt_log
         metadata_group.attrs["log_every_n"] = self.log_every_n
+        # "window_average": each row is the mean over log_every_n sim steps,
+        # while time/step/time_utc mark the first sim step of the window.
+        metadata_group.attrs["logging_mode"] = "window_average"
         metadata_group.attrs["total_simulation_time"] = self.total_simulation_time
         metadata_group.attrs["total_simulation_days"] = self.total_simulation_days
 
@@ -452,6 +455,10 @@ class HerculesModel:
         if "external_signals" in self.h_dict and self.h_dict["external_signals"]:
             external_signals_group = data_group.create_group("external_signals")
             for signal_name in self.h_dict["external_signals"].keys():
+                # "time" and "time_utc" are reserved timing columns from the source
+                # CSV; the reader reconstructs time_utc from metadata, so skip them.
+                if signal_name in ("time", "time_utc"):
+                    continue
                 # Only create dataset if signal should be logged
                 should_log = (
                     self.external_data_log_channels is None
@@ -709,34 +716,43 @@ class HerculesModel:
 
     def _log_data_to_hdf5(self):
         """
-        Logs the  state of the main dict to memory buffers and writes to HDF5 periodically.
+        Accumulate the main dict into memory buffers and write to HDF5 periodically.
 
-        This method buffers data in memory and only writes to disk when the buffer is full,
-        significantly improving performance by reducing disk I/O frequency.
+        Each logged row is the arithmetic mean of the ``log_every_n`` sim-step values
+        that fall in its window; ``time`` and ``step`` are taken from the first sim
+        step of the window (so reconstructed ``time_utc`` also marks the window
+        start). The final window may be shorter than ``log_every_n`` and is averaged
+        over its actual size.
         """
         # Initialize HDF5 file on first call
         if not self.output_structure_determined:
             self._initialize_hdf5_file()
 
-        # Apply  logging stride
-        if self.step % self.log_every_n != 0:
-            return
-
         # Initialize buffers on first call
         if not self.data_buffers:
             self._initialize_data_buffers()
 
-        # Buffer basic time information
-        self.data_buffers["time"][self.buffer_row] = self.h_dict["time"]
-        self.data_buffers["step"][self.buffer_row] = self.h_dict["step"]
+        window_position = self.step % self.log_every_n
+        is_window_start = window_position == 0
+        is_window_end = (window_position == self.log_every_n - 1) or (self.step == self.n_steps - 1)
 
-        # Buffer plant-level outputs
-        self.data_buffers["plant_power"][self.buffer_row] = self.h_dict["plant"]["power"]
-        self.data_buffers["plant_locally_generated_power"][self.buffer_row] = self.h_dict["plant"][
+        buffer_row = self.buffer_row
+
+        # On window start: seed time/step from the first sim step and zero the
+        # numeric accumulators at this row so we can add into them each sim step.
+        if is_window_start:
+            self.data_buffers["time"][buffer_row] = self.h_dict["time"]
+            self.data_buffers["step"][buffer_row] = self.h_dict["step"]
+            for dataset_name in self._accumulate_dataset_names:
+                self.data_buffers[dataset_name][buffer_row] = 0.0
+
+        # Accumulate plant-level outputs
+        self.data_buffers["plant_power"][buffer_row] += self.h_dict["plant"]["power"]
+        self.data_buffers["plant_locally_generated_power"][buffer_row] += self.h_dict["plant"][
             "locally_generated_power"
         ]
 
-        # Buffer component outputs
+        # Accumulate component outputs
         for component_name in self.hybrid_plant.component_names:
             component_obj = self.hybrid_plant.component_objects[component_name]
 
@@ -753,9 +769,7 @@ class HerculesModel:
                         if index < len(channel_obj):
                             dataset_name = f"{component_name}.{channel_name}.{index:03d}"
                             if dataset_name in self.data_buffers:
-                                self.data_buffers[dataset_name][self.buffer_row] = channel_obj[
-                                    index
-                                ]
+                                self.data_buffers[dataset_name][buffer_row] += channel_obj[index]
                     else:
                         raise ValueError(
                             f"Channel {channel_name} is not an array in {component_name}"
@@ -771,12 +785,12 @@ class HerculesModel:
                             for i in range(len(arr)):
                                 dataset_name = f"{component_name}.{c}.{i:03d}"
                                 if dataset_name in self.data_buffers:
-                                    self.data_buffers[dataset_name][self.buffer_row] = arr[i]
+                                    self.data_buffers[dataset_name][buffer_row] += arr[i]
                         else:
                             # Handle scalar values
                             dataset_name = f"{component_name}.{c}"
                             if dataset_name in self.data_buffers:
-                                self.data_buffers[dataset_name][self.buffer_row] = output_value
+                                self.data_buffers[dataset_name][buffer_row] += output_value
 
             if "units" in self.h_dict[component_name]:
                 for unit in component_obj.units:
@@ -784,13 +798,15 @@ class HerculesModel:
                     for c in unit.log_channels:
                         dataset_name = f"{component_name}.{unit_name}.{c}"
                         if dataset_name in self.data_buffers:
-                            self.data_buffers[dataset_name][self.buffer_row] = self.h_dict[
+                            self.data_buffers[dataset_name][buffer_row] += self.h_dict[
                                 component_name
                             ][unit_name][c]
 
-        # Buffer external signals (only those specified in log_channels)
+        # Accumulate external signals (only those specified in log_channels)
         if "external_signals" in self.h_dict and self.h_dict["external_signals"]:
             for signal_name, signal_value in self.h_dict["external_signals"].items():
+                if signal_name in ("time", "time_utc"):
+                    continue
                 # Only buffer if signal should be logged
                 should_log = (
                     self.external_data_log_channels is None
@@ -799,15 +815,20 @@ class HerculesModel:
                 if should_log:
                     dataset_name = f"external_signals.{signal_name}"
                     if dataset_name in self.data_buffers:
-                        self.data_buffers[dataset_name][self.buffer_row] = signal_value
+                        self.data_buffers[dataset_name][buffer_row] += signal_value
 
-        # Increment buffer row counter
-        self.buffer_row += 1
-        self.total_rows_written += 1
+        # On window end: divide accumulators by the actual window size to produce the
+        # mean, then advance the buffer row (and flush if full).
+        if is_window_end:
+            window_size = window_position + 1
+            if window_size > 1:
+                for dataset_name in self._accumulate_dataset_names:
+                    self.data_buffers[dataset_name][buffer_row] /= window_size
+            self.buffer_row += 1
+            self.total_rows_written += 1
 
-        # Write buffer to disk when full
-        if self.buffer_row >= self.buffer_size:
-            self._flush_buffer_to_hdf5()
+            if self.buffer_row >= self.buffer_size:
+                self._flush_buffer_to_hdf5()
 
     def _initialize_data_buffers(self):
         """Initialize memory buffers for all datasets."""
@@ -820,6 +841,12 @@ class HerculesModel:
                 self.data_buffers[dataset_name] = np.zeros(
                     self.buffer_size, dtype=hercules_float_type
                 )
+
+        # Cache the datasets that are accumulated (all except time/step) for fast
+        # iteration during window-start zeroing and window-end division.
+        self._accumulate_dataset_names = [
+            name for name in self.hdf5_datasets if name not in ("time", "step")
+        ]
 
     def _flush_buffer_to_hdf5(self):
         """Write buffered data to HDF5 datasets and reset buffer."""

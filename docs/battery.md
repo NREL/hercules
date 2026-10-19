@@ -77,9 +77,9 @@ The `log_channels` parameter controls which outputs are written to the HDF5 outp
 ```yaml
 battery:
   component_type: BatterySimple
-  energy_capacity: 100.0  # kWh (deliverable energy at rated power)
-  charge_rate: 50.0  # kW
-  discharge_rate: 50.0  # kW
+  energy_capacity: 10000  # kWh (deliverable energy at rated power)
+  charge_rate: 2500  # kW, represents a 2.5 MW, 4-hour battery
+  discharge_rate: 2500  # kW
   # max_SOC and min_SOC default to 1.0 and 0.0 respectively.
   # Set them only to model degradation or other nameplate deviations:
   # max_SOC: 0.9

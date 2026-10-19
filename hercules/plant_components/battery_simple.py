@@ -91,7 +91,8 @@ class BatterySimple(ComponentBase):
 
         Args:
             h_dict (dict): Dictionary containing simulation parameters including:
-                - energy_capacity: Battery energy capacity in kWh
+                - energy_capacity: Deliverable energy capacity in kWh (energy
+                    discharged at the terminals from SOC 1 to 0)
                 - charge_rate: Maximum charge rate in kW
                 - discharge_rate: Maximum discharge rate in kW
                 - max_SOC: Optional maximum state of charge (0-1, default 1.0).
@@ -111,7 +112,6 @@ class BatterySimple(ComponentBase):
         # Call the base class init (sets self.component_name and self.component_type)
         super().__init__(h_dict, component_name)
 
-        # size = h_dict[self.component_name]["size"]
         self.energy_capacity = h_dict[self.component_name]["energy_capacity"]  # [kWh]
         initial_conditions = h_dict[self.component_name]["initial_conditions"]
         self.SOC = initial_conditions["SOC"]  # [fraction]

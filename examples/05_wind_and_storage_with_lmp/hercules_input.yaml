@@ -30,7 +30,6 @@ wind_farm:
 
 battery:
   component_type: BatterySimple
-  size: 10000  # kW size of the battery (10 MW)
   energy_capacity: 10000 # total capacity of the battery in kWh (10 MWh)
   charge_rate: 10000 # charge rate in kW (10 MW)
   discharge_rate: 10000 # discharge rate in kW (10 MW)

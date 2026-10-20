@@ -1,7 +1,7 @@
 # README
 
 # hercules
-Hercules is an open-source tool for hybrid plant simulations in real time. Hercules  co-simulates multiple technologies to form a hybrid plant that can include wind, solar, storage and electrolyzers. The entire hybrid plant can be controlled using [Hycon](https://github.com/NatLabRockies/hycon).
+Hercules is an open-source tool for hybrid plant simulation in real time. Hercules  co-simulates multiple technologies to form a hybrid plant that can include wind, solar, storage and electrolyzers. The entire hybrid plant can be controlled using [Hycon](https://github.com/NatLabRockies/hycon).
 
 ## Part of the WETO Stack
 
